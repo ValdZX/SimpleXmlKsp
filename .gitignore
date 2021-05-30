@@ -2,3 +2,12 @@
 /.gradle/
 /processor/build/
 /sample/build/
+/gradlew
+/gradlew.bat
+/gradle/wrapper/
+/.idea/sonarlint/issuestore/
+/.idea/libraries-with-intellij-classes.xml
+/.idea/compiler.xml
+/.idea/gradle.xml
+/.idea/jarRepositories.xml
+/.idea/misc.xml
