@@ -52,16 +52,29 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
         val fileBuilder = FileSpec.builder("ua.vald_zx.xml", "XmlExtensions")
         filesToGenerate.forEach { (fullName, classToGenerate) ->
             logger.warn("$fullName")
+            val beanName = classToGenerate.xmlBean.simpleName.asString()
             fileBuilder.addFunction(
                 FunSpec.builder("toXml")
                     .receiver(
                         ClassName(
                             classToGenerate.xmlBean.packageName.asString(),
-                            classToGenerate.xmlBean.simpleName.asString()
+                            beanName
                         )
                     )
                     .returns(String::class)
                     .addStatement("return \"$fullName\"")
+                    .build()
+            )
+            fileBuilder.addFunction(
+                FunSpec.builder("parse$beanName")
+                    .receiver(String::class)
+                    .returns(
+                        ClassName(
+                            classToGenerate.xmlBean.packageName.asString(),
+                            beanName
+                        )
+                    )
+                    .addStatement("return ${beanName}()")
                     .build()
             )
         }
