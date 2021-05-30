@@ -1,4 +1,4 @@
-package ua.vald_zx.xml.processor
+package ua.vald_zx.simplexml.ksp.processor
 
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
@@ -10,7 +10,7 @@ import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
-import ua.vald_zx.xml.Element
+import ua.vald_zx.simplexml.ksp.Element
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
 

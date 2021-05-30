@@ -1,7 +1,6 @@
 # Project exclude paths
 /.gradle/
-/processor/build/
-/sample/build/
+*/build/
 /gradlew
 /gradlew.bat
 /gradle/wrapper/
@@ -11,3 +10,4 @@
 /.idea/gradle.xml
 /.idea/jarRepositories.xml
 /.idea/misc.xml
+/.idea/artifacts/annotations_jvm.xml

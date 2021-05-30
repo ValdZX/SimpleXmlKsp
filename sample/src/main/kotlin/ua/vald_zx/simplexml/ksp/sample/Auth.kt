@@ -1,7 +1,7 @@
-package ua.vald_zx.xml.sample
+package ua.vald_zx.simplexml.ksp.sample
 
-import ua.vald_zx.xml.Element
-import ua.vald_zx.xml.Path
+import ua.vald_zx.simplexml.ksp.Element
+import ua.vald_zx.simplexml.ksp.Path
 
 data class Auth(
     @Element("UserId")

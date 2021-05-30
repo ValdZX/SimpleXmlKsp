@@ -1,4 +1,4 @@
-package ua.vald_zx.xml.processor
+package ua.vald_zx.simplexml.ksp.processor
 
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
