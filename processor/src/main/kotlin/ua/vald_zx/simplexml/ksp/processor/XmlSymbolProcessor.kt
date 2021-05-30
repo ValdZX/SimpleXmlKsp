@@ -49,9 +49,10 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
     }
 
     override fun finish() {
+        if (filesToGenerate.isEmpty()) return
         val fileBuilder = FileSpec.builder("ua.vald_zx.xml", "XmlExtensions")
         filesToGenerate.forEach { (fullName, classToGenerate) ->
-            logger.warn("$fullName")
+            logger.info("processing $fullName")
             val beanName = classToGenerate.xmlBean.simpleName.asString()
             fileBuilder.addFunction(
                 FunSpec.builder("toXml")
