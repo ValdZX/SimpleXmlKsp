@@ -18,6 +18,6 @@ sourceSets {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation(project(":annotations"))
+    implementation(project(":core"))
     ksp(project(":processor"))
 }

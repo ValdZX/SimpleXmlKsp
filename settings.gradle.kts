@@ -9,4 +9,4 @@ pluginManagement {
 
 include("processor")
 include("sample")
-include("annotations")
+include("core")
