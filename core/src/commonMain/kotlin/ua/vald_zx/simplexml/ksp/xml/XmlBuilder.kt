@@ -1,4 +1,6 @@
-package ua.vald_zx.simplexml.ksp
+package ua.vald_zx.simplexml.ksp.xml
+
+import ua.vald_zx.simplexml.ksp.xml.utils.Escaping.unescapeHtml
 
 @DslMarker
 annotation class TagMarker
@@ -12,7 +14,7 @@ interface Tag {
     val name: String
     val attributes: MutableList<Attribute>
 
-    fun attr(name: String, value: String) = attributes.add(Attribute(name.clean(), value.escape()))
+    fun attr(name: String, value: String) = attributes.add(Attribute(name.clean(), value.unescapeHtml()))
 
     fun render(margin: Int = 0): String
 
@@ -33,7 +35,7 @@ data class TagFather(
         tags.add(TagFather(name.clean(), pretty = pretty).apply(block))
 
     fun tag(name: String, value: String, block: TagValue.() -> Unit = {}) =
-        tags.add(TagValue(name.clean(), value.escape(), pretty = pretty).apply(block))
+        tags.add(TagValue(name.clean(), value.unescapeHtml(), pretty = pretty).apply(block))
 
     override fun render(margin: Int): String = StringBuilder().apply {
         if (pretty) {
@@ -79,9 +81,3 @@ fun tag(name: String, pretty: Boolean = false, block: TagFather.() -> Unit) =
 
 private fun String.clean() = replace(Regex("[\\\\!\"#\$%&'()*+,/;<=>?@\\[\\]^`{|}~ ]"), "")
     .replace(Regex("^([-.])+"), "")
-
-private fun String.escape() = replace("<", "&lt;")
-    .replace(">", "&gt;")
-    .replace("&", "&amp;")
-    .replace("'", "&apos;")
-    .replace("\"", "&quot;")

@@ -1,4 +1,4 @@
-import ua.vald_zx.simplexml.ksp.tag
+import ua.vald_zx.simplexml.ksp.xml.tag
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -15,7 +15,8 @@ class XmlBuilderTest {
     </Auth>
 </Auth>
     """.trimIndent()
-    private val lineXml = "<Auth><UserId>1234</UserId><Auth lang=\"ru\"><Password>qwerty</Password><Auth><Device>Android</Device></Auth></Auth></Auth>"
+    private val lineXml =
+        "<Auth><UserId>1234</UserId><Auth lang=\"ru\"><Password>qwerty</Password><Auth><Device>Android</Device></Auth></Auth></Auth>"
 
     @Test
     fun buildPrettyXml() {
@@ -30,6 +31,7 @@ class XmlBuilderTest {
         }.render()
         assertEquals(xmlString, prettyXml)
     }
+
     @Test
     fun buildLineXml() {
         val xmlString = tag("Auth") {
