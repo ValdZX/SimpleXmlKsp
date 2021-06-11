@@ -2,11 +2,13 @@ rootProject.name = "SimpleXmlKsp"
 
 pluginManagement {
     repositories {
-        gradlePluginPortal()
         google()
+        gradlePluginPortal()
+        mavenCentral()
     }
 }
 
-include("processor")
-include("sample")
 include("core")
+include("processor")
+include("sample:androidApp")
+include("sample:shared")

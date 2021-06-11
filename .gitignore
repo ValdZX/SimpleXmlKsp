@@ -1,6 +1,6 @@
 # Project exclude paths
 /.gradle/
-*/build/
+**/build/
 /gradlew
 /gradlew.bat
 /gradle/wrapper/
@@ -10,5 +10,7 @@
 /.idea/gradle.xml
 /.idea/jarRepositories.xml
 /.idea/misc.xml
-/.idea/artifacts/annotations_jvm.xml
+/.idea/artifacts
 /.idea/uiDesigner.xml
+**/*.iml
+local.properties

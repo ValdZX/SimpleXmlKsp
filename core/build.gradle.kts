@@ -3,7 +3,7 @@ plugins {
     id("com.android.library")
 }
 
-version = "unspecified"
+version = "0.1"
 
 repositories {
     mavenCentral()
@@ -25,6 +25,11 @@ kotlin {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
             }
+        }
+
+        val androidAndroidTestRelease by getting
+        val androidTest by getting {
+            dependsOn(androidAndroidTestRelease)
         }
     }
 }
