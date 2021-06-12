@@ -55,14 +55,14 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
                                 .addModifiers(KModifier.OVERRIDE)
                                 .returns(String::class)
                                 .addParameter("obj", beanClassName)
-                                .addStatement("return \"$beanClassName\"")
+                                .generateSerialization(beanClassName)
                                 .build()
                         ).addFunction(
                             FunSpec.builder("deserialize")
                                 .addModifiers(KModifier.OVERRIDE)
                                 .addParameter("raw", String::class)
                                 .returns(beanClassName)
-                                .addStatement("return $beanClassName()")
+                                .generateDeserialization(beanClassName)
                                 .build()
                         ).build()
                 ).build()
@@ -112,12 +112,22 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
 
         }
     }
-}
 
-private fun FileSpec.Builder.addImports(toRegister: List<ToRegistration>): FileSpec.Builder {
-    toRegister.forEach { toRegistration ->
-        addImport(toRegistration.beanClass, "")
-        addImport(toRegistration.serializerClass, "")
+    private fun FileSpec.Builder.addImports(toRegister: List<ToRegistration>): FileSpec.Builder {
+        toRegister.forEach { toRegistration ->
+            addImport(toRegistration.beanClass, "")
+            addImport(toRegistration.serializerClass, "")
+        }
+        return this
     }
-    return this
+
+    private fun FunSpec.Builder.generateSerialization(beanClassName: ClassName): FunSpec.Builder {
+        addStatement("return \"$beanClassName\"")
+        return this
+    }
+
+    private fun FunSpec.Builder.generateDeserialization(beanClassName: ClassName): FunSpec.Builder {
+        addStatement("return $beanClassName()")
+        return this
+    }
 }
