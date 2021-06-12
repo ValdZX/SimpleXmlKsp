@@ -9,6 +9,11 @@ plugins {
 
 version = "1.0"
 
+ksp {
+    arg("ModulePackage", "ua.vald_zx.simplexml.sample.custompackage")
+    arg("ModuleName", "Sample")
+}
+
 kotlin {
     android()
     jvm()

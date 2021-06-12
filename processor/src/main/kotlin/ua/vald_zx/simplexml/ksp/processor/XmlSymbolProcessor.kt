@@ -18,6 +18,7 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
 
     private val logger = environment.logger
     private val codeGenerator = environment.codeGenerator
+    private val options = environment.options
     private val filesToGenerate = mutableMapOf<String, BeanToGenerate>()
     private val visitor = ElementsVisitor(filesToGenerate)
 
@@ -31,11 +32,16 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
 
     override fun finish() {
         if (filesToGenerate.isEmpty()) return
-        var modulePackage: String? = null
+
+        val modulePackageArgument = options["ModulePackage"]
+        val moduleName = options["ModuleName"].orEmpty()
+        var modulePackage: String? = modulePackageArgument
         val toRegister = filesToGenerate.map { (_, classToGenerate) ->
             val beanName = classToGenerate.name
             val packageName = classToGenerate.packagePath
-            modulePackage = findModulePackage(packageName, modulePackage)
+            if (modulePackageArgument.isNullOrEmpty()) {
+                modulePackage = findModulePackage(packageName, modulePackage)
+            }
             val beanClassName = ClassName(packageName, beanName)
             val objectName = beanName + "Serializer"
             logger.info("Generating $packageName.$objectName")
@@ -72,7 +78,7 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
 
         val modulePackageVal = modulePackage
         if (modulePackageVal != null) {
-            val fileName = "ModuleInitializer"
+            val fileName = "${moduleName}ModuleInitializer"
             val file = FileSpec.builder(modulePackageVal, fileName)
                 .addImport(GlobalSerializersLibrary::class, "")
                 .addImports(toRegister)
