@@ -11,6 +11,7 @@ version = "1.0"
 
 kotlin {
     android()
+    jvm()
 
     val iosTarget: (String, KotlinNativeTarget.() -> Unit) -> KotlinNativeTarget =
         if (System.getenv("SDK_NAME")?.startsWith("iphoneos") == true)
@@ -30,7 +31,7 @@ kotlin {
 
     sourceSets {
         val commonMain by getting {
-            kotlin.srcDir(File("$buildDir/generated/ksp/release/kotlin"))
+            kotlin.srcDir(File("$buildDir/generated/ksp/main/kotlin"))
             dependencies {
                 implementation(kotlin("stdlib"))
                 implementation(project(":core"))
@@ -39,6 +40,7 @@ kotlin {
         }
         val commonTest by getting {
             dependencies {
+                implementation(kotlin("test"))
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
             }
