@@ -1,6 +1,6 @@
 package ua.vald_zx.simplexml.ksp.xml.utils
 
-object Constants {
+internal object Constants {
     const val CHAR_FORWARD_SLASH = '/'
     const val CHAR_SPACE = ' '
     const val CHAR_EQUALS = '='

@@ -1,12 +1,12 @@
 package ua.vald_zx.simplexml.ksp.xml.utils
 
 
-interface Trim {
+internal interface Trim {
     fun trim(input: String): String
     fun isWhitespace(c: Char): Boolean
 }
 
-object Trimming {
+internal object Trimming {
     class NativeTrimmer : Trim {
         override fun trim(input: String): String {
             return input.trim { it <= ' ' }

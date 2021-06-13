@@ -1,10 +1,10 @@
 package ua.vald_zx.simplexml.ksp.xml.utils
 
-interface UnEscape {
+internal interface UnEscape {
     fun unescape(input: String): String
 }
 
-object Escaping {
+internal object Escaping {
     fun String.unescapeXml(): String {
         val text = this
         val result = StringBuilder(text.length)

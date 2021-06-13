@@ -51,6 +51,14 @@ open class XmlElement(
         return list
     }
 
+    fun getAll(tagName: String): List<XmlElement> {
+        return this.children.filter { it.name == tagName }
+    }
+
+    operator fun get(tagName: String): XmlElement {
+        return this.children.first { it.name == tagName }
+    }
+
     override fun toString(): String {
         return "XmlElement[$name]"
     }
@@ -84,7 +92,11 @@ open class XmlElement(
     }
 
     companion object {
-        fun findChildForName(element: XmlElement?, name: String, defaultValue: XmlElement?): XmlElement? {
+        fun findChildForName(
+            element: XmlElement?,
+            name: String,
+            defaultValue: XmlElement?
+        ): XmlElement? {
             if (element == null) return defaultValue
             for (child in element.children) {
                 if (name == child.name) return child
@@ -92,7 +104,11 @@ open class XmlElement(
             return defaultValue
         }
 
-        private fun getElementsByTagName(element: XmlElement, name: String, list: MutableList<XmlElement>) {
+        private fun getElementsByTagName(
+            element: XmlElement,
+            name: String,
+            list: MutableList<XmlElement>
+        ) {
             if (name == element.name) list.add(element)
             for (child in element.children) {
                 getElementsByTagName(child, name, list)

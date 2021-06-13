@@ -1,6 +1,6 @@
 package ua.vald_zx.simplexml.ksp.xml.utils
 
-object Builder {
+internal object Builder {
     class MapBuilder<K, V>(private val map: MutableMap<K, V>) {
         fun put(k: K, v: V): MapBuilder<K, V> {
             map[k] = v

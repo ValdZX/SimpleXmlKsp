@@ -4,7 +4,7 @@ import ua.vald_zx.simplexml.ksp.xml.error.InvalidXml
 import ua.vald_zx.simplexml.ksp.xml.parsing.EventParser
 import ua.vald_zx.simplexml.ksp.xml.utils.*
 
-object XmlStreamReader {
+internal object XmlStreamReader {
     fun toXmlStream(input: InputStreamReader, parser: EventParser, trimmer: Trim, escaper: UnEscape) {
         var isStart = true
         var str: String

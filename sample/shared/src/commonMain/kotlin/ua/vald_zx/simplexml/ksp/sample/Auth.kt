@@ -9,6 +9,6 @@ data class Auth(
     @Path("Auth")
     @Element("Password", false)
     var password: String = "",
-    @field:[Path("Auth") Element("Device", false)]
+    @field:[Path("Auth/House") Element("Device", false)]
     var device: String = ""
 )

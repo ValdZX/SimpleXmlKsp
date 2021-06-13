@@ -47,22 +47,30 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
             logger.info("Generating $packageName.$objectName")
             val serializerClassName = ClassName(packageName, objectName)
             val file = FileSpec.builder(packageName, objectName)
+                .addImport("ua.vald_zx.simplexml.ksp.xml", "tag")
+                .addImport("ua.vald_zx.simplexml.ksp.xml.XmlReader", "readXml")
+                .addImport("ua.vald_zx.simplexml.ksp.xml.error", "InvalidXml")
                 .addType(
                     TypeSpec.objectBuilder(objectName)
-                        .addSuperinterface(ClassName("ua.vald_zx.simplexml.ksp", "Serializer").parameterizedBy(beanClassName))
+                        .addSuperinterface(
+                            ClassName(
+                                "ua.vald_zx.simplexml.ksp",
+                                "Serializer"
+                            ).parameterizedBy(beanClassName)
+                        )
                         .addFunction(
                             FunSpec.builder("serialize")
                                 .addModifiers(KModifier.OVERRIDE)
                                 .returns(String::class)
                                 .addParameter("obj", beanClassName)
-                                .generateSerialization(beanClassName)
+                                .generateSerialization(classToGenerate)
                                 .build()
                         ).addFunction(
                             FunSpec.builder("deserialize")
                                 .addModifiers(KModifier.OVERRIDE)
                                 .addParameter("raw", String::class)
                                 .returns(beanClassName)
-                                .generateDeserialization(beanClassName)
+                                .generateDeserialization(classToGenerate)
                                 .build()
                         ).build()
                 ).build()
@@ -71,7 +79,11 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
                 packageName,
                 objectName
             ).use { stream ->
-                OutputStreamWriter(stream, StandardCharsets.UTF_8).use { writer -> file.writeTo(writer) }
+                OutputStreamWriter(stream, StandardCharsets.UTF_8).use { writer ->
+                    file.writeTo(
+                        writer
+                    )
+                }
             }
             ToRegistration(beanClassName, serializerClassName)
         }
@@ -98,7 +110,11 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
                 modulePackageVal,
                 fileName
             ).use { stream ->
-                OutputStreamWriter(stream, StandardCharsets.UTF_8).use { writer -> file.writeTo(writer) }
+                OutputStreamWriter(stream, StandardCharsets.UTF_8).use { writer ->
+                    file.writeTo(
+                        writer
+                    )
+                }
             }
         }
         super.finish()
@@ -121,13 +137,83 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
         return this
     }
 
-    private fun FunSpec.Builder.generateSerialization(beanClassName: ClassName): FunSpec.Builder {
-        addStatement("return \"$beanClassName\"")
+    private fun FunSpec.Builder.generateSerialization(beanToGenerate: BeanToGenerate): FunSpec.Builder {
+        val statementBuilder = StringBuilder()
+        statementBuilder.appendLine("return tag(\"${beanToGenerate.rootName}\") {")
+        beanToGenerate.toDom().renderChildren(statementBuilder, 1)
+        statementBuilder.appendLine("}.render()")
+        addStatement(statementBuilder.toString())
         return this
     }
 
-    private fun FunSpec.Builder.generateDeserialization(beanClassName: ClassName): FunSpec.Builder {
-        addStatement("return $beanClassName()")
+    private fun FunSpec.Builder.generateDeserialization(beanToGenerate: BeanToGenerate): FunSpec.Builder {
+        val statementBuilder = StringBuilder()
+        beanToGenerate.toDom()
+        statementBuilder.appendLine("val dom = raw.readXml() ?: throw InvalidXml()")
+//        statementBuilder.appendLine("val elements = dom[\"$rootName\"]")
+        statementBuilder.appendLine("TODO()")
+        addStatement(statementBuilder.toString())
         return this
+    }
+
+    private fun Iterable<FieldElement>.renderChildren(builder: StringBuilder, offset: Int) {
+        val margin = " ".repeat(offset * 4)
+        forEach { field ->
+            if (field.children.isNotEmpty()) {
+                builder.appendLine("${margin}tag(\"${field.tagName}\") {")
+                field.children.renderChildren(builder, offset + 1)
+                builder.appendLine("${margin}}")
+            } else {
+                builder.appendLine("${margin}tag(\"${field.tagName}\", obj.${field.fieldName})")
+            }
+        }
+    }
+
+    private fun BeanToGenerate.toDom(): List<FieldElement> {
+        val firstLayerFields = fields
+            .filter { it.path.isEmpty() }
+            .map { FieldElement(it.tagName, it.fieldName, isValueTag = true) }.toMutableList()
+        fields.filter {
+            it.path.isNotEmpty()
+        }.map { field ->
+            val path = field.path.split("/")
+            addLayer(firstLayerFields, path[0], path.subList(1, path.size), field)
+        }
+        return firstLayerFields
+    }
+
+    private fun addLayer(
+        currentLayerFields: MutableList<FieldElement>,
+        currentLayerTag: String,
+        path: List<String>,
+        field: FieldToGenerate
+    ) {
+        if (currentLayerTag.isEmpty()) {
+            if (currentLayerFields.any { it.tagName == field.tagName }) {
+                error("already has tag with name ${field.tagName}")
+            } else {
+                currentLayerFields.add(
+                    FieldElement(
+                        field.tagName,
+                        field.fieldName,
+                        isValueTag = true
+                    )
+                )
+            }
+        } else {
+            val currentPathTag =
+                currentLayerFields.find {
+                    it.tagName == currentLayerTag
+                } ?: FieldElement(
+                    currentLayerTag,
+                    isValueTag = false
+                ).apply { currentLayerFields.add(this) }
+            if (currentPathTag.isValueTag) error("already has field with name ${currentPathTag.tagName}")
+            if (path.isEmpty()) {
+                addLayer(currentPathTag.children, "", emptyList(), field)
+            } else {
+                addLayer(currentPathTag.children, path[0], path.subList(1, path.size), field)
+            }
+        }
     }
 }

@@ -1,7 +1,7 @@
 package ua.vald_zx.simplexml.ksp.xml.utils
 
 
-object XmlParse {
+internal object XmlParse {
 
     fun getNameOfTag(tag: String): String {
         var offset = 0

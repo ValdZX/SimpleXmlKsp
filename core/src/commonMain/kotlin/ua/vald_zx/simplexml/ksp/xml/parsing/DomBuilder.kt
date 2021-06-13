@@ -3,7 +3,7 @@ package ua.vald_zx.simplexml.ksp.xml.parsing
 import ua.vald_zx.simplexml.ksp.xml.model.XmlElement
 import ua.vald_zx.simplexml.ksp.xml.model.XmlTextElement
 
-class DomBuilder : EventParser {
+internal class DomBuilder : EventParser {
     var root: XmlElement? = null
         private set
     private var current: XmlElement? = null
