@@ -4,13 +4,13 @@ plugins {
     kotlin("multiplatform")
     kotlin("native.cocoapods")
     id("com.android.library")
-    id("com.google.devtools.ksp") version "1.5.10-1.0.0-beta01"
+    id("com.google.devtools.ksp") version "1.5.10-1.0.0-beta02"
 }
 
 version = "1.0"
 
 ksp {
-    arg("ModulePackage", "ua.vald_zx.simplexml.sample.custompackage")
+    arg("ModulePackage", "ua.vald_zx.simplexml.ksp.sample.custompackage")
     arg("ModuleName", "Sample")
 }
 

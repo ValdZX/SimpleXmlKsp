@@ -2,7 +2,7 @@ import ua.vald_zx.simplexml.ksp.GlobalSerializersLibrary
 import ua.vald_zx.simplexml.ksp.SimpleXml
 import ua.vald_zx.simplexml.ksp.sample.Auth
 import ua.vald_zx.simplexml.ksp.sample.AuthSerializer
-import ua.vald_zx.simplexml.sample.custompackage.SampleModuleInitializer
+import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleModuleInitializer
 import kotlin.test.Test
 import kotlin.test.assertIs
 
