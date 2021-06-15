@@ -21,13 +21,15 @@ class GenerationTest {
     fun serializeTest() {
         SampleModuleInitializer.init()
         val authToSerialize = Auth(userId = "Vald_ZX", password = "Linkoln", device = "Android")
-        println(SimpleXml.serialize(authToSerialize))
+        val message = SimpleXml.serialize(authToSerialize)
+        println(message)
     }
 
     @Test
     fun deserializeTest() {
         SampleModuleInitializer.init()
-        assertIs<Auth>(SimpleXml.deserialize<Auth>("<Auth/>"))
+        val value = SimpleXml.deserialize<Auth>("<Auth><UserId>Vald_ZX</UserId><Auth><Password>Linkoln</Password><House><Device>Android</Device></House></Auth></Auth>")
+        assertIs<Auth>(value)
     }
 }
 
@@ -45,12 +47,12 @@ object AuthSer : Serializer<Auth> {
 
     override fun deserialize(raw: String): Auth {
         val dom = raw.readXml() ?: throw InvalidXml()
-        val elements0 = dom["Auth"]
-        val elements1 = elements0["House"]
+        val layer1Tag1 = dom["Auth"]
+        val layer2Tag1 = layer1Tag1["House"]
         return Auth(
             userId = dom["UserId"].text,
-            password = elements0["Password"].text,
-            device = elements1["Device"].text
+            password = layer1Tag1["Password"].text,
+            device = layer2Tag1["Device"].text
         )
     }
 }

@@ -6,8 +6,7 @@ import ua.vald_zx.simplexml.ksp.Path
 data class Auth(
     @Element("UserId")
     var userId: String = "",
-    @Path("Auth")
-    @Element("Password", false)
+    @field:[Path("Auth") Element("Password", false)]
     var password: String = "",
     @field:[Path("Auth/House") Element("Device", false)]
     var device: String = ""

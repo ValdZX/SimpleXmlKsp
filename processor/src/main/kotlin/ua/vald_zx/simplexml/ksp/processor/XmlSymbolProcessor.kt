@@ -148,10 +148,16 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
 
     private fun FunSpec.Builder.generateDeserialization(beanToGenerate: BeanToGenerate): FunSpec.Builder {
         val statementBuilder = StringBuilder()
-        beanToGenerate.toDom()
+        val margin = " ".repeat(4)
+        val dom = beanToGenerate.toDom()
         statementBuilder.appendLine("val dom = raw.readXml() ?: throw InvalidXml()")
-//        statementBuilder.appendLine("val elements = dom[\"$rootName\"]")
-        statementBuilder.appendLine("TODO()")
+        val fieldToValueMap: MutableMap<String, String> = mutableMapOf()
+        dom.generateValues(statementBuilder, fieldToValueMap, "dom", 0)
+        statementBuilder.appendLine("return ${beanToGenerate.name}(")
+        beanToGenerate.fields.forEach { field ->
+            statementBuilder.appendLine("${margin}${field.fieldName} = ${fieldToValueMap[field.fieldName]}.text,")
+        }
+        statementBuilder.appendLine(")")
         addStatement(statementBuilder.toString())
         return this
     }
@@ -213,6 +219,23 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
                 addLayer(currentPathTag.children, "", emptyList(), field)
             } else {
                 addLayer(currentPathTag.children, path[0], path.subList(1, path.size), field)
+            }
+        }
+    }
+
+    private fun List<FieldElement>.generateValues(
+        statementBuilder: StringBuilder,
+        fieldToValueMap: MutableMap<String, String>,
+        parentValueName: String,
+        layer: Int
+    ) {
+        forEachIndexed { index, element ->
+            val currentValueName = "layer${layer}Tag$index"
+            statementBuilder.appendLine("val $currentValueName = $parentValueName[\"${element.tagName}\"]")
+            if (element.isValueTag) {
+                fieldToValueMap[element.fieldName] = currentValueName
+            } else {
+                element.children.generateValues(statementBuilder, fieldToValueMap, currentValueName, layer + 1)
             }
         }
     }
