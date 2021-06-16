@@ -63,6 +63,10 @@ open class XmlElement(
         return "XmlElement[$name]"
     }
 
+    fun attribute(name: String): AttributeElement {
+        return AttributeElement(name, attributes[name].orEmpty())
+    }
+
     class XmlElementBuilder(name: String) {
         private val element = XmlElement(name)
         fun attribute(name: String, value: String): XmlElementBuilder {

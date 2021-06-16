@@ -1,32 +1,62 @@
-import ua.vald_zx.simplexml.ksp.GlobalSerializersLibrary
+import ua.vald_zx.simplexml.ksp.Serializer
 import ua.vald_zx.simplexml.ksp.SimpleXml
-import ua.vald_zx.simplexml.ksp.sample.Auth
-import ua.vald_zx.simplexml.ksp.sample.AuthSerializer
+import ua.vald_zx.simplexml.ksp.sample.beans.Auth
+import ua.vald_zx.simplexml.ksp.sample.beans.XmlBean
 import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleModuleInitializer
+import ua.vald_zx.simplexml.ksp.xml.XmlReader.readXml
+import ua.vald_zx.simplexml.ksp.xml.error.InvalidXml
+import ua.vald_zx.simplexml.ksp.xml.tag
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 class GenerationTest {
+
     @Test
-    fun findSerializersTest() {
+    fun authTest() {
         SampleModuleInitializer.init()
-        assertIs<AuthSerializer>(GlobalSerializersLibrary.findSerializers(Auth::class))
+        val auth = Auth("Vald_ZX", "Linkoln", "Android", "18.06.2021 1:03", "EN")
+        val xml = SimpleXml.serialize(auth)
+        println(xml)
+        val deserializedAuth = SimpleXml.deserialize<Auth>(xml)
+        assertEquals(auth, deserializedAuth)
     }
 
     @Test
-    fun serializeTest() {
+    fun xmlBeanTest() {
         SampleModuleInitializer.init()
-        val authToSerialize = Auth(userId = "Vald_ZX", password = "Linkoln", device = "Android")
-        val message = SimpleXml.serialize(authToSerialize)
-        println(message)
-    }
-
-    @Test
-    fun deserializeTest() {
-        SampleModuleInitializer.init()
-        val value = SimpleXml.deserialize<Auth>(
-            "<Auth><UserId>Vald_ZX</UserId><Auth><Password>Linkoln</Password><House><Device>Android</Device></House></Auth></Auth>"
+        val bean = XmlBean(
+            layer0TagString0 = "1",
+            layer0TagString1 = "2",
+            layer1Path0TagString0 = "3",
+            layer1Path0TagString1 = "4",
+            layer2Path0TagString0 = "5",
+            layer2Path0TagString1 = "6",
+            layer3Path0TagString0 = "7",
+            layer3Path0TagString1 = "8",
+            layer3Path1TagString1 = "9",
+            layer3Path1TagString0 = "10",
+            layer2Path1TagString1 = "11",
+            layer2Path1TagString0 = "12",
+            layer1Path1TagString1 = "13",
+            layer1Path1TagString0 = "14",
+            layer0TagString4 = "15",
+            layer0TagString3 = "16",
+            layer0Path2AttributeString0 = "17",
+            layer0Path2AttributeString1 = "18",
+            layer0Path3AttributeString0 = "19",
+            layer0Path3AttributeString1 = "20",
+            layer1Path4AttributeString0 = "21",
+            layer1Path4AttributeString1 = "22",
+            layer1Path5AttributeString0 = "23",
+            layer1Path5AttributeString1 = "24",
+            Layer0Path6Tag = "25",
+            layer0Path6AttributeString0 = "26",
+            layer0Path6AttributeString1 = "27",
         )
-        assertIs<Auth>(value)
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean = SimpleXml.deserialize<XmlBean>(xml)
+        assertEquals(bean, deserializedBean)
     }
 }

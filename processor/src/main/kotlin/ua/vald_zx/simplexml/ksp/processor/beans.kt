@@ -1,27 +1,30 @@
 package ua.vald_zx.simplexml.ksp.processor
 
+import com.google.devtools.ksp.symbol.KSTypeReference
 import com.squareup.kotlinpoet.ClassName
 
-data class BeanToGenerate(
+data class ClassToGenerate(
     val fullName: String,
     val name: String,
     val rootName: String,
     val packagePath: String,
-    val fields: MutableList<FieldToGenerate> = mutableListOf()
+    val properties: MutableList<Property> = mutableListOf()
 )
 
-data class FieldToGenerate(
-    val fieldName: String,
-    val tagName: String,
-    val type: FieldType,
+data class Property(
+    val propertyName: String,
+    val unitName: String,
+    val xmlType: XmlUnitType,
+    val type: KSTypeReference,
     val path: String,
     val required: Boolean,
+    val inline: Boolean,
 )
 
 data class FieldElement(
-    val tagName: String,
-    val fieldName: String = "",
-    val isValueTag: Boolean = false,
+    val name: String,
+    val propertyName: String = "",
+    val type: XmlUnitType = XmlUnitType.TAG,
     val children: MutableList<FieldElement> = mutableListOf()
 )
 
@@ -30,9 +33,9 @@ data class ToRegistration(
     val serializerClass: ClassName,
 )
 
-enum class FieldType {
-    OBJECT,
+enum class XmlUnitType {
+    TAG,
     LIST,
-    SET,
-    MAP
+    ATTRIBUTE,
+    UNKNOWN
 }
