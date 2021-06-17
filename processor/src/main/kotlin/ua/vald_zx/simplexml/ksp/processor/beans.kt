@@ -14,6 +14,7 @@ data class ClassToGenerate(
 data class Property(
     val propertyName: String,
     val unitName: String,
+    val entry: String,
     val xmlType: XmlUnitType,
     val type: KSTypeReference,
     val path: String,

@@ -16,6 +16,7 @@ annotation class Element(val name: String = "", val required: Boolean = false)
 @Target(AnnotationTarget.FIELD)
 annotation class ElementList(
     val name: String = "",
-    val inline: Boolean = false,
-    val required: Boolean = false
+    val entry: String = "",
+    val required: Boolean = false,
+    val inline: Boolean = false
 )

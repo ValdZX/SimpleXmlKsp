@@ -22,6 +22,7 @@ class ElementsVisitor(
         logger.info("Visited $parentName property $propertyName")
         var path = ""
         var name = ""
+        var entry = ""
         var required = true
         var inline = false
         var type: XmlUnitType = XmlUnitType.UNKNOWN
@@ -33,20 +34,21 @@ class ElementsVisitor(
                 }
                 Element::class.simpleName     -> {
                     name = annotation.arguments[0].value as String
-                    required = annotation.arguments[1].value as Boolean? ?: false
+                    required = annotation.arguments[1].value as Boolean
                     if (type != XmlUnitType.UNKNOWN) error("$parentName failure. Illegal annotation on $propertyName")
                     type = XmlUnitType.TAG
                 }
                 Attribute::class.simpleName   -> {
                     name = annotation.arguments[0].value as String
-                    required = annotation.arguments[1].value as Boolean? ?: false
+                    required = annotation.arguments[1].value as Boolean
                     if (type != XmlUnitType.UNKNOWN) error("$parentName failure. Illegal annotation on $propertyName")
                     type = XmlUnitType.ATTRIBUTE
                 }
                 ElementList::class.simpleName -> {
                     name = annotation.arguments[0].value as String
-                    inline = annotation.arguments[1].value as Boolean? ?: false
-                    required = annotation.arguments[2].value as Boolean? ?: false
+                    entry = annotation.arguments[1].value as String
+                    required = annotation.arguments[2].value as Boolean
+                    inline = annotation.arguments[3].value as Boolean
                     if (type != XmlUnitType.UNKNOWN) error("$parentName failure. Illegal annotation on $propertyName")
                     type = XmlUnitType.LIST
                 }
@@ -68,6 +70,7 @@ class ElementsVisitor(
                 path = path,
                 propertyName = propertyName,
                 unitName = name,
+                entry = entry,
                 xmlType = type,
                 type = property.type,
                 required = required,
