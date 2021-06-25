@@ -4,7 +4,7 @@ plugins {
     kotlin("multiplatform")
     kotlin("native.cocoapods")
     id("com.android.library")
-    id("com.google.devtools.ksp") version "1.5.10-1.0.0-beta02"
+    id("com.google.devtools.ksp")
 }
 
 version = "1.0"

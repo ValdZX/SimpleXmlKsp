@@ -28,27 +28,27 @@ class ElementsVisitor(
         var type: XmlUnitType = XmlUnitType.UNKNOWN
         property.annotations.forEach { annotation ->
             when (annotation.shortName.asString()) {
-                Path::class.simpleName        -> {
+                Path::class.simpleName -> {
                     path = annotation.arguments[0].value as String
                     if (path.isEmpty()) error("$parentName failure. Remove @Path or fill name on $propertyName")
                 }
-                Element::class.simpleName     -> {
+                Element::class.simpleName -> {
                     name = annotation.arguments[0].value as String
-                    required = annotation.arguments[1].value as Boolean
+                    required = (annotation.arguments[1].value as Boolean?) ?: false
                     if (type != XmlUnitType.UNKNOWN) error("$parentName failure. Illegal annotation on $propertyName")
                     type = XmlUnitType.TAG
                 }
-                Attribute::class.simpleName   -> {
+                Attribute::class.simpleName -> {
                     name = annotation.arguments[0].value as String
-                    required = annotation.arguments[1].value as Boolean
+                    required = (annotation.arguments[1].value as Boolean?) ?: false
                     if (type != XmlUnitType.UNKNOWN) error("$parentName failure. Illegal annotation on $propertyName")
                     type = XmlUnitType.ATTRIBUTE
                 }
                 ElementList::class.simpleName -> {
                     name = annotation.arguments[0].value as String
                     entry = annotation.arguments[1].value as String
-                    required = annotation.arguments[2].value as Boolean
-                    inline = annotation.arguments[3].value as Boolean
+                    required = (annotation.arguments[2].value as Boolean?) ?: false
+                    inline = (annotation.arguments[3].value as Boolean?) ?: false
                     if (type != XmlUnitType.UNKNOWN) error("$parentName failure. Illegal annotation on $propertyName")
                     type = XmlUnitType.LIST
                 }
