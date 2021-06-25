@@ -9,11 +9,11 @@ import ua.vald_zx.simplexml.ksp.Root
 data class XmlBean(
     @Element("Layer0TagString0")
     var layer0TagString0: String = "",
-    @Element("Layer0TagString1")
+    @Element
     var layer0TagString1: String = "",
     @field:[Path("Layer0Path0") Element("Layer1TagString0", false)]
     var layer1Path0TagString0: String = "",
-    @field:[Path("Layer0Path0") Element("Layer1TagString1", false)]
+    @field:[Path("Layer0Path0") Element(required = false)]
     var layer1Path0TagString1: String = "",
     @field:[Path("Layer0Path0/Layer1Path0") Element("Layer2Path0TagString0", false)]
     var layer2Path0TagString0: String = "",
@@ -59,6 +59,6 @@ data class XmlBean(
     var Layer0Path6Tag: String = "",
     @field:[Path("Layer0Path6Tag") Attribute("Layer0Path6String0")]
     var layer0Path6AttributeString0: String = "",
-    @field:[Path("Layer0Path6Tag") Attribute("Layer0Path6String1")]
+    @field:[Path("Layer0Path6Tag") Attribute]
     var layer0Path6AttributeString1: String = "",
-    )
+)

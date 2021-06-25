@@ -5,33 +5,36 @@ import ua.vald_zx.simplexml.ksp.xml.error.InvalidXml
 import ua.vald_zx.simplexml.ksp.xml.tag
 
 
-object AuthSerializationSample : Serializer<Auth> {
-
-    override fun serialize(obj: Auth): String {
-        return tag("Auth") {
-            tag("UserId", obj.userId)
-            tag("Auth") {
-                tag("Password", obj.password)
+object AuthSerializer : Serializer<Auth> {
+    override fun serialize(obj: Auth): String = tag("Auth") {
+        tag("UserId", obj.userId)
+        tag("Auth") {
+            tag("Password", obj.password)
+            tag("House") {
                 tag("Device", obj.device) {
                     attr("time", obj.time)
+                    attr("locale", obj.locale)
                 }
             }
-        }.render()
-    }
+        }
+    }.render()
+
 
     override fun deserialize(raw: String): Auth {
         val dom = raw.readXml() ?: throw InvalidXml()
-        val layer1Tag1 = dom["Auth"]
-        val layer2Tag1 = layer1Tag1["House"]
-        val layer3Tag1 = layer2Tag1["Device"]
-        val layer3Attribute1 = layer3Tag1.attribute("time")
-        val layer3Attribute2 = layer3Tag1.attribute("locale")
+        val layer0Tag0 = dom["UserId"]
+        val layer0Tag1 = dom["Auth"]
+        val layer1Tag2 = layer0Tag1["Password"]
+        val layer1Tag3 = layer0Tag1["House"]
+        val layer2Tag4 = layer1Tag3["Device"]
+        val layer3Attribute5 = layer2Tag4.attribute("time")
+        val layer3Attribute6 = layer2Tag4.attribute("locale")
         return Auth(
-            userId = dom["UserId"].text,
-            password = layer1Tag1["Password"].text,
-            device = layer3Tag1.text,
-            time = layer3Attribute1.text,
-            locale = layer3Attribute2.text
+            userId = layer0Tag0.text,
+            password = layer1Tag2.text,
+            device = layer2Tag4.text,
+            time = layer3Attribute5.text,
+            locale = layer3Attribute6.text,
         )
     }
 }

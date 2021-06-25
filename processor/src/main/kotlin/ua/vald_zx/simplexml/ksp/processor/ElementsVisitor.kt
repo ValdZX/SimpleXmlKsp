@@ -12,8 +12,7 @@ import ua.vald_zx.simplexml.ksp.Path
 class ElementsVisitor(
     private val classToGenerate: MutableMap<String, ClassToGenerate>,
     private val logger: KSPLogger
-) :
-    KSVisitorVoid() {
+) : KSVisitorVoid() {
     override fun visitPropertyDeclaration(property: KSPropertyDeclaration, data: Unit) {
         val parent = property.parentDeclaration
         if (parent !is KSClassDeclaration) return
@@ -29,26 +28,60 @@ class ElementsVisitor(
         property.annotations.forEach { annotation ->
             when (annotation.shortName.asString()) {
                 Path::class.simpleName -> {
-                    path = annotation.arguments[0].value as String
-                    if (path.isEmpty()) error("$parentName failure. Remove @Path or fill name on $propertyName")
+                    annotation.arguments.forEach { arg ->
+                        when (arg.name?.getShortName()) {
+                            "path" -> {
+                                path = arg.value.asString()
+                                if (path.isEmpty()) error("$parentName failure. Remove @Path or fill name on $propertyName")
+                            }
+                        }
+                    }
                 }
                 Element::class.simpleName -> {
-                    name = annotation.arguments[0].value as String
-                    required = (annotation.arguments[1].value as Boolean?) ?: false
+                    annotation.arguments.forEach { arg ->
+                        when (arg.name?.getShortName()) {
+                            "name" -> {
+                                name = arg.value.asString(default = propertyName)
+                            }
+                            "required" -> {
+                                required = arg.value.asBoolean(default = true)
+                            }
+                        }
+                    }
                     if (type != XmlUnitType.UNKNOWN) error("$parentName failure. Illegal annotation on $propertyName")
                     type = XmlUnitType.TAG
                 }
                 Attribute::class.simpleName -> {
-                    name = annotation.arguments[0].value as String
-                    required = (annotation.arguments[1].value as Boolean?) ?: false
+                    annotation.arguments.forEach { arg ->
+                        when (arg.name?.getShortName()) {
+                            "name" -> {
+                                name = arg.value.asString(default = propertyName)
+                            }
+                            "required" -> {
+                                required = arg.value.asBoolean(default = true)
+                            }
+                        }
+                    }
                     if (type != XmlUnitType.UNKNOWN) error("$parentName failure. Illegal annotation on $propertyName")
                     type = XmlUnitType.ATTRIBUTE
                 }
                 ElementList::class.simpleName -> {
-                    name = annotation.arguments[0].value as String
-                    entry = annotation.arguments[1].value as String
-                    required = (annotation.arguments[2].value as Boolean?) ?: false
-                    inline = (annotation.arguments[3].value as Boolean?) ?: false
+                    annotation.arguments.forEach { arg ->
+                        when (arg.name?.getShortName()) {
+                            "name" -> {
+                                name = arg.value.asString(default = propertyName)
+                            }
+                            "entry" -> {
+                                entry = arg.value.asString()
+                            }
+                            "required" -> {
+                                required = arg.value.asBoolean(default = true)
+                            }
+                            "inline" -> {
+                                inline = arg.value.asBoolean()
+                            }
+                        }
+                    }
                     if (type != XmlUnitType.UNKNOWN) error("$parentName failure. Illegal annotation on $propertyName")
                     type = XmlUnitType.LIST
                 }
@@ -78,4 +111,12 @@ class ElementsVisitor(
             )
         )
     }
+}
+
+private fun Any?.asString(default: String = ""): String {
+    return (this as String?) ?: default
+}
+
+private fun Any?.asBoolean(default: Boolean = false): Boolean {
+    return (this as Boolean?) ?: default
 }
