@@ -55,8 +55,8 @@ open class XmlElement(
         return this.children.filter { it.name == tagName }
     }
 
-    operator fun get(tagName: String): XmlElement {
-        return this.children.first { it.name == tagName }
+    operator fun get(tagName: String): XmlElement? {
+        return this.children.firstOrNull { it.name == tagName }
     }
 
     override fun toString(): String {

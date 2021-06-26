@@ -4,10 +4,7 @@ import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSVisitorVoid
-import ua.vald_zx.simplexml.ksp.Attribute
-import ua.vald_zx.simplexml.ksp.Element
-import ua.vald_zx.simplexml.ksp.ElementList
-import ua.vald_zx.simplexml.ksp.Path
+import ua.vald_zx.simplexml.ksp.*
 
 class ElementsVisitor(
     private val classToGenerate: MutableMap<String, ClassToGenerate>,
@@ -87,12 +84,18 @@ class ElementsVisitor(
                 }
             }
         }
+        val hasDefault = parent.primaryConstructor
+            ?.parameters
+            ?.any { it.name?.asString() == propertyName && it.hasDefault }
+            ?: true
+        if (!hasDefault && !required) error("$parentName::$propertyName is not required without default value")
         classToGenerate.getOrPut(parentName) {
             val parentShortName = parent.simpleName.getShortName()
             val rootName = parent.annotations
-                .filter { annotation -> annotation.shortName.getShortName() == "Root" }
+                .filter { annotation -> annotation.shortName.getShortName() == Root::class.simpleName }
                 .firstOrNull()?.arguments?.getOrNull(0)?.value?.toString() ?: parentShortName
             ClassToGenerate(
+                bean = parent,
                 fullName = parentName,
                 name = parentShortName,
                 rootName = rootName,
@@ -101,13 +104,14 @@ class ElementsVisitor(
         }.properties.add(
             Property(
                 path = path,
-                propertyName = propertyName,
-                unitName = name,
+                name = propertyName,
+                xmlName = name,
                 entry = entry,
                 xmlType = type,
                 type = property.type,
                 required = required,
-                inline = inline
+                inline = inline,
+                hasDefault = hasDefault
             )
         )
     }

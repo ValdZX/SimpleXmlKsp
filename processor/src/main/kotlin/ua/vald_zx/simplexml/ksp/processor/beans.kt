@@ -1,9 +1,11 @@
 package ua.vald_zx.simplexml.ksp.processor
 
+import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.squareup.kotlinpoet.ClassName
 
 data class ClassToGenerate(
+    val bean: KSClassDeclaration,
     val fullName: String,
     val name: String,
     val rootName: String,
@@ -12,13 +14,14 @@ data class ClassToGenerate(
 )
 
 data class Property(
-    val propertyName: String,
-    val unitName: String,
+    val name: String,
+    val xmlName: String,
     val entry: String,
     val xmlType: XmlUnitType,
     val type: KSTypeReference,
     val path: String,
     val required: Boolean,
+    val hasDefault: Boolean,
     val inline: Boolean,
 )
 
