@@ -2,7 +2,7 @@ package ua.vald_zx.simplexml.ksp.processor.generator
 
 import com.squareup.kotlinpoet.FunSpec
 import ua.vald_zx.simplexml.ksp.processor.ClassToGenerate
-import ua.vald_zx.simplexml.ksp.processor.FieldElement
+import ua.vald_zx.simplexml.ksp.processor.DomElement
 import ua.vald_zx.simplexml.ksp.processor.XmlUnitType
 import ua.vald_zx.simplexml.ksp.processor.toDom
 
@@ -16,22 +16,34 @@ internal fun FunSpec.Builder.generateSerialization(classToGenerate: ClassToGener
     return this
 }
 
-private fun Iterable<FieldElement>.renderChildren(builder: StringBuilder, offset: Int) {
+private fun Iterable<DomElement>.renderChildren(builder: StringBuilder, offset: Int) {
     val margin = " ".repeat(offset * 4)
-    forEach { field ->
-        if (field.children.isNotEmpty()) {
-            if (field.propertyName.isEmpty()) {
-                builder.appendLine("${margin}tag(\"${field.name}\") {")
+    forEach { unit ->
+        if (unit.isNullable) {
+            if (unit.children.isNotEmpty()) {
+                //TODO
             } else {
-                builder.appendLine("${margin}tag(\"${field.name}\", obj.${field.propertyName}) {")
+                if (unit.type == XmlUnitType.TAG) {
+                    builder.appendLine("${margin}obj.${unit.propertyName}?.let { tag(\"${unit.xmlName}\", it) }")
+                } else if (unit.type == XmlUnitType.ATTRIBUTE) {
+                    builder.appendLine("${margin}attr.${unit.propertyName}?.let { tag(\"${unit.xmlName}\", it) }")
+                }
             }
-            field.children.renderChildren(builder, offset + 1)
-            builder.appendLine("${margin}}")
         } else {
-            if (field.type == XmlUnitType.TAG) {
-                builder.appendLine("${margin}tag(\"${field.name}\", obj.${field.propertyName})")
-            } else if (field.type == XmlUnitType.ATTRIBUTE) {
-                builder.appendLine("${margin}attr(\"${field.name}\", obj.${field.propertyName})")
+            if (unit.children.isNotEmpty()) {
+                if (unit.propertyName.isEmpty()) {
+                    builder.appendLine("${margin}tag(\"${unit.xmlName}\") {")
+                } else {
+                    builder.appendLine("${margin}tag(\"${unit.xmlName}\", obj.${unit.propertyName}) {")
+                }
+                unit.children.renderChildren(builder, offset + 1)
+                builder.appendLine("${margin}}")
+            } else {
+                if (unit.type == XmlUnitType.TAG) {
+                    builder.appendLine("${margin}tag(\"${unit.xmlName}\", obj.${unit.propertyName})")
+                } else if (unit.type == XmlUnitType.ATTRIBUTE) {
+                    builder.appendLine("${margin}attr(\"${unit.xmlName}\", obj.${unit.propertyName})")
+                }
             }
         }
     }

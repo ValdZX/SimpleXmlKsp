@@ -17,8 +17,8 @@ class ElementsVisitor(
         val propertyName = property.simpleName.asString()
         logger.info("Visited $parentName property $propertyName")
         var path = ""
-        var name = ""
-        var entry = ""
+        var elementName = ""
+        var entryListName = ""
         var required = true
         var inline = false
         var type: XmlUnitType = XmlUnitType.UNKNOWN
@@ -38,7 +38,7 @@ class ElementsVisitor(
                     annotation.arguments.forEach { arg ->
                         when (arg.name?.getShortName()) {
                             "name" -> {
-                                name = arg.value.asString(default = propertyName)
+                                elementName = arg.value.asString(default = propertyName)
                             }
                             "required" -> {
                                 required = arg.value.asBoolean(default = true)
@@ -52,7 +52,7 @@ class ElementsVisitor(
                     annotation.arguments.forEach { arg ->
                         when (arg.name?.getShortName()) {
                             "name" -> {
-                                name = arg.value.asString(default = propertyName)
+                                elementName = arg.value.asString(default = propertyName)
                             }
                             "required" -> {
                                 required = arg.value.asBoolean(default = true)
@@ -66,10 +66,10 @@ class ElementsVisitor(
                     annotation.arguments.forEach { arg ->
                         when (arg.name?.getShortName()) {
                             "name" -> {
-                                name = arg.value.asString(default = propertyName)
+                                elementName = arg.value.asString(default = propertyName)
                             }
                             "entry" -> {
-                                entry = arg.value.asString()
+                                entryListName = arg.value.asString()
                             }
                             "required" -> {
                                 required = arg.value.asBoolean(default = true)
@@ -84,11 +84,13 @@ class ElementsVisitor(
                 }
             }
         }
-        val hasDefault = parent.primaryConstructor
-            ?.parameters
-            ?.any { it.name?.asString() == propertyName && it.hasDefault }
-            ?: true
-        if (!hasDefault && !required) error("$parentName::$propertyName is not required without default value")
+        val constructorParameters = parent.primaryConstructor?.parameters
+        val requiredToConstructor = constructorParameters
+            ?.find { it.name?.asString() == propertyName }
+            ?.hasDefault?.not() ?: false
+        if (requiredToConstructor && !required) error(
+            "$parentName::$propertyName is not required without default value"
+        )
         classToGenerate.getOrPut(parentName) {
             val parentShortName = parent.simpleName.getShortName()
             val rootName = parent.annotations
@@ -101,17 +103,17 @@ class ElementsVisitor(
                 rootName = rootName,
                 packagePath = parent.packageName.asString()
             )
-        }.properties.add(
-            Property(
-                path = path,
-                name = propertyName,
-                xmlName = name,
-                entry = entry,
+        }.propertyElements.add(
+            PropertyElement(
+                propertyName = propertyName,
+                xmlName = elementName,
+                listEntryName = entryListName,
                 xmlType = type,
-                type = property.type,
+                propertyType = property.type,
+                xmlPath = path,
                 required = required,
-                inline = inline,
-                hasDefault = hasDefault
+                requiredToConstructor = requiredToConstructor,
+                inlineList = inline
             )
         )
     }

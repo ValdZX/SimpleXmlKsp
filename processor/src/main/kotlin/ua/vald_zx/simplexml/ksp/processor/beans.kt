@@ -2,6 +2,7 @@ package ua.vald_zx.simplexml.ksp.processor
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSTypeReference
+import com.google.devtools.ksp.symbol.Nullability
 import com.squareup.kotlinpoet.ClassName
 
 data class ClassToGenerate(
@@ -10,27 +11,32 @@ data class ClassToGenerate(
     val name: String,
     val rootName: String,
     val packagePath: String,
-    val properties: MutableList<Property> = mutableListOf()
+    val propertyElements: MutableList<PropertyElement> = mutableListOf()
 )
 
-data class Property(
-    val name: String,
+data class PropertyElement(
+    val propertyName: String,
+    val propertyType: KSTypeReference,
     val xmlName: String,
-    val entry: String,
     val xmlType: XmlUnitType,
-    val type: KSTypeReference,
-    val path: String,
+    val xmlPath: String,
     val required: Boolean,
-    val hasDefault: Boolean,
-    val inline: Boolean,
+    val requiredToConstructor: Boolean,
+    val listEntryName: String,
+    val inlineList: Boolean
 )
 
-data class FieldElement(
-    val name: String,
-    val propertyName: String = "",
-    val type: XmlUnitType = XmlUnitType.TAG,
-    val children: MutableList<FieldElement> = mutableListOf()
-)
+data class DomElement(
+    val property: PropertyElement? = null,
+    val xmlName: String = property?.xmlName.orEmpty(),
+    val propertyName: String = property?.propertyName.orEmpty(),
+    val type: XmlUnitType = property?.xmlType ?: XmlUnitType.TAG,
+    val children: MutableList<DomElement> = mutableListOf()
+) {
+    val isNullable: Boolean
+        get() = property?.let { it.propertyType.resolve().nullability != Nullability.NOT_NULL }
+            ?: false
+}
 
 data class ToRegistration(
     val beanClass: ClassName,

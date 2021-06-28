@@ -17,4 +17,16 @@ data class Auth(
     var time: String = "",
     @field:[Path("Auth/House/Device") Attribute]
     var locale: String = ""
-)
+) {
+    @Element(required = false)
+    var legend: String? = null
+
+    @Element
+    var legend2: String? = null
+
+    @Element(required = false)
+    var legend3: String? = null
+
+    @field:[Path("legend3") Attribute(required = false)]
+    var legend4: String? = null
+}

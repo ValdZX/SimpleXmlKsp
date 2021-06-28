@@ -15,7 +15,9 @@ class GenerationTest {
     @Test
     fun authTest() {
         SampleModuleInitializer.init()
-        val auth = Auth("Vald_ZX", "Linkoln", "Android", "18.06.2021 1:03", "EN")
+        val auth = Auth("Vald_ZX", "Kharkiv", "Linkoln", "Android", "18.06.2021 1:03", "EN")
+        auth.legend2 = "Legend2"
+        auth.legend4 = "Legend4"
         val xml = SimpleXml.serialize(auth)
         println(xml)
         val deserializedAuth = SimpleXml.deserialize<Auth>(xml)
@@ -55,7 +57,6 @@ class GenerationTest {
             layer0Path6AttributeString1 = "27",
         )
         val xml = SimpleXml.serialize(bean)
-        println(xml)
         val deserializedBean = SimpleXml.deserialize<XmlBean>(xml)
         assertEquals(bean, deserializedBean)
     }

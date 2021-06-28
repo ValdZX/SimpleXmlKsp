@@ -3,7 +3,7 @@ package ua.vald_zx.simplexml.ksp.processor.generator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.squareup.kotlinpoet.FunSpec
 import ua.vald_zx.simplexml.ksp.processor.ClassToGenerate
-import ua.vald_zx.simplexml.ksp.processor.FieldElement
+import ua.vald_zx.simplexml.ksp.processor.DomElement
 import ua.vald_zx.simplexml.ksp.processor.XmlUnitType
 import ua.vald_zx.simplexml.ksp.processor.toDom
 
@@ -12,6 +12,7 @@ internal fun FunSpec.Builder.generateDeserialization(
     classToGenerate: ClassToGenerate,
     logger: KSPLogger
 ): FunSpec.Builder {
+    logger.info("Generating deserialization method for ${classToGenerate.rootName}")
     val statementBuilder = StringBuilder()
     val margin = "    "
     val dom = classToGenerate.toDom()
@@ -19,18 +20,18 @@ internal fun FunSpec.Builder.generateDeserialization(
     val fieldToValueMap: MutableMap<String, String> = mutableMapOf()
     dom.generateValues(statementBuilder, fieldToValueMap, "dom", 0)
     statementBuilder.appendLine("return ${classToGenerate.name}(")
-    val propertiesHasDefault = classToGenerate.properties.filter { it.hasDefault }
-    val propertiesHasNotDefault = classToGenerate.properties.subtract(propertiesHasDefault)
-    propertiesHasNotDefault.forEach { property ->
-        val name = property.name
+    val propertiesRequiredToConstructor = classToGenerate.propertyElements.filter { it.requiredToConstructor }
+    val propertiesDynamics = classToGenerate.propertyElements.subtract(propertiesRequiredToConstructor)
+    propertiesRequiredToConstructor.forEach { property ->
+        val name = property.propertyName
         statementBuilder.appendLine("${margin}$name = ${fieldToValueMap[name]}?.text ?: error(\"\"\"fields $name value is required\"\"\"),")
     }
-    if (propertiesHasDefault.isEmpty()) {
+    if (propertiesDynamics.isEmpty()) {
         statementBuilder.appendLine(")")
     } else {
         statementBuilder.appendLine(").apply {")
-        propertiesHasDefault.forEach { property ->
-            val name = property.name
+        propertiesDynamics.forEach { property ->
+            val name = property.propertyName
             val parsedValue = fieldToValueMap[name]
             if (!property.required) {
                 statementBuilder.appendLine("${margin}if ($parsedValue != null) $name = $parsedValue.text")
@@ -44,7 +45,7 @@ internal fun FunSpec.Builder.generateDeserialization(
     return this
 }
 
-private fun List<FieldElement>.generateValues(
+private fun List<DomElement>.generateValues(
     statementBuilder: StringBuilder,
     fieldToValueMap: MutableMap<String, String>,
     parentValueName: String,
@@ -60,7 +61,7 @@ private fun List<FieldElement>.generateValues(
     forEach { element ->
         if (element.type == XmlUnitType.TAG) {
             val currentValueName = "layer${layer}Tag${iterator.next()}"
-            statementBuilder.appendLine("val $currentValueName = $parentValueName?.get(\"${element.name}\")")
+            statementBuilder.appendLine("val $currentValueName = $parentValueName?.get(\"${element.xmlName}\")")
             fieldToValueMap[element.propertyName] = currentValueName
             element.children.generateValues(
                 statementBuilder,
@@ -71,7 +72,7 @@ private fun List<FieldElement>.generateValues(
             )
         } else if (element.type == XmlUnitType.ATTRIBUTE) {
             val currentValueName = "layer${layer}Attribute${iterator.next()}"
-            statementBuilder.appendLine("val $currentValueName = $parentValueName?.attribute(\"${element.name}\")")
+            statementBuilder.appendLine("val $currentValueName = $parentValueName?.attribute(\"${element.xmlName}\")")
             fieldToValueMap[element.propertyName] = currentValueName
         }
     }
