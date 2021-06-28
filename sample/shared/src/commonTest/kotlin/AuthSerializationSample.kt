@@ -8,6 +8,16 @@ public object AuthSerializer : Serializer<Auth> {
     public override fun serialize(obj: Auth): String = tag("Auth") {
         obj.legend?.let { tag("legend", it) }
         obj.legend2?.let { tag("legend2", it) }
+        val legend3 = obj.legend3
+        if (legend3 != null) {
+            tag("legend3", legend3) {
+                obj.legend4?.let { attr("legend4", it) }
+            }
+        } else {
+            tag("legend3") {
+                obj.legend4?.let { attr("legend4", it) }
+            }
+        }
         tag("UserId", obj.userId)
         tag("location", obj.location)
         tag("Auth") {
@@ -40,12 +50,12 @@ public object AuthSerializer : Serializer<Auth> {
             userId = layer0Tag4?.text ?: error("""fields userId value is required"""),
             password = layer1Tag7?.text ?: error("""fields password value is required"""),
         ).apply {
-            legend = layer0Tag0?.text ?: error("""fields legend value is required""")
+            if (layer0Tag0 != null) legend = layer0Tag0.text
             legend2 = layer0Tag1?.text ?: error("""fields legend2 value is required""")
-            legend3 = layer0Tag2?.text ?: error("""fields legend3 value is required""")
+            if (layer0Tag2 != null) legend3 = layer0Tag2.text
             location = layer0Tag5?.text ?: error("""fields location value is required""")
             device = layer2Tag9?.text ?: error("""fields device value is required""")
-            legend4 = layer1Attribute3?.text ?: error("""fields legend4 value is required""")
+            if (layer1Attribute3 != null) legend4 = layer1Attribute3.text
             time = layer3Attribute10?.text ?: error("""fields time value is required""")
             locale = layer3Attribute11?.text ?: error("""fields locale value is required""")
         }

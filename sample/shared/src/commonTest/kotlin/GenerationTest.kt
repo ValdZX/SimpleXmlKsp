@@ -22,6 +22,8 @@ class GenerationTest {
         println(xml)
         val deserializedAuth = SimpleXml.deserialize<Auth>(xml)
         assertEquals(auth, deserializedAuth)
+        assertEquals(auth.legend2, deserializedAuth.legend2)
+        assertEquals(auth.legend4, deserializedAuth.legend4)
     }
 
     @Test

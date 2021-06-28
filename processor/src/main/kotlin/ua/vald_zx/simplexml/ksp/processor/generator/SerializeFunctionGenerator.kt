@@ -18,15 +18,25 @@ internal fun FunSpec.Builder.generateSerialization(classToGenerate: ClassToGener
 
 private fun Iterable<DomElement>.renderChildren(builder: StringBuilder, offset: Int) {
     val margin = " ".repeat(offset * 4)
+    val submargin = " ".repeat((offset + 1) * 4)
     forEach { unit ->
         if (unit.isNullable) {
             if (unit.children.isNotEmpty()) {
-                //TODO
+                builder.appendLine("${margin}val ${unit.propertyName} = obj.${unit.propertyName}")
+                builder.appendLine("${margin}if (${unit.propertyName} != null) {")
+                builder.appendLine("${submargin}tag(\"${unit.xmlName}\", ${unit.propertyName}) {")
+                unit.children.renderChildren(builder, offset + 2)
+                builder.appendLine("${submargin}}")
+                builder.appendLine("${margin}} else {")
+                builder.appendLine("${submargin}tag(\"${unit.xmlName}\") {")
+                unit.children.renderChildren(builder, offset + 2)
+                builder.appendLine("${submargin}}")
+                builder.appendLine("${margin}}")
             } else {
                 if (unit.type == XmlUnitType.TAG) {
                     builder.appendLine("${margin}obj.${unit.propertyName}?.let { tag(\"${unit.xmlName}\", it) }")
                 } else if (unit.type == XmlUnitType.ATTRIBUTE) {
-                    builder.appendLine("${margin}attr.${unit.propertyName}?.let { tag(\"${unit.xmlName}\", it) }")
+                    builder.appendLine("${margin}obj.${unit.propertyName}?.let { attr(\"${unit.xmlName}\", it) }")
                 }
             }
         } else {
