@@ -33,6 +33,10 @@ data class DomElement(
     val type: XmlUnitType = property?.xmlType ?: XmlUnitType.TAG,
     val children: MutableList<DomElement> = mutableListOf()
 ) {
+    val entryName: String
+        get() = property?.listEntryName.orEmpty()
+    val inlineList: Boolean
+        get() = property?.inlineList ?: false
     val isNullable: Boolean
         get() = property?.let { it.propertyType.resolve().nullability != Nullability.NOT_NULL }
             ?: false

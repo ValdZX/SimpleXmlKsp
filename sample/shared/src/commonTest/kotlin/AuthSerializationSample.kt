@@ -29,6 +29,14 @@ public object AuthSerializer : Serializer<Auth> {
                 }
             }
         }
+        tag("Phones") {
+            obj.phones.forEach {
+                tag("Phone", it)
+            }
+        }
+        obj.phones.forEach {
+            tag("Address", it)
+        }
     }.render()
 
 
@@ -41,6 +49,9 @@ public object AuthSerializer : Serializer<Auth> {
         val layer0Tag4 = dom?.get("UserId")
         val layer0Tag5 = dom?.get("location")
         val layer0Tag6 = dom?.get("Auth")
+        val layer0Tag10 = dom?.get("Phones")
+        val layer0List11 = layer0Tag10?.getAll("Phone")
+        val layer0List12 = dom?.getAll("Address")
         val layer1Tag7 = layer0Tag6?.get("Password")
         val layer1Tag8 = layer0Tag6?.get("House")
         val layer2Tag9 = layer1Tag8?.get("Device")
@@ -58,7 +69,8 @@ public object AuthSerializer : Serializer<Auth> {
             if (layer1Attribute3 != null) legend4 = layer1Attribute3.text
             time = layer3Attribute10?.text ?: error("""fields time value is required""")
             locale = layer3Attribute11?.text ?: error("""fields locale value is required""")
+            phones = layer0List11?.map { it.text } ?: emptyList()
+            addresses = layer0List12?.map { it.text } ?: emptyList()
         }
-
     }
 }

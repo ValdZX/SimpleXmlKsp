@@ -2,6 +2,7 @@ package ua.vald_zx.simplexml.ksp.sample.beans
 
 import ua.vald_zx.simplexml.ksp.Attribute
 import ua.vald_zx.simplexml.ksp.Element
+import ua.vald_zx.simplexml.ksp.ElementList
 import ua.vald_zx.simplexml.ksp.Path
 
 data class Auth(
@@ -16,7 +17,9 @@ data class Auth(
     @field:[Path("Auth/House/Device") Attribute("time")]
     var time: String = "",
     @field:[Path("Auth/House/Device") Attribute]
-    var locale: String = ""
+    var locale: String = "",
+    @ElementList(name = "Phones", entry = "Phone", required = false)
+    var phones: List<String> = mutableListOf()
 ) {
     @Element(required = false)
     var legend: String? = null
@@ -29,4 +32,7 @@ data class Auth(
 
     @field:[Path("legend3") Attribute(required = false)]
     var legend4: String? = null
+
+    @ElementList(inline = true, entry = "Address", required = false)
+    var addresses: List<String> = mutableListOf()
 }

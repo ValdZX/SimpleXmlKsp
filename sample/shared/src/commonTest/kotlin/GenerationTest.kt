@@ -18,12 +18,16 @@ class GenerationTest {
         val auth = Auth("Vald_ZX", "Kharkiv", "Linkoln", "Android", "18.06.2021 1:03", "EN")
         auth.legend2 = "Legend2"
         auth.legend4 = "Legend4"
+        auth.phones = listOf("+380502808980", "+380952808982", "+380572808984")
+        auth.addresses = listOf("Klochkovskaya, 244", "OJarosha, 51", "Svobody, 8")
         val xml = SimpleXml.serialize(auth)
         println(xml)
         val deserializedAuth = SimpleXml.deserialize<Auth>(xml)
         assertEquals(auth, deserializedAuth)
         assertEquals(auth.legend2, deserializedAuth.legend2)
         assertEquals(auth.legend4, deserializedAuth.legend4)
+        assertEquals(auth.phones, deserializedAuth.phones)
+        assertEquals(auth.addresses, deserializedAuth.addresses)
     }
 
     @Test

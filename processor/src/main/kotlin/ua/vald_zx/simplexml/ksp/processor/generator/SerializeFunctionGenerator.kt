@@ -19,6 +19,7 @@ internal fun FunSpec.Builder.generateSerialization(classToGenerate: ClassToGener
 private fun Iterable<DomElement>.renderChildren(builder: StringBuilder, offset: Int) {
     val margin = " ".repeat(offset * 4)
     val submargin = " ".repeat((offset + 1) * 4)
+    val subsubmargin = " ".repeat((offset + 2) * 4)
     forEach { unit ->
         if (unit.isNullable) {
             if (unit.children.isNotEmpty()) {
@@ -49,10 +50,27 @@ private fun Iterable<DomElement>.renderChildren(builder: StringBuilder, offset: 
                 unit.children.renderChildren(builder, offset + 1)
                 builder.appendLine("${margin}}")
             } else {
-                if (unit.type == XmlUnitType.TAG) {
-                    builder.appendLine("${margin}tag(\"${unit.xmlName}\", obj.${unit.propertyName})")
-                } else if (unit.type == XmlUnitType.ATTRIBUTE) {
-                    builder.appendLine("${margin}attr(\"${unit.xmlName}\", obj.${unit.propertyName})")
+                when (unit.type) {
+                    XmlUnitType.TAG -> {
+                        builder.appendLine("${margin}tag(\"${unit.xmlName}\", obj.${unit.propertyName})")
+                    }
+                    XmlUnitType.ATTRIBUTE -> {
+                        builder.appendLine("${margin}attr(\"${unit.xmlName}\", obj.${unit.propertyName})")
+                    }
+                    XmlUnitType.LIST -> {
+                        if(unit.inlineList) {
+                            builder.appendLine("${margin}obj.${unit.propertyName}.forEach {")
+                            builder.appendLine("${submargin}tag(\"${unit.entryName}\", it)")
+                            builder.appendLine("${margin}}")
+                        } else {
+                            builder.appendLine("${margin}tag(\"${unit.xmlName}\") {")
+                            builder.appendLine("${submargin}obj.${unit.propertyName}.forEach {")
+                            builder.appendLine("${subsubmargin}tag(\"${unit.entryName}\", it)")
+                            builder.appendLine("${submargin}}")
+                            builder.appendLine("${margin}}")
+                        }
+                    }
+                    else -> error("Not supported XmlUnitType ${unit.type}")
                 }
             }
         }
