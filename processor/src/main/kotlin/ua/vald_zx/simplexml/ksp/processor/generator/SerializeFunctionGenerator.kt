@@ -17,62 +17,70 @@ internal fun FunSpec.Builder.generateSerialization(classToGenerate: ClassToGener
 }
 
 private fun Iterable<DomElement>.renderChildren(builder: StringBuilder, offset: Int) {
-    val margin = " ".repeat(offset * 4)
-    val submargin = " ".repeat((offset + 1) * 4)
-    val subsubmargin = " ".repeat((offset + 2) * 4)
-    forEach { unit ->
-        if (unit.isNullable) {
-            if (unit.children.isNotEmpty()) {
-                builder.appendLine("${margin}val ${unit.propertyName} = obj.${unit.propertyName}")
-                builder.appendLine("${margin}if (${unit.propertyName} != null) {")
-                builder.appendLine("${submargin}tag(\"${unit.xmlName}\", ${unit.propertyName}) {")
-                unit.children.renderChildren(builder, offset + 2)
-                builder.appendLine("${submargin}}")
-                builder.appendLine("${margin}} else {")
-                builder.appendLine("${submargin}tag(\"${unit.xmlName}\") {")
-                unit.children.renderChildren(builder, offset + 2)
-                builder.appendLine("${submargin}}")
-                builder.appendLine("${margin}}")
+    val currentMargin = " ".repeat(offset * 4)
+    val oneDeeperMargin = " ".repeat((offset + 1) * 4)
+    val twoDeeperMargin = " ".repeat((offset + 2) * 4)
+    forEach { element ->
+        if (element.isNullable) {
+            if (element.children.isNotEmpty()) {
+                val childrenPrint = StringBuilder()
+                element.children.renderChildren(childrenPrint, offset + 2)
+                builder.appendLine("${currentMargin}val ${element.propertyName} = obj.${element.propertyName}")
+                builder.appendLine("${currentMargin}if (${element.propertyName} != null) {")
+                builder.appendLine("${oneDeeperMargin}tag(\"${element.xmlName}\", ${element.propertyName}) {")
+                builder.appendLine(childrenPrint)
+                builder.appendLine("${oneDeeperMargin}}")
+                builder.appendLine("${currentMargin}} else {")
+                builder.appendLine("${oneDeeperMargin}tag(\"${element.xmlName}\") {")
+                builder.appendLine(childrenPrint)
+                builder.appendLine("${oneDeeperMargin}}")
+                builder.appendLine("${currentMargin}}")
             } else {
-                if (unit.type == XmlUnitType.TAG) {
-                    builder.appendLine("${margin}obj.${unit.propertyName}?.let { tag(\"${unit.xmlName}\", it) }")
-                } else if (unit.type == XmlUnitType.ATTRIBUTE) {
-                    builder.appendLine("${margin}obj.${unit.propertyName}?.let { attr(\"${unit.xmlName}\", it) }")
+                if (element.type == XmlUnitType.TAG) {
+                    builder.appendLine("${currentMargin}obj.${element.propertyName}?.let { tag(\"${element.xmlName}\", it) }")
+                } else if (element.type == XmlUnitType.ATTRIBUTE) {
+                    builder.appendLine("${currentMargin}obj.${element.propertyName}?.let { attr(\"${element.xmlName}\", it) }")
                 }
             }
         } else {
-            if (unit.children.isNotEmpty()) {
-                if (unit.propertyName.isEmpty()) {
-                    builder.appendLine("${margin}tag(\"${unit.xmlName}\") {")
+            if (element.children.isNotEmpty()) {
+                if (element.propertyName.isEmpty()) {
+                    builder.appendLine("${currentMargin}tag(\"${element.xmlName}\") {")
                 } else {
-                    builder.appendLine("${margin}tag(\"${unit.xmlName}\", obj.${unit.propertyName}) {")
+                    builder.appendLine("${currentMargin}tag(\"${element.xmlName}\", obj.${element.propertyName}) {")
                 }
-                unit.children.renderChildren(builder, offset + 1)
-                builder.appendLine("${margin}}")
+                element.children.renderChildren(builder, offset + 1)
+                builder.appendLine("${currentMargin}}")
             } else {
-                when (unit.type) {
+                when (element.type) {
                     XmlUnitType.TAG -> {
-                        builder.appendLine("${margin}tag(\"${unit.xmlName}\", obj.${unit.propertyName})")
+                        builder.appendLine("${currentMargin}tag(\"${element.xmlName}\", obj.${element.propertyName})")
                     }
                     XmlUnitType.ATTRIBUTE -> {
-                        builder.appendLine("${margin}attr(\"${unit.xmlName}\", obj.${unit.propertyName})")
+                        builder.appendLine("${currentMargin}attr(\"${element.xmlName}\", obj.${element.propertyName})")
                     }
                     XmlUnitType.LIST -> {
-                        if(unit.inlineList) {
-                            builder.appendLine("${margin}obj.${unit.propertyName}.forEach {")
-                            builder.appendLine("${submargin}tag(\"${unit.entryName}\", it)")
-                            builder.appendLine("${margin}}")
+                        if (element.inlineList) {
+                            builder.printListForeach(currentMargin, element, oneDeeperMargin)
                         } else {
-                            builder.appendLine("${margin}tag(\"${unit.xmlName}\") {")
-                            builder.appendLine("${submargin}obj.${unit.propertyName}.forEach {")
-                            builder.appendLine("${subsubmargin}tag(\"${unit.entryName}\", it)")
-                            builder.appendLine("${submargin}}")
-                            builder.appendLine("${margin}}")
+                            builder.appendLine("${currentMargin}tag(\"${element.xmlName}\") {")
+                            builder.printListForeach(oneDeeperMargin, element, twoDeeperMargin)
+                            builder.appendLine("${currentMargin}}")
                         }
                     }
-                    else -> error("Not supported XmlUnitType ${unit.type}")
+                    else -> error("Not supported XmlUnitType ${element.type}")
                 }
             }
         }
     }
+}
+
+private fun StringBuilder.printListForeach(
+    currentMargin: String,
+    unit: DomElement,
+    oneDeeperMargin: String
+) {
+    appendLine("${currentMargin}obj.${unit.propertyName}.forEach {")
+    appendLine("${oneDeeperMargin}tag(\"${unit.entryName}\", it)")
+    appendLine("${currentMargin}}")
 }
