@@ -1,5 +1,7 @@
 package ua.vald_zx.simplexml.ksp
 
+import kotlin.reflect.KClass
+
 
 @Target(AnnotationTarget.CLASS)
 annotation class Root(val name: String)
@@ -20,3 +22,6 @@ annotation class ElementList(
     val required: Boolean = false,
     val inline: Boolean = false
 )
+
+@Target(AnnotationTarget.FIELD)
+annotation class Convert(val converter: KClass<out Serializer<*>>)
