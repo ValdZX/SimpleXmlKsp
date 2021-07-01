@@ -36,7 +36,6 @@ kotlin {
 
     sourceSets {
         val commonMain by getting {
-            kotlin.srcDir(File("$buildDir/generated/ksp/main/kotlin"))
             dependencies {
                 implementation(kotlin("stdlib"))
                 implementation(project(":core"))

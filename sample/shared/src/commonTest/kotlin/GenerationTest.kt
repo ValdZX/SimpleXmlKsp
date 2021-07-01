@@ -1,20 +1,20 @@
-import ua.vald_zx.simplexml.ksp.Serializer
 import ua.vald_zx.simplexml.ksp.SimpleXml
 import ua.vald_zx.simplexml.ksp.sample.beans.Auth
 import ua.vald_zx.simplexml.ksp.sample.beans.XmlBean
 import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleModuleInitializer
-import ua.vald_zx.simplexml.ksp.xml.XmlReader.readXml
-import ua.vald_zx.simplexml.ksp.xml.error.InvalidXml
-import ua.vald_zx.simplexml.ksp.xml.tag
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertIs
 
 class GenerationTest {
 
+    @BeforeTest
+    fun init() {
+        SampleModuleInitializer.init()
+    }
+
     @Test
     fun authTest() {
-        SampleModuleInitializer.init()
         val auth = Auth("Vald_ZX", "Kharkiv", "Linkoln", "Android", "18.06.2021 1:03", "EN")
         auth.legend2 = "Legend2"
         auth.legend4 = "Legend4"
@@ -32,7 +32,6 @@ class GenerationTest {
 
     @Test
     fun xmlBeanTest() {
-        SampleModuleInitializer.init()
         val bean = XmlBean(
             layer0TagString0 = "1",
             layer0TagString1 = "2",

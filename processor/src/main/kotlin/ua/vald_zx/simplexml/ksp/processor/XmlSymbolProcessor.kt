@@ -56,14 +56,14 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
             logger.info("Generating $packageName.$objectName")
             val serializerClassName = ClassName(packageName, objectName)
             val file = FileSpec.builder(packageName, objectName)
-                .addImport(LIBRARY_PACKAGE, "tag")
-                .addImport("$LIBRARY_PACKAGE.XmlReader", "readXml")
-                .addImport("$LIBRARY_PACKAGE.error", "InvalidXml")
+                .addImport("$LIBRARY_PACKAGE.xml", "tag")
+                .addImport("$LIBRARY_PACKAGE.xml.XmlReader", "readXml")
+                .addImport("$LIBRARY_PACKAGE.xml.error", "InvalidXml")
                 .addType(
                     TypeSpec.objectBuilder(objectName)
                         .addSuperinterface(
                             ClassName(
-                                "ua.vald_zx.simplexml.ksp",
+                                LIBRARY_PACKAGE,
                                 "Serializer"
                             ).parameterizedBy(beanClassName)
                         )
@@ -145,6 +145,6 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
     }
 
     companion object {
-        const val LIBRARY_PACKAGE = "ua.vald_zx.simplexml.ksp.xml"
+        const val LIBRARY_PACKAGE = "ua.vald_zx.simplexml.ksp"
     }
 }
