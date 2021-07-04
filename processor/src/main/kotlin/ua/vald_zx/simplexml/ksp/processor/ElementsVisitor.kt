@@ -1,10 +1,9 @@
 package ua.vald_zx.simplexml.ksp.processor
 
 import com.google.devtools.ksp.processing.KSPLogger
-import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSPropertyDeclaration
-import com.google.devtools.ksp.symbol.KSVisitorVoid
+import com.google.devtools.ksp.symbol.*
 import ua.vald_zx.simplexml.ksp.*
+import kotlin.reflect.KClass
 
 class ElementsVisitor(
     private val classToGenerate: MutableMap<String, ClassToGenerate>,
@@ -21,6 +20,9 @@ class ElementsVisitor(
         var entryListName = ""
         var required = true
         var inline = false
+        var converterType: KSType? = null
+        val propertyType = property.type
+        var propertyEntryType: KSTypeReference? = null
         var type: XmlUnitType = XmlUnitType.UNKNOWN
         property.annotations.forEach { annotation ->
             when (annotation.shortName.asString()) {
@@ -36,7 +38,8 @@ class ElementsVisitor(
                 }
                 Element::class.simpleName -> {
                     annotation.arguments.forEach { arg ->
-                        when (arg.name?.getShortName()) {
+                        val shortName = arg.name?.getShortName()
+                        when (shortName) {
                             "name" -> {
                                 elementName = arg.value.asString(default = propertyName)
                             }
@@ -63,6 +66,9 @@ class ElementsVisitor(
                     type = XmlUnitType.ATTRIBUTE
                 }
                 ElementList::class.simpleName -> {
+                    if (property.type.resolve().declaration.simpleName.asString() != "List") {
+                        error("$parentName failure. Illegal annotation on $propertyName. ElementList only for kotlin.collections.List")
+                    }
                     annotation.arguments.forEach { arg ->
                         when (arg.name?.getShortName()) {
                             "name" -> {
@@ -81,6 +87,10 @@ class ElementsVisitor(
                     }
                     if (type != XmlUnitType.UNKNOWN) error("$parentName failure. Illegal annotation on $propertyName")
                     type = XmlUnitType.LIST
+                    propertyEntryType = propertyType.element?.typeArguments?.first()?.type
+                }
+                Convert::class.simpleName -> {
+                    converterType = annotation.arguments.first().value as KSType
                 }
             }
         }
@@ -88,9 +98,16 @@ class ElementsVisitor(
         val requiredToConstructor = constructorParameters
             ?.find { it.name?.asString() == propertyName }
             ?.hasDefault?.not() ?: false
-        if (requiredToConstructor && !required) error(
-            "$parentName::$propertyName is not required without default value"
-        )
+        if (requiredToConstructor && !required) {
+            error("$parentName::$propertyName is not required without default value")
+        }
+        if (type == XmlUnitType.LIST && entryListName.isEmpty()) {
+            entryListName =
+                propertyType.element?.typeArguments?.first()?.type?.resolve()?.declaration?.simpleName?.getShortName()
+                    ?: error(
+                        "$parentName::$propertyName invalid list"
+                    )
+        }
         classToGenerate.getOrPut(parentName) {
             val parentShortName = parent.simpleName.getShortName()
             val rootName = parent.annotations
@@ -109,18 +126,20 @@ class ElementsVisitor(
                 xmlName = elementName,
                 listEntryName = entryListName,
                 xmlType = type,
-                propertyType = property.type,
+                propertyType = propertyType,
                 xmlPath = path,
                 required = required,
                 requiredToConstructor = requiredToConstructor,
-                inlineList = inline
+                inlineList = inline,
+                converterType = converterType,
+                propertyEntryType = propertyEntryType
             )
         )
     }
 }
 
 private fun Any?.asString(default: String = ""): String {
-    return (this as String?) ?: default
+    return if (this is String && this.isNotEmpty()) this else default
 }
 
 private fun Any?.asBoolean(default: Boolean = false): Boolean {

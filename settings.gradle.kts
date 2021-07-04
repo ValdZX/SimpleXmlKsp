@@ -10,5 +10,4 @@ pluginManagement {
 
 include("core")
 include("processor")
-include("sample:androidApp")
-include("sample:shared")
+include("test:kmm")

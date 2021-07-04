@@ -1,71 +1,99 @@
 package ua.vald_zx.simplexml.ksp.processor.generator
 
 import com.squareup.kotlinpoet.FunSpec
-import ua.vald_zx.simplexml.ksp.processor.ClassToGenerate
-import ua.vald_zx.simplexml.ksp.processor.DomElement
-import ua.vald_zx.simplexml.ksp.processor.XmlUnitType
-import ua.vald_zx.simplexml.ksp.processor.toDom
+import ua.vald_zx.simplexml.ksp.processor.*
 
 
 internal fun FunSpec.Builder.generateSerialization(classToGenerate: ClassToGenerate): FunSpec.Builder {
-    val statementBuilder = StringBuilder()
-    statementBuilder.appendLine("return tag(\"${classToGenerate.rootName}\") {")
-    classToGenerate.toDom().renderChildren(statementBuilder, 1)
-    statementBuilder.appendLine("}.render()")
-    addStatement(statementBuilder.toString())
+    val serializersMap = generateAndGetSerializers(classToGenerate)
+    beginControlFlow("tagFather.apply")
+    renderChildren(classToGenerate.toDom(), serializersMap)
+    endControlFlow()
     return this
 }
 
-private fun Iterable<DomElement>.renderChildren(builder: StringBuilder, offset: Int) {
-    val currentMargin = " ".repeat(offset * 4)
-    val oneDeeperMargin = " ".repeat((offset + 1) * 4)
-    val twoDeeperMargin = " ".repeat((offset + 2) * 4)
-    forEach { element ->
+private fun FunSpec.Builder.renderChildren(
+    elements: Iterable<DomElement>,
+    serializersMap: Map<PropertyElement, String>
+) {
+    elements.forEach { element ->
+        val serializerName = serializersMap[element.property]
         if (element.isNullable) {
             if (element.children.isNotEmpty()) {
-                val childrenPrint = StringBuilder()
-                element.children.renderChildren(childrenPrint, offset + 2)
-                builder.appendLine("${currentMargin}val ${element.propertyName} = obj.${element.propertyName}")
-                builder.appendLine("${currentMargin}if (${element.propertyName} != null) {")
-                builder.appendLine("${oneDeeperMargin}tag(\"${element.xmlName}\", ${element.propertyName}) {")
-                builder.appendLine(childrenPrint)
-                builder.appendLine("${oneDeeperMargin}}")
-                builder.appendLine("${currentMargin}} else {")
-                builder.appendLine("${oneDeeperMargin}tag(\"${element.xmlName}\") {")
-                builder.appendLine(childrenPrint)
-                builder.appendLine("${oneDeeperMargin}}")
-                builder.appendLine("${currentMargin}}")
+                addStatement("val ${element.propertyName} = obj.${element.propertyName}")
+                beginControlFlow("if (${element.propertyName} != null)")
+                beginControlFlow("$serializerName.buildXml(this, \"${element.xmlName}\", ${element.propertyName})")
+                renderChildren(element.children, serializersMap)
+                endControlFlow()
+                nextControlFlow("else")
+                beginControlFlow("tag(\"${element.xmlName}\")")
+                renderChildren(element.children, serializersMap)
+                endControlFlow()
+                endControlFlow()
             } else {
-                if (element.type == XmlUnitType.TAG) {
-                    builder.appendLine("${currentMargin}obj.${element.propertyName}?.let { tag(\"${element.xmlName}\", it) }")
-                } else if (element.type == XmlUnitType.ATTRIBUTE) {
-                    builder.appendLine("${currentMargin}obj.${element.propertyName}?.let { attr(\"${element.xmlName}\", it) }")
+                when (element.type) {
+                    XmlUnitType.TAG -> {
+                        if (element.property?.required == true) {
+                            addStatement("val ${element.propertyName} = obj.${element.propertyName}?: throw SerializeException(\"\"\"field ${element.xmlName} value is required\"\"\")")
+                            addStatement("$serializerName.buildXml(this, \"${element.xmlName}\", ${element.propertyName})")
+                        } else {
+                            beginControlFlow("obj.${element.propertyName}?.let")
+                            addStatement("$serializerName.buildXml(this, \"${element.xmlName}\", it)")
+                            endControlFlow()
+                        }
+                    }
+                    XmlUnitType.ATTRIBUTE -> {
+                        val serializeCall = "$serializerName.serialize(it)"
+                        beginControlFlow("obj.${element.propertyName}?.let")
+                        addStatement("attr(\"${element.xmlName}\", $serializeCall)")
+                        endControlFlow()
+                    }
+                    XmlUnitType.LIST -> {
+                        val entrySerializerName = serializersMap[element.property]
+                        if (element.inlineList) {
+                            beginControlFlow("obj.${element.propertyName}?.forEach")
+                            addStatement("$entrySerializerName.buildXml(this, \"${element.entryName}\", it)")
+                            endControlFlow()
+                        } else {
+                            beginControlFlow("obj.${element.propertyName}?.let")
+                            addStatement("list ->")
+                            beginControlFlow("tag(\"${element.xmlName}\") {")
+                            beginControlFlow("list.forEach {")
+                            addStatement("$entrySerializerName.buildXml(this, \"${element.entryName}\", it)")
+                            endControlFlow()
+                            endControlFlow()
+                            endControlFlow()
+                        }
+                    }
+                    else -> error("Not supported type ${element.type}")
                 }
             }
         } else {
             if (element.children.isNotEmpty()) {
                 if (element.propertyName.isEmpty()) {
-                    builder.appendLine("${currentMargin}tag(\"${element.xmlName}\") {")
+                    beginControlFlow("tag(\"${element.xmlName}\")")
                 } else {
-                    builder.appendLine("${currentMargin}tag(\"${element.xmlName}\", obj.${element.propertyName}) {")
+                    beginControlFlow("$serializerName.buildXml(this, \"${element.xmlName}\", obj.${element.propertyName})")
                 }
-                element.children.renderChildren(builder, offset + 1)
-                builder.appendLine("${currentMargin}}")
+                renderChildren(element.children, serializersMap)
+                endControlFlow()
             } else {
                 when (element.type) {
                     XmlUnitType.TAG -> {
-                        builder.appendLine("${currentMargin}tag(\"${element.xmlName}\", obj.${element.propertyName})")
+                        addStatement("${serializerName}.buildXml(this, \"${element.xmlName}\", obj.${element.propertyName})")
                     }
                     XmlUnitType.ATTRIBUTE -> {
-                        builder.appendLine("${currentMargin}attr(\"${element.xmlName}\", obj.${element.propertyName})")
+                        val serializeCall = "$serializerName.serialize(obj.${element.propertyName})"
+                        addStatement("attr(\"${element.xmlName}\", $serializeCall)")
                     }
                     XmlUnitType.LIST -> {
+                        val entrySerializerName = serializersMap[element.property]
                         if (element.inlineList) {
-                            builder.printListForeach(currentMargin, element, oneDeeperMargin)
+                            printListForeach(element, entrySerializerName)
                         } else {
-                            builder.appendLine("${currentMargin}tag(\"${element.xmlName}\") {")
-                            builder.printListForeach(oneDeeperMargin, element, twoDeeperMargin)
-                            builder.appendLine("${currentMargin}}")
+                            beginControlFlow("tag(\"${element.xmlName}\") {")
+                            printListForeach(element, entrySerializerName)
+                            endControlFlow()
                         }
                     }
                     else -> error("Not supported XmlUnitType ${element.type}")
@@ -75,12 +103,8 @@ private fun Iterable<DomElement>.renderChildren(builder: StringBuilder, offset: 
     }
 }
 
-private fun StringBuilder.printListForeach(
-    currentMargin: String,
-    unit: DomElement,
-    oneDeeperMargin: String
-) {
-    appendLine("${currentMargin}obj.${unit.propertyName}.forEach {")
-    appendLine("${oneDeeperMargin}tag(\"${unit.entryName}\", it)")
-    appendLine("${currentMargin}}")
+private fun FunSpec.Builder.printListForeach(element: DomElement, entrySerializerName: String?) {
+    beginControlFlow("obj.${element.propertyName}.forEach")
+    addStatement("$entrySerializerName.buildXml(this, \"${element.entryName}\", it)")
+    endControlFlow()
 }

@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "1.5.20" apply false
-    id("com.google.devtools.ksp") version "1.5.20-1.0.0-beta04" apply false
+    kotlin("jvm") version "1.5.21" apply false
+    id("com.google.devtools.ksp") version "1.5.21-1.0.0-beta06" apply false
 }
 
 buildscript {
@@ -10,8 +10,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath(kotlin("gradle-plugin", version = "1.5.20"))
-        classpath("com.android.tools.build:gradle:4.2.2")
+        classpath(kotlin("gradle-plugin", version = "1.5.21"))
+        classpath("com.android.tools.build:gradle:4.1.3")
     }
 }
 

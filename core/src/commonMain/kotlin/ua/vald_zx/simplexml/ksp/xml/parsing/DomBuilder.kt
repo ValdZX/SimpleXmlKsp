@@ -1,14 +1,14 @@
 package ua.vald_zx.simplexml.ksp.xml.parsing
 
-import ua.vald_zx.simplexml.ksp.xml.model.XmlElement
-import ua.vald_zx.simplexml.ksp.xml.model.XmlTextElement
+import ua.vald_zx.simplexml.ksp.xml.model.TagXmlElement
+import ua.vald_zx.simplexml.ksp.xml.model.TextXmlElement
 
 internal class DomBuilder : EventParser {
-    var root: XmlElement? = null
+    var root: TagXmlElement? = null
         private set
-    private var current: XmlElement? = null
+    private var current: TagXmlElement? = null
     override fun startNode(name: String, attrs: MutableMap<String, String>) {
-        val tmp = XmlElement(name, current, attrs)
+        val tmp = TagXmlElement(name, current, attrs)
         if (current != null) current?.appendChild(tmp) else this.root = tmp
         current = tmp
     }
@@ -19,6 +19,6 @@ internal class DomBuilder : EventParser {
 
     override fun someText(txt: String) {
         if (txt.isEmpty()) return
-        current?.children?.add(XmlTextElement(current, txt.trim { it <= ' ' }))
+        current?.children?.add(TextXmlElement(current, txt.trim { it <= ' ' }))
     }
 }

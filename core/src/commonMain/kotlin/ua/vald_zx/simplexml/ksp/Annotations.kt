@@ -7,21 +7,21 @@ import kotlin.reflect.KClass
 annotation class Root(val name: String)
 
 @Target(AnnotationTarget.FIELD)
-annotation class Attribute(val name: String = "", val required: Boolean = false)
+annotation class Attribute(val name: String = "", val required: Boolean = true)
 
 @Target(AnnotationTarget.FIELD)
 annotation class Path(val path: String)
 
 @Target(AnnotationTarget.FIELD)
-annotation class Element(val name: String = "", val required: Boolean = false)
+annotation class Element(val name: String = "", val required: Boolean = true)
 
 @Target(AnnotationTarget.FIELD)
 annotation class ElementList(
     val name: String = "",
     val entry: String = "",
-    val required: Boolean = false,
+    val required: Boolean = true,
     val inline: Boolean = false
 )
 
 @Target(AnnotationTarget.FIELD)
-annotation class Convert(val converter: KClass<out Serializer<*>>)
+annotation class Convert(val converter: KClass<out Converter<*>>)

@@ -14,7 +14,9 @@ interface Tag {
     val name: String
     val attributes: MutableList<Attribute>
 
-    fun attr(name: String, value: String) = attributes.add(Attribute(name.clean(), value.unescapeHtml()))
+    fun attr(name: String, value: String) {
+        attributes.add(Attribute(name.clean(), value.unescapeHtml()))
+    }
 
     fun render(margin: Int = 0): String
 

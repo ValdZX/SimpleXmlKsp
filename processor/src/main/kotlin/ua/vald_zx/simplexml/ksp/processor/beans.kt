@@ -1,6 +1,7 @@
 package ua.vald_zx.simplexml.ksp.processor
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.Nullability
 import com.squareup.kotlinpoet.ClassName
@@ -23,7 +24,9 @@ data class PropertyElement(
     val required: Boolean,
     val requiredToConstructor: Boolean,
     val listEntryName: String,
-    val inlineList: Boolean
+    val inlineList: Boolean,
+    val converterType: KSType?,
+    val propertyEntryType: KSTypeReference? = null
 )
 
 data class DomElement(
@@ -42,9 +45,10 @@ data class DomElement(
             ?: false
 }
 
-data class ToRegistration(
+data class GeneratedSerializerSpec(
     val beanClass: ClassName,
     val serializerClass: ClassName,
+    val packageName: String,
 )
 
 enum class XmlUnitType {
