@@ -5,7 +5,7 @@ import ua.vald_zx.simplexml.ksp.xml.parsing.EventParser
 import ua.vald_zx.simplexml.ksp.xml.utils.*
 
 internal object XmlStreamReader {
-    fun toXmlStream(input: InputStreamReader, parser: EventParser, trimmer: Trim, escaper: UnEscape) {
+    fun toXmlStream(input: StringReader, parser: EventParser, trimmer: Trim, escaper: UnEscape) {
         var isStart = true
         var str: String
         while (XmlParse.readLine(input, Constants.XML_TAG_START).also { str = it ?: "" } != null) {

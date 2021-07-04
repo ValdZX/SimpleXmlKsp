@@ -12,7 +12,7 @@ internal object XmlParse {
         return tag.substring(0, offset)
     }
 
-    fun readLine(input: InputStreamReader, end: Char): String? {
+    fun readLine(input: StringReader, end: Char): String? {
         val chars = StringBuilder()
         var data: Int
         while (input.read().also { data = it } != -1) {
@@ -22,7 +22,7 @@ internal object XmlParse {
         return if (data == -1) null else chars.toString()
     }
 
-    fun readUntil(input: InputStreamReader, end: String): String? {
+    fun readUntil(input: StringReader, end: String): String? {
         val chars = StringBuilder()
         for (i in end.indices) {
             val data = input.read()

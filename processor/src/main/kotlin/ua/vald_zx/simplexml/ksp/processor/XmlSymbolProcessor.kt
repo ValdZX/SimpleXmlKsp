@@ -132,7 +132,6 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
             modulePackage == null -> fullName
             fullName.contains(modulePackage) -> modulePackage
             else -> fullName.intersect(modulePackage)
-
         }
     }
 
