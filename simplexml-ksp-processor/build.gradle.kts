@@ -9,10 +9,10 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":core"))
+    implementation(project(":simplexml-ksp-core"))
     implementation("com.google.devtools.ksp:symbol-processing-api:1.5.21-1.0.0-beta06")
     implementation("com.squareup:kotlinpoet:1.8.0")
-    kspTest(project(":processor"))
+    kspTest(project(":simplexml-ksp-processor"))
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-common"))
     testImplementation(kotlin("test-annotations-common"))

@@ -38,8 +38,8 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(kotlin("stdlib"))
-                implementation(project(":core"))
-                configurations["ksp"].dependencies.add(project.dependencies.create(project(":processor")))
+                implementation(project(":simplexml-ksp-core"))
+                configurations["ksp"].dependencies.add(project.dependencies.create(project(":simplexml-ksp-processor")))
             }
         }
         val commonTest by getting {
