@@ -8,6 +8,6 @@ pluginManagement {
     }
 }
 
-include("core")
-include("processor")
-include("test:kmm")
+include("simplexml-ksp-core")
+include("simplexml-ksp-processor")
+include("simplexml-ksp-test:kmm")
