@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "io.github.valdzx"
-version = "1.0.0-alpha01"
+version = "1.0.0-alpha01-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -60,15 +60,22 @@ android {
     }
 }
 
-val sonatypeUsername: String? = System.getenv("SONATYPE_USERNAME")
-val sonatypePassword: String? = System.getenv("SONATYPE_PASSWORD")
-val repositoryId: String? = System.getenv("SONATYPE_REPOSITORY_ID")
+val sonatypeUsername: String? = project.properties["sonatype.login"]?.toString()
+val sonatypePassword: String? = project.properties["sonatype.password"]?.toString()
 publishing {
     publications {
         repositories {
             maven {
-                name = "oss"
-                url = uri("https://oss.sonatype.org/service/local/staging/deployByRepositoryId/$repositoryId/")
+                name = "snapshot"
+                url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+                credentials {
+                    username = sonatypeUsername
+                    password = sonatypePassword
+                }
+            }
+            maven {
+                name = "staging"
+                url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
                 credentials {
                     username = sonatypeUsername
                     password = sonatypePassword
@@ -106,9 +113,5 @@ publishing {
 }
 
 signing {
-    useInMemoryPgpKeys(
-        System.getenv("GPG_PRIVATE_KEY"),
-        System.getenv("GPG_PRIVATE_PASSWORD")
-    )
     sign(publishing.publications)
 }
