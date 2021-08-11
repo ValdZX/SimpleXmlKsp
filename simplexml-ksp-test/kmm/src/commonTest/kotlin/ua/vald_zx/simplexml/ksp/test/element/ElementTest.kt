@@ -1,4 +1,4 @@
-package ua.vald_zx.simplexml.ksp.test.required
+package ua.vald_zx.simplexml.ksp.test.element
 
 import ua.vald_zx.simplexml.ksp.SimpleXml
 import ua.vald_zx.simplexml.ksp.exception.DeserializeException
@@ -6,7 +6,7 @@ import ua.vald_zx.simplexml.ksp.exception.SerializeException
 import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleModuleInitializer
 import kotlin.test.*
 
-class RequiredTest {
+class ElementTest {
 
     @BeforeTest
     fun init() {

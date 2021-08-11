@@ -1,4 +1,4 @@
-package ua.vald_zx.simplexml.ksp.test.required
+package ua.vald_zx.simplexml.ksp.test.element
 
 import ua.vald_zx.simplexml.ksp.Element
 

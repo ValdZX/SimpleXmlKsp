@@ -5,26 +5,67 @@ import ua.vald_zx.simplexml.ksp.Converter
 import ua.vald_zx.simplexml.ksp.Element
 import ua.vald_zx.simplexml.ksp.ElementList
 
+/*
+<ConstructorFieldListOfStrings>
+    <List>
+        <Entry>Value1</Entry>
+        <Entry>Value2</Entry>
+        <Entry>Value3</Entry>
+    </List>
+</ConstructorFieldListOfStrings>
+ */
 data class ConstructorFieldListOfStrings(
     @ElementList(name = "List", entry = "Entry")
     val list: List<String>
 )
 
+/*
+<ConstructorInlineFieldListOfStrings>
+    <Entry>Value1</Entry>
+    <Entry>Value2</Entry>
+    <Entry>Value3</Entry>
+</ConstructorInlineFieldListOfStrings>
+ */
 data class ConstructorInlineFieldListOfStrings(
     @ElementList(entry = "Entry", inline = true)
     val list: List<String>
 )
 
+/*
+<ConstructorFieldListOfStringsWithoutName>
+    <list>
+        <Entry>Value1</Entry>
+        <Entry>Value2</Entry>
+        <Entry>Value3</Entry>
+    </list>
+</ConstructorFieldListOfStringsWithoutName>
+ */
 data class ConstructorFieldListOfStringsWithoutName(
     @ElementList(entry = "Entry")
     val list: List<String>
 )
 
+/*
+<ConstructorFieldListOfStringsWithoutEntry>
+    <List>
+        <String>Value1</String>
+        <String>Value2</String>
+        <String>Value3</String>
+    </List>
+</ConstructorFieldListOfStringsWithoutEntry>
+ */
 data class ConstructorFieldListOfStringsWithoutEntry(
     @ElementList(name = "List")
     val list: List<String>
 )
 
+/*
+<ConstructorInlineFieldListOfStringsWithoutEntry>
+    <String>Value1</String>
+    <String>Value2</String>
+    <String>Value3</String>
+</ConstructorInlineFieldListOfStringsWithoutEntry>
+ */
 data class ConstructorInlineFieldListOfStringsWithoutEntry(
     @ElementList(inline = true)
     val list: List<String>
@@ -48,11 +89,45 @@ class ListItemConverter : Converter<ListItem> {
     }
 }
 
+/*
+<ConstructorFieldListOfObjects>
+    <List>
+        <Entry>
+            <tag1>Value1</tag1>
+            <tag2>1</tag2>
+        </Entry>
+        <Entry>
+            <tag1>Value2</tag1>
+            <tag2>2</tag2>
+        </Entry>
+        <Entry>
+            <tag1>Value3</tag1>
+            <tag2>3</tag2>
+        </Entry>
+    </List>
+</ConstructorFieldListOfObjects>
+ */
 data class ConstructorFieldListOfObjects(
     @ElementList(name = "List", entry = "Entry")
     val list: List<ListItem>
 )
 
+/*
+<ConstructorInlineFieldListOfObjects>
+    <Entry>
+        <tag1>Value1</tag1>
+        <tag2>1</tag2>
+    </Entry>
+    <Entry>
+        <tag1>Value2</tag1>
+        <tag2>2</tag2>
+    </Entry>
+    <Entry>
+        <tag1>Value3</tag1>
+        <tag2>3</tag2>
+    </Entry>
+</ConstructorInlineFieldListOfObjects>
+ */
 data class ConstructorInlineFieldListOfObjects(
     @ElementList(entry = "Entry", inline = true)
     val list: List<ListItem>
@@ -63,11 +138,27 @@ data class ConstructorFieldListOfObjectsWithConvert(
     val list: List<ListItem>
 )
 
+/*
+<FieldListOfStrings>
+    <List>
+        <Entry>Value1</Entry>
+        <Entry>Value2</Entry>
+        <Entry>Value3</Entry>
+    </List>
+</FieldListOfStrings>
+ */
 data class FieldListOfStrings(
     @ElementList(name = "List", entry = "Entry")
     val list: List<String>
 )
 
+/*
+<FieldInlineListOfStrings>
+    <Entry>Value1</Entry>
+    <Entry>Value2</Entry>
+    <Entry>Value3</Entry>
+</FieldInlineListOfStrings>
+ */
 data class FieldInlineListOfStrings(
     @ElementList(entry = "Entry", inline = true)
     val list: List<String>
