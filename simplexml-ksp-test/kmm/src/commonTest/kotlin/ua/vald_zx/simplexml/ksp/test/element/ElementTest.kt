@@ -68,6 +68,22 @@ class ElementTest {
     }
 
     @Test
+    fun NotRequiredConstructorNullableFieldTest() {
+        val bean = NotRequiredConstructorNullableField("NotRequiredConstructorNullableField")
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: NotRequiredConstructorNullableField = SimpleXml.deserialize(xml)
+        assertEquals(bean, deserializedBean)
+    }
+
+    @Test
+    fun `NotRequiredConstructorNullableFieldTest null test`() {
+        val xml = "<NotRequiredConstructorNullableField/>"
+        val deserializedBean: NotRequiredConstructorNullableField = SimpleXml.deserialize(xml)
+        assertEquals(null, deserializedBean.tag)
+    }
+
+    @Test
     fun RequiredConstructorFieldWithDefaultTest() {
         val bean = RequiredConstructorFieldWithDefault("RequiredConstructorFieldWithDefault")
         val xml = SimpleXml.serialize(bean)

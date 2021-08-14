@@ -12,6 +12,11 @@ data class RequiredConstructorNullableField(
     var tag: String?
 )
 
+data class NotRequiredConstructorNullableField(
+    @Element(required = false)
+    var tag: String?
+)
+
 data class RequiredConstructorFieldWithDefault(
     @Element(required = true)
     var tag: String = "Default"

@@ -19,7 +19,6 @@ dependencies {
     implementation(project(":simplexml-ksp-core"))
     implementation("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
     implementation("com.squareup:kotlinpoet:1.8.0")
-    kspTest(project(":simplexml-ksp-processor"))
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-common"))
     testImplementation(kotlin("test-annotations-common"))

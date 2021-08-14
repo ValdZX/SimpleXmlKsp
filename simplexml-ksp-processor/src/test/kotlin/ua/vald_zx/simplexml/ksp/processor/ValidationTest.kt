@@ -2,24 +2,70 @@ package ua.vald_zx.simplexml.ksp.processor
 
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
+import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
+import com.tschuchort.compiletesting.kspIncremental
 import com.tschuchort.compiletesting.symbolProcessorProviders
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ValidationTest {
 
+    fun SourceFile.compile(): KotlinCompilation.Result {
+        val compilation = KotlinCompilation().apply {
+            sources = listOf(this@compile)
+            symbolProcessorProviders = listOf(XmlSymbolProcessorProvider())
+            inheritClassPath = true
+            verbose = false
+            kspIncremental = true
+        }
+        return compilation.compile()
+    }
+
     @Test
     fun `Compile empty class test`() {
-        val source = SourceFile.kotlin(
+        val result = kotlin(
             "EmptyClass.kt", """
-        class EmptyClass()
+        class EmptyClass
     """
-        )
-        val compilation = KotlinCompilation().apply {
-            sources = listOf(source)
-            symbolProcessorProviders = listOf(XmlSymbolProcessorProvider())
-        }
-        val result = compilation.compile()
+        ).compile()
+
         assertEquals(result.exitCode, KotlinCompilation.ExitCode.OK)
+    }
+
+    @Test
+    fun `Compile Element class test`() {
+        val result = kotlin(
+            "RequiredConstructorField.kt", """
+        package test
+
+        import ua.vald_zx.simplexml.ksp.Element
+
+        data class RequiredConstructorField(
+            @Element(required = true)
+            var tag: String
+        )
+    """
+        ).compile()
+        result.generatedFiles.forEach {
+            println(it.name)
+        }
+        assertEquals(result.exitCode, KotlinCompilation.ExitCode.OK)
+    }
+
+    @Test
+    fun `Compile NotRequiredConstructorField class test`() {
+        val result = kotlin(
+            "NotRequiredConstructorField.kt", """
+        package test
+
+        import ua.vald_zx.simplexml.ksp.Element
+
+        data class NotRequiredConstructorField(
+            @Element(required = false)
+            var tag: String
+        )
+    """
+        ).compile()
+        assertEquals(result.exitCode, KotlinCompilation.ExitCode.COMPILATION_ERROR)
     }
 }

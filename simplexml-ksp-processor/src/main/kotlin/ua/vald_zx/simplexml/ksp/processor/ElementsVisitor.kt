@@ -3,7 +3,6 @@ package ua.vald_zx.simplexml.ksp.processor
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.*
 import ua.vald_zx.simplexml.ksp.*
-import kotlin.reflect.KClass
 
 class ElementsVisitor(
     private val classToGenerate: MutableMap<String, ClassToGenerate>,
@@ -98,7 +97,7 @@ class ElementsVisitor(
         val requiredToConstructor = constructorParameters
             ?.find { it.name?.asString() == propertyName }
             ?.hasDefault?.not() ?: false
-        if (requiredToConstructor && !required) {
+        if (requiredToConstructor && !required && propertyType.resolve().nullability == Nullability.NOT_NULL) {
             error("$parentName::$propertyName is not required without default value")
         }
         if (type == XmlUnitType.LIST && entryListName.isEmpty()) {
