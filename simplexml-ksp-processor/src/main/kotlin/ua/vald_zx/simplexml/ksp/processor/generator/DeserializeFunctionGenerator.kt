@@ -122,6 +122,13 @@ private fun FunSpec.Builder.generateValues(
                     val entryValuesName = "layer${layer}Tag${iterator.next()}"
                     addStatement("val $entryValuesName = $currentValueName?.getAll(\"${element.entryName}\")")
                     fieldToValueMap[element.propertyName] = entryValuesName
+                    generateValues(
+                        element.children.filter { it.type == XmlUnitType.ATTRIBUTE },
+                        fieldToValueMap,
+                        currentValueName,
+                        layer + 1,
+                        iterator
+                    )
                 }
             }
             else -> error("Not supported XmlUnitType ${element.type}")

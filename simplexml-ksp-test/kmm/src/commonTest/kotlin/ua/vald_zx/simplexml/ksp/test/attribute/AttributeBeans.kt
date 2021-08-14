@@ -30,7 +30,7 @@ data class TagAttribute(
 //)
 
 data class ListAttribute(
-    @field:[Path("Tag") Attribute]
+    @field:[Path("List") Attribute]
     var attr: String,
     @ElementList(name = "List")
     var tag: List<String>

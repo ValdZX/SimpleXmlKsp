@@ -40,13 +40,11 @@ private fun FunSpec.Builder.renderChildren(
             }
         } else {
             if (element.children.isNotEmpty()) {
-                if (element.propertyName.isEmpty()) {
-                    beginControlFlow("tag(\"${element.xmlName}\")")
-                } else {
-                    beginControlFlow("$serializerName.buildXml(this, \"${element.xmlName}\", obj.${element.propertyName})")
+                when (element.type) {
+                    XmlUnitType.TAG -> tagWithChildren(serializerName, element, serializersMap)
+                    XmlUnitType.LIST -> listWithAttributes(serializerName, element, serializersMap)
+                    else -> error("Not supported XmlUnitType ${element.type}")
                 }
-                renderChildren(element.children, serializersMap)
-                endControlFlow()
             } else {
                 when (element.type) {
                     XmlUnitType.TAG -> tag(serializerName, element)
@@ -67,6 +65,16 @@ private fun FunSpec.Builder.printListForeach(element: DomElement, entrySerialize
 
 private fun FunSpec.Builder.tag(serializerName: String?, element: DomElement) {
     addStatement("${serializerName}.buildXml(this, \"${element.xmlName}\", obj.${element.propertyName})")
+}
+
+private fun FunSpec.Builder.tagWithChildren(serializerName: String?, element: DomElement, serializersMap: Map<PropertyElement, String>) {
+    if (element.propertyName.isEmpty()) {
+        beginControlFlow("tag(\"${element.xmlName}\")")
+    } else {
+        beginControlFlow("$serializerName.buildXml(this, \"${element.xmlName}\", obj.${element.propertyName})")
+    }
+    renderChildren(element.children, serializersMap)
+    endControlFlow()
 }
 
 private fun FunSpec.Builder.tagNullableValue(serializerName: String?, element: DomElement) {
@@ -97,6 +105,17 @@ private fun FunSpec.Builder.list(serializerName: String?, element: DomElement) {
         printListForeach(element, serializerName)
     } else {
         beginControlFlow("tag(\"${element.xmlName}\") {")
+        printListForeach(element, serializerName)
+        endControlFlow()
+    }
+}
+
+private fun FunSpec.Builder.listWithAttributes(serializerName: String?, element: DomElement, serializersMap: Map<PropertyElement, String>) {
+    if (element.inlineList) {
+        printListForeach(element, serializerName)
+    } else {
+        beginControlFlow("tag(\"${element.xmlName}\") {")
+        renderChildren(element.children, serializersMap)
         printListForeach(element, serializerName)
         endControlFlow()
     }
