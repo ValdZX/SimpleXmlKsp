@@ -32,38 +32,9 @@ private fun FunSpec.Builder.renderChildren(
                 endControlFlow()
             } else {
                 when (element.type) {
-                    XmlUnitType.TAG -> {
-                        if (element.property?.required == true) {
-                            addStatement("val ${element.propertyName} = obj.${element.propertyName}?: throw SerializeException(\"\"\"field ${element.xmlName} value is required\"\"\")")
-                            addStatement("$serializerName.buildXml(this, \"${element.xmlName}\", ${element.propertyName})")
-                        } else {
-                            beginControlFlow("obj.${element.propertyName}?.let")
-                            addStatement("$serializerName.buildXml(this, \"${element.xmlName}\", it)")
-                            endControlFlow()
-                        }
-                    }
-                    XmlUnitType.ATTRIBUTE -> {
-                        val serializeCall = "$serializerName.serialize(it)"
-                        beginControlFlow("obj.${element.propertyName}?.let")
-                        addStatement("attr(\"${element.xmlName}\", $serializeCall)")
-                        endControlFlow()
-                    }
-                    XmlUnitType.LIST -> {
-                        if (element.inlineList) {
-                            beginControlFlow("obj.${element.propertyName}?.forEach")
-                            addStatement("$serializerName.buildXml(this, \"${element.entryName}\", it)")
-                            endControlFlow()
-                        } else {
-                            beginControlFlow("obj.${element.propertyName}?.let")
-                            addStatement("list ->")
-                            beginControlFlow("tag(\"${element.xmlName}\") {")
-                            beginControlFlow("list.forEach {")
-                            addStatement("$serializerName.buildXml(this, \"${element.entryName}\", it)")
-                            endControlFlow()
-                            endControlFlow()
-                            endControlFlow()
-                        }
-                    }
+                    XmlUnitType.TAG -> tagNullableValue(serializerName, element)
+                    XmlUnitType.ATTRIBUTE -> attributeNullableValue(serializerName, element)
+                    XmlUnitType.LIST -> listNullableValue(serializerName, element)
                     else -> error("Not supported type ${element.type}")
                 }
             }
@@ -98,9 +69,27 @@ private fun FunSpec.Builder.tag(serializerName: String?, element: DomElement) {
     addStatement("${serializerName}.buildXml(this, \"${element.xmlName}\", obj.${element.propertyName})")
 }
 
+private fun FunSpec.Builder.tagNullableValue(serializerName: String?, element: DomElement) {
+    if (element.property?.required == true) {
+        addStatement("val ${element.propertyName} = obj.${element.propertyName}?: throw SerializeException(\"\"\"field ${element.xmlName} value is required\"\"\")")
+        addStatement("$serializerName.buildXml(this, \"${element.xmlName}\", ${element.propertyName})")
+    } else {
+        beginControlFlow("obj.${element.propertyName}?.let")
+        addStatement("$serializerName.buildXml(this, \"${element.xmlName}\", it)")
+        endControlFlow()
+    }
+}
+
 private fun FunSpec.Builder.attribute(serializerName: String?, element: DomElement) {
     val serializeCall = "$serializerName.serialize(obj.${element.propertyName})"
     addStatement("attr(\"${element.xmlName}\", $serializeCall)")
+}
+
+private fun FunSpec.Builder.attributeNullableValue(serializerName: String?, element: DomElement) {
+    val serializeCall = "$serializerName.serialize(it)"
+    beginControlFlow("obj.${element.propertyName}?.let")
+    addStatement("attr(\"${element.xmlName}\", $serializeCall)")
+    endControlFlow()
 }
 
 private fun FunSpec.Builder.list(serializerName: String?, element: DomElement) {
@@ -109,6 +98,23 @@ private fun FunSpec.Builder.list(serializerName: String?, element: DomElement) {
     } else {
         beginControlFlow("tag(\"${element.xmlName}\") {")
         printListForeach(element, serializerName)
+        endControlFlow()
+    }
+}
+
+private fun FunSpec.Builder.listNullableValue(serializerName: String?, element: DomElement) {
+    if (element.inlineList) {
+        beginControlFlow("obj.${element.propertyName}?.forEach")
+        addStatement("$serializerName.buildXml(this, \"${element.entryName}\", it)")
+        endControlFlow()
+    } else {
+        beginControlFlow("obj.${element.propertyName}?.let")
+        addStatement("list ->")
+        beginControlFlow("tag(\"${element.xmlName}\") {")
+        beginControlFlow("list.forEach {")
+        addStatement("$serializerName.buildXml(this, \"${element.entryName}\", it)")
+        endControlFlow()
+        endControlFlow()
         endControlFlow()
     }
 }
