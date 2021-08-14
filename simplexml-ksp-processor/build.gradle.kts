@@ -23,6 +23,8 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-common"))
     testImplementation(kotlin("test-annotations-common"))
+    testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.4.2")
+    testImplementation("com.github.tschuchortdev:kotlin-compile-testing-ksp:1.4.2")
 }
 
 val sonatypeUsername: String? = project.properties["sonatype.login"]?.toString()
