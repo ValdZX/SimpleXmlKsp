@@ -17,7 +17,7 @@ java {
 
 dependencies {
     implementation(project(":simplexml-ksp-core"))
-    implementation("com.google.devtools.ksp:symbol-processing-api:1.5.21-1.0.0-beta06")
+    implementation("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
     implementation("com.squareup:kotlinpoet:1.8.0")
     kspTest(project(":simplexml-ksp-processor"))
     testImplementation(kotlin("test"))
@@ -31,9 +31,9 @@ publishing {
     publications {
         repositories {
             create<MavenPublication>("jvm") {
-                groupId = "io.github.valdzx"
+                groupId = projectGroup
                 artifactId = "simplexml-ksp-processor"
-                version = "1.0.0-alpha01-SNAPSHOT"
+                version = projectVersion
 
                 from(components["java"])
             }
@@ -56,7 +56,7 @@ publishing {
         }
         withType<MavenPublication> {
             pom {
-                description.set("KODEIN Dependency Injection Core")
+                description.set("Simple XML Ksp - Processor")
                 licenses {
                     license {
                         name.set("Apache License")

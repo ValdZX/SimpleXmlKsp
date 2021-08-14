@@ -5,8 +5,8 @@ plugins {
     id("signing")
 }
 
-group = "io.github.valdzx"
-version = "1.0.0-alpha01-SNAPSHOT"
+group = projectGroup
+version = projectVersion
 
 repositories {
     mavenCentral()

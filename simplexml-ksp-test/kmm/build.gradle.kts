@@ -7,7 +7,7 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-version = "1.0.0-alpha01-SNAPSHOT"
+version = projectVersion
 
 ksp {
     arg("ModulePackage", "ua.vald_zx.simplexml.ksp.sample.custompackage")

@@ -49,17 +49,16 @@ private fun FunSpec.Builder.renderChildren(
                         endControlFlow()
                     }
                     XmlUnitType.LIST -> {
-                        val entrySerializerName = serializersMap[element.property]
                         if (element.inlineList) {
                             beginControlFlow("obj.${element.propertyName}?.forEach")
-                            addStatement("$entrySerializerName.buildXml(this, \"${element.entryName}\", it)")
+                            addStatement("$serializerName.buildXml(this, \"${element.entryName}\", it)")
                             endControlFlow()
                         } else {
                             beginControlFlow("obj.${element.propertyName}?.let")
                             addStatement("list ->")
                             beginControlFlow("tag(\"${element.xmlName}\") {")
                             beginControlFlow("list.forEach {")
-                            addStatement("$entrySerializerName.buildXml(this, \"${element.entryName}\", it)")
+                            addStatement("$serializerName.buildXml(this, \"${element.entryName}\", it)")
                             endControlFlow()
                             endControlFlow()
                             endControlFlow()
@@ -79,23 +78,9 @@ private fun FunSpec.Builder.renderChildren(
                 endControlFlow()
             } else {
                 when (element.type) {
-                    XmlUnitType.TAG -> {
-                        addStatement("${serializerName}.buildXml(this, \"${element.xmlName}\", obj.${element.propertyName})")
-                    }
-                    XmlUnitType.ATTRIBUTE -> {
-                        val serializeCall = "$serializerName.serialize(obj.${element.propertyName})"
-                        addStatement("attr(\"${element.xmlName}\", $serializeCall)")
-                    }
-                    XmlUnitType.LIST -> {
-                        val entrySerializerName = serializersMap[element.property]
-                        if (element.inlineList) {
-                            printListForeach(element, entrySerializerName)
-                        } else {
-                            beginControlFlow("tag(\"${element.xmlName}\") {")
-                            printListForeach(element, entrySerializerName)
-                            endControlFlow()
-                        }
-                    }
+                    XmlUnitType.TAG -> tag(serializerName, element)
+                    XmlUnitType.ATTRIBUTE -> attribute(serializerName, element)
+                    XmlUnitType.LIST -> list(serializerName, element)
                     else -> error("Not supported XmlUnitType ${element.type}")
                 }
             }
@@ -107,4 +92,23 @@ private fun FunSpec.Builder.printListForeach(element: DomElement, entrySerialize
     beginControlFlow("obj.${element.propertyName}.forEach")
     addStatement("$entrySerializerName.buildXml(this, \"${element.entryName}\", it)")
     endControlFlow()
+}
+
+private fun FunSpec.Builder.tag(serializerName: String?, element: DomElement) {
+    addStatement("${serializerName}.buildXml(this, \"${element.xmlName}\", obj.${element.propertyName})")
+}
+
+private fun FunSpec.Builder.attribute(serializerName: String?, element: DomElement) {
+    val serializeCall = "$serializerName.serialize(obj.${element.propertyName})"
+    addStatement("attr(\"${element.xmlName}\", $serializeCall)")
+}
+
+private fun FunSpec.Builder.list(serializerName: String?, element: DomElement) {
+    if (element.inlineList) {
+        printListForeach(element, serializerName)
+    } else {
+        beginControlFlow("tag(\"${element.xmlName}\") {")
+        printListForeach(element, serializerName)
+        endControlFlow()
+    }
 }

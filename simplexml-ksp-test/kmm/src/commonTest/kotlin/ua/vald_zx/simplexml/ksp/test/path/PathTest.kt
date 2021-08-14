@@ -1,10 +1,10 @@
 package ua.vald_zx.simplexml.ksp.test.path
 
 import ua.vald_zx.simplexml.ksp.SimpleXml
+import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleModuleInitializer
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleModuleInitializer
 
 class PathTest {
 
@@ -21,6 +21,7 @@ class PathTest {
         val deserializedBean: ElementWithOneLayerPath = SimpleXml.deserialize(xml)
         assertEquals(bean, deserializedBean)
     }
+
     @Test
     fun `ElementWithTwoLayerPath serialize deserialize test`() {
         val bean = ElementWithTwoLayerPath("ElementWithTwoLayerPath")
