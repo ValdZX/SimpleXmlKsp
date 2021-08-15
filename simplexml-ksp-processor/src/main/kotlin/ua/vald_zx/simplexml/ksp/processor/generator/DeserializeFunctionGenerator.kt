@@ -149,6 +149,6 @@ private fun FunSpec.Builder.addDeserializeCallStatement(
         addStatement("$fieldStatement ?: throw DeserializeException(\"\"\"field ${property.propertyName} value is required\"\"\")")
         addStatement(")$postfix")
     } else {
-        addStatement("$prefix$serializerName.readData($fieldStatement)")
+        addStatement("$prefix$fieldStatement?.let { $serializerName.readData(it) }$postfix")
     }
 }
