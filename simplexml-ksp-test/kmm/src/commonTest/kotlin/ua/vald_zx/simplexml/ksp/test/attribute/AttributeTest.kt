@@ -40,15 +40,6 @@ class AttributeTest {
         assertEquals(bean, deserializedBean)
     }
 
-//    @Test
-//    fun `SubTagPathAttribute serialize deserialize test`() {
-//        val bean = SubTagPathAttribute("SubTagPathAttributeATTR", "SubTagPathAttributeTAG")
-//        val xml = SimpleXml.serialize(bean)
-//        println(xml)
-//        val deserializedBean: SubTagPathAttribute = SimpleXml.deserialize(xml)
-//        assertEquals(bean, deserializedBean)
-//    }
-
     @Test
     fun `ListAttribute serialize deserialize test`() {
         val bean = ListAttribute("ListAttribute", listOf("Value1", "Value2", "Value3"))

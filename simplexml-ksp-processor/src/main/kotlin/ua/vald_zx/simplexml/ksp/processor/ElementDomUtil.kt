@@ -1,7 +1,8 @@
 package ua.vald_zx.simplexml.ksp.processor
 
 
-internal fun ClassToGenerate.toDom(): List<DomElement> {
+internal fun makeDom(toGenerate: ClassToGenerate): List<DomElement> {
+    val propertyElements = toGenerate.propertyElements
     val firstLayerFields = propertyElements
         .filter { it.xmlPath.isEmpty() }
         .map { DomElement(it) }.toMutableList()

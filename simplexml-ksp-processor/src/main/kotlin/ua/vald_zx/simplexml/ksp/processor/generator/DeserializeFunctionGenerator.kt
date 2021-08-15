@@ -13,14 +13,12 @@ internal fun FunSpec.Builder.generateDeserialization(
     logger.info("Generating deserialization method for $className")
     val serializersMap = generateAndGetSerializers(classToGenerate)
     addStatement("element as TagXmlElement?")
-    val dom = classToGenerate.toDom()
     val fieldToValueMap: MutableMap<String, String> = mutableMapOf()
-    generateValues(dom, fieldToValueMap, "element", 0)
+    generateValues(classToGenerate.dom, fieldToValueMap, "element", 0)
     addStatement("return ${classToGenerate.name}(")
-    val propertiesRequiredToConstructor =
-        classToGenerate.propertyElements.filter { it.requiredToConstructor }
-    val propertiesDynamics =
-        classToGenerate.propertyElements.subtract(propertiesRequiredToConstructor)
+    val propertyElements = classToGenerate.propertyElements
+    val propertiesRequiredToConstructor = propertyElements
+        .filter { it.isConstructorParameter && !it.hasDefaultValue }
     propertiesRequiredToConstructor.forEach { property ->
         val name = property.propertyName
         if (property.xmlType == XmlUnitType.LIST) {
@@ -42,6 +40,7 @@ internal fun FunSpec.Builder.generateDeserialization(
             )
         }
     }
+    val propertiesDynamics = propertyElements.subtract(propertiesRequiredToConstructor)
     if (propertiesDynamics.isEmpty()) {
         addStatement(")")
     } else {

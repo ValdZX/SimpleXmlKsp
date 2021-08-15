@@ -17,7 +17,8 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
     private val codeGenerator = environment.codeGenerator
     private val options = environment.options
     private val filesToGenerate = mutableMapOf<String, ClassToGenerate>()
-    private val visitor = ElementsVisitor(filesToGenerate, logger)
+    private val isStrictMode = options["strict"]?.toBoolean() ?: false
+    private val visitor = ElementsVisitor(isStrictMode, filesToGenerate, logger)
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         listOfNotNull(
@@ -38,9 +39,9 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
         val modulePackageArgument = options["ModulePackage"].orEmpty()
         val moduleNameArgument = options["ModuleName"].orEmpty()
 
-        val serializerSpecList = filesToGenerate.map { (_, classToGenerate) ->
-            codeGenerator.generateSerializer(classToGenerate, logger)
-        }
+        val serializerSpecList = filesToGenerate.values
+            .filter { toGenerate -> toGenerate.isValid(isStrictMode, logger) }
+            .map { toGenerate -> codeGenerator.generateSerializer(toGenerate, logger) }
         var modulePackage = modulePackageArgument
         if (modulePackageArgument.isEmpty()) {
             serializerSpecList.forEach { spec ->

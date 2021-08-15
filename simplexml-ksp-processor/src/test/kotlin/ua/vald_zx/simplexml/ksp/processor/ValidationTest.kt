@@ -68,4 +68,44 @@ class ValidationTest {
         ).compile()
         assertEquals(result.exitCode, KotlinCompilation.ExitCode.COMPILATION_ERROR)
     }
+
+    @Test
+    fun `Compile SubTagPathAttribute class test`() {
+        val result = kotlin(
+            "SubTagPathAttribute.kt", """
+        package test
+
+        import ua.vald_zx.simplexml.ksp.Attribute
+        import ua.vald_zx.simplexml.ksp.Element
+        import ua.vald_zx.simplexml.ksp.Path
+
+        data class SubTagPathAttribute(
+            @field:[Path("Tag/Layer1") Attribute]
+            var attr: String,
+            @Element(name = "Tag")
+            var tag: String
+        )
+    """,
+        ).compile()
+        assertEquals(result.exitCode, KotlinCompilation.ExitCode.COMPILATION_ERROR)
+    }
+
+    @Test
+    fun `Compile Value+Variable class test`() {
+        val result = kotlin(
+            "SubTagPathAttribute.kt", """
+        package test
+
+        import ua.vald_zx.simplexml.ksp.Element
+
+        data class RequiredConstructorField(
+            @Element(required = true)
+            val tag: String,
+            @Element(required = true)
+            var tag2: String
+        )
+    """,
+        ).compile()
+        assertEquals(result.exitCode, KotlinCompilation.ExitCode.OK)
+    }
 }

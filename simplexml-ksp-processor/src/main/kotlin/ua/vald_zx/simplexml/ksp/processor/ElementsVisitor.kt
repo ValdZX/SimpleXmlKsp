@@ -1,10 +1,14 @@
 package ua.vald_zx.simplexml.ksp.processor
 
 import com.google.devtools.ksp.processing.KSPLogger
-import com.google.devtools.ksp.symbol.*
-import ua.vald_zx.simplexml.ksp.*
+import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSPropertyDeclaration
+import com.google.devtools.ksp.symbol.KSVisitorVoid
+import com.google.devtools.ksp.symbol.Nullability
+import ua.vald_zx.simplexml.ksp.Root
 
 class ElementsVisitor(
+    private val isStrictMode: Boolean,
     private val classToGenerate: MutableMap<String, ClassToGenerate>,
     private val logger: KSPLogger
 ) : KSVisitorVoid() {
@@ -13,99 +17,16 @@ class ElementsVisitor(
         if (parent !is KSClassDeclaration) return
         val parentName = parent.fullName
         val propertyName = property.simpleName.asString()
-        logger.info("Visited $parentName property $propertyName")
-        var path = ""
-        var elementName = ""
-        var entryListName = ""
-        var required = true
-        var inline = false
-        var converterType: KSType? = null
         val propertyType = property.type
-        var propertyEntryType: KSTypeReference? = null
-        var type: XmlUnitType = XmlUnitType.UNKNOWN
-        property.annotations.forEach { annotation ->
-            when (annotation.shortName.asString()) {
-                Path::class.simpleName -> {
-                    annotation.arguments.forEach { arg ->
-                        when (arg.name?.getShortName()) {
-                            "path" -> {
-                                path = arg.value.asString()
-                                if (path.isEmpty()) error("$parentName failure. Remove @Path or fill name on $propertyName")
-                            }
-                        }
-                    }
-                }
-                Element::class.simpleName -> {
-                    annotation.arguments.forEach { arg ->
-                        val shortName = arg.name?.getShortName()
-                        when (shortName) {
-                            "name" -> {
-                                elementName = arg.value.asString(default = propertyName)
-                            }
-                            "required" -> {
-                                required = arg.value.asBoolean(default = true)
-                            }
-                        }
-                    }
-                    if (type != XmlUnitType.UNKNOWN) error("$parentName failure. Illegal annotation on $propertyName")
-                    type = XmlUnitType.TAG
-                }
-                Attribute::class.simpleName -> {
-                    annotation.arguments.forEach { arg ->
-                        when (arg.name?.getShortName()) {
-                            "name" -> {
-                                elementName = arg.value.asString(default = propertyName)
-                            }
-                            "required" -> {
-                                required = arg.value.asBoolean(default = true)
-                            }
-                        }
-                    }
-                    if (type != XmlUnitType.UNKNOWN) error("$parentName failure. Illegal annotation on $propertyName")
-                    type = XmlUnitType.ATTRIBUTE
-                }
-                ElementList::class.simpleName -> {
-                    if (property.type.resolve().declaration.simpleName.asString() != "List") {
-                        error("$parentName failure. Illegal annotation on $propertyName. ElementList only for kotlin.collections.List")
-                    }
-                    annotation.arguments.forEach { arg ->
-                        when (arg.name?.getShortName()) {
-                            "name" -> {
-                                elementName = arg.value.asString(default = propertyName)
-                            }
-                            "entry" -> {
-                                entryListName = arg.value.asString()
-                            }
-                            "required" -> {
-                                required = arg.value.asBoolean(default = true)
-                            }
-                            "inline" -> {
-                                inline = arg.value.asBoolean()
-                            }
-                        }
-                    }
-                    if (type != XmlUnitType.UNKNOWN) error("$parentName failure. Illegal annotation on $propertyName")
-                    type = XmlUnitType.LIST
-                    propertyEntryType = propertyType.element?.typeArguments?.first()?.type
-                }
-                Convert::class.simpleName -> {
-                    converterType = annotation.arguments.first().value as KSType
-                }
-            }
-        }
+        val annotationInfo = property.getAnnotationInfo(logger, isStrictMode, propertyType, parentName, propertyName)
         val constructorParameters = parent.primaryConstructor?.parameters
-        val requiredToConstructor = constructorParameters
-            ?.find { it.name?.asString() == propertyName }
-            ?.hasDefault?.not() ?: false
-        if (requiredToConstructor && !required && propertyType.resolve().nullability == Nullability.NOT_NULL) {
+        val constructorParameter = constructorParameters?.find { it.name?.asString() == propertyName }
+        val isVariable = property.isMutable
+        val isConstructorParameter = constructorParameter != null
+        val hasDefaultValue = constructorParameter?.hasDefault ?: false
+        val requiredToConstructor = constructorParameter?.hasDefault?.not() ?: false
+        if (requiredToConstructor && !annotationInfo.required && propertyType.resolve().nullability == Nullability.NOT_NULL) {
             error("$parentName::$propertyName is not required without default value")
-        }
-        if (type == XmlUnitType.LIST && entryListName.isEmpty()) {
-            entryListName =
-                propertyType.element?.typeArguments?.first()?.type?.resolve()?.declaration?.simpleName?.getShortName()
-                    ?: error(
-                        "$parentName::$propertyName invalid list"
-                    )
         }
         classToGenerate.getOrPut(parentName) {
             val parentShortName = parent.simpleName.getShortName()
@@ -122,25 +43,19 @@ class ElementsVisitor(
         }.propertyElements.add(
             PropertyElement(
                 propertyName = propertyName,
-                xmlName = elementName,
-                listEntryName = entryListName,
-                xmlType = type,
+                xmlName = annotationInfo.elementName,
+                listEntryName = annotationInfo.entryListName,
+                xmlType = annotationInfo.type,
                 propertyType = propertyType,
-                xmlPath = path,
-                required = required,
-                requiredToConstructor = requiredToConstructor,
-                inlineList = inline,
-                converterType = converterType,
-                propertyEntryType = propertyEntryType
+                xmlPath = annotationInfo.path,
+                required = annotationInfo.required,
+                isVariable = isVariable,
+                isConstructorParameter = isConstructorParameter,
+                hasDefaultValue = hasDefaultValue,
+                inlineList = annotationInfo.inline,
+                converterType = annotationInfo.converterType,
+                propertyEntryType = annotationInfo.propertyEntryType
             )
         )
     }
-}
-
-private fun Any?.asString(default: String = ""): String {
-    return if (this is String && this.isNotEmpty()) this else default
-}
-
-private fun Any?.asBoolean(default: Boolean = false): Boolean {
-    return (this as Boolean?) ?: default
 }

@@ -22,13 +22,6 @@ data class TagAttribute(
     var tag: String
 )
 
-//data class SubTagPathAttribute(
-//    @field:[Path("Tag/Layer1") Attribute]
-//    var attr: String,
-//    @Element(name = "Tag")
-//    var tag: String
-//)
-
 data class ListAttribute(
     @field:[Path("List") Attribute]
     var attr: String,

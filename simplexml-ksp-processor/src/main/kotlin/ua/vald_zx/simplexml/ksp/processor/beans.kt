@@ -13,7 +13,9 @@ data class ClassToGenerate(
     val rootName: String,
     val packagePath: String,
     val propertyElements: MutableList<PropertyElement> = mutableListOf()
-)
+) {
+    val dom: List<DomElement> by lazy { makeDom(this) }
+}
 
 data class PropertyElement(
     val propertyName: String,
@@ -22,7 +24,9 @@ data class PropertyElement(
     val xmlType: XmlUnitType,
     val xmlPath: String,
     val required: Boolean,
-    val requiredToConstructor: Boolean,
+    val isVariable: Boolean,
+    val isConstructorParameter: Boolean,
+    val hasDefaultValue: Boolean,
     val listEntryName: String,
     val inlineList: Boolean,
     val converterType: KSType?,

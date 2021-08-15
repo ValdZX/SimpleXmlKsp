@@ -1,13 +1,16 @@
 package ua.vald_zx.simplexml.ksp.processor.generator
 
 import com.squareup.kotlinpoet.FunSpec
-import ua.vald_zx.simplexml.ksp.processor.*
+import ua.vald_zx.simplexml.ksp.processor.ClassToGenerate
+import ua.vald_zx.simplexml.ksp.processor.DomElement
+import ua.vald_zx.simplexml.ksp.processor.PropertyElement
+import ua.vald_zx.simplexml.ksp.processor.XmlUnitType
 
 
 internal fun FunSpec.Builder.generateSerialization(classToGenerate: ClassToGenerate): FunSpec.Builder {
     val serializersMap = generateAndGetSerializers(classToGenerate)
     beginControlFlow("tagFather.apply")
-    renderChildren(classToGenerate.toDom(), serializersMap)
+    renderChildren(classToGenerate.dom, serializersMap)
     endControlFlow()
     return this
 }
@@ -67,7 +70,11 @@ private fun FunSpec.Builder.tag(serializerName: String?, element: DomElement) {
     addStatement("${serializerName}.buildXml(this, \"${element.xmlName}\", obj.${element.propertyName})")
 }
 
-private fun FunSpec.Builder.tagWithChildren(serializerName: String?, element: DomElement, serializersMap: Map<PropertyElement, String>) {
+private fun FunSpec.Builder.tagWithChildren(
+    serializerName: String?,
+    element: DomElement,
+    serializersMap: Map<PropertyElement, String>
+) {
     if (element.propertyName.isEmpty()) {
         beginControlFlow("tag(\"${element.xmlName}\")")
     } else {
@@ -110,7 +117,11 @@ private fun FunSpec.Builder.list(serializerName: String?, element: DomElement) {
     }
 }
 
-private fun FunSpec.Builder.listWithAttributes(serializerName: String?, element: DomElement, serializersMap: Map<PropertyElement, String>) {
+private fun FunSpec.Builder.listWithAttributes(
+    serializerName: String?,
+    element: DomElement,
+    serializersMap: Map<PropertyElement, String>
+) {
     if (element.inlineList) {
         printListForeach(element, serializerName)
     } else {
