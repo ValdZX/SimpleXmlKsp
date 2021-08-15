@@ -68,7 +68,7 @@ internal fun FunSpec.Builder.generateDeserialization(
                 val serializerName = serializersMap[property] ?: error("Not found serializer")
                 if (!property.required) {
                     beginControlFlow("if ($parsedValue != null)")
-                    addDeserializeCallStatement("$parsedValue", property, serializerName, "$name = ")
+                    addDeserializeCallStatement("$parsedValue", property, serializerName, "$name = ", isNotNull = true)
                     endControlFlow()
                 } else {
                     addDeserializeCallStatement("$parsedValue", property, serializerName, "$name = ")
@@ -148,6 +148,8 @@ private fun FunSpec.Builder.addDeserializeCallStatement(
         addStatement("$prefix$serializerName.readData(")
         addStatement("$fieldStatement ?: throw DeserializeException(\"\"\"field ${property.propertyName} value is required\"\"\")")
         addStatement(")$postfix")
+    } else if (isNotNull) {
+        addStatement("$prefix$serializerName.readData($fieldStatement)$postfix")
     } else {
         addStatement("$prefix$fieldStatement?.let { $serializerName.readData(it) }$postfix")
     }
