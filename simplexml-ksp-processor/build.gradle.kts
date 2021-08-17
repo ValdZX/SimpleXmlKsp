@@ -26,6 +26,10 @@ dependencies {
     testImplementation("com.github.tschuchortdev:kotlin-compile-testing-ksp:1.4.2")
 }
 
+val javadocJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("javadoc")
+}
+
 val sonatypeUsername: String? = project.properties["sonatype.login"]?.toString()
 val sonatypePassword: String? = project.properties["sonatype.password"]?.toString()
 publishing {
@@ -56,15 +60,17 @@ publishing {
             }
         }
         withType<MavenPublication> {
+            artifact(javadocJar.get())
             pom {
+                name.set("SimpleXmlKsp")
                 description.set("Simple XML Ksp - Processor")
+                url.set("https://github.com/ValdZX/SimpleXmlKsp")
                 licenses {
                     license {
                         name.set("Apache License")
                         url.set("http://www.apache.org/licenses/LICENSE-2.0")
                     }
                 }
-                url.set("https://github.com/ValdZX/SimpleXmlKsp")
                 issueManagement {
                     system.set("Github")
                     url.set("https://github.com/ValdZX/SimpleXmlKsp/issues")
@@ -75,6 +81,7 @@ publishing {
                 }
                 developers {
                     developer {
+                        id.set("Vald_ZX")
                         name.set("Vladislav Khimichenko")
                         email.set("khimichenko.vladislav@gmail.com")
                     }
