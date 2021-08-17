@@ -13,7 +13,9 @@ repositories {
 }
 
 kotlin {
-    android()
+    android {
+        publishLibraryVariants("release", "debug")
+    }
     jvm()
     ios()
     sourceSets {
