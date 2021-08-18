@@ -28,3 +28,11 @@ data class ListAttribute(
     @ElementList(name = "List")
     var tag: List<String>
 )
+
+
+data class NullableTagAttribute(
+    @field:[Path("Tag") Attribute]
+    var attr: String,
+    @Element(name = "Tag", required = false)
+    var tag: String? = null
+)

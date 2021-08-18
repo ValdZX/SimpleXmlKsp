@@ -48,4 +48,23 @@ class AttributeTest {
         val deserializedBean: ListAttribute = SimpleXml.deserialize(xml)
         assertEquals(bean, deserializedBean)
     }
+
+    @Test
+    fun `NullableTagAttribute serialize deserialize test`() {
+        val bean = NullableTagAttribute("NullableTagAttributeATTR", "NullableTagAttributeTAG")
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: NullableTagAttribute = SimpleXml.deserialize(xml)
+        assertEquals(bean, deserializedBean)
+    }
+
+    @Test
+    fun `NullableTagAttribute with empty tag serialize deserialize test`() {
+        val bean = NullableTagAttribute("NullableTagAttributeATTR")
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: NullableTagAttribute = SimpleXml.deserialize(xml)
+        assertEquals(bean.attr, deserializedBean.attr)
+        assertEquals(deserializedBean.tag, "")
+    }
 }
