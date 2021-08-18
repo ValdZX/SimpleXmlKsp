@@ -40,6 +40,11 @@ kotlin {
                 implementation(kotlin("test-annotations-common"))
             }
         }
+        val jvmTest by getting {
+            dependencies {
+                implementation("org.simpleframework:simple-xml:2.7.1")
+            }
+        }
         val androidMain by getting
         val androidAndroidTestRelease by getting
         val androidTest by getting {

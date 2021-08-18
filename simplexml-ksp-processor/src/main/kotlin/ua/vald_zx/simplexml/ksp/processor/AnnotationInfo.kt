@@ -5,6 +5,7 @@ import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeReference
 import ua.vald_zx.simplexml.ksp.*
+import ua.vald_zx.simplexml.ksp.processor.XmlSymbolProcessor.Companion.LIBRARY_PACKAGE
 
 data class AnnotationInfo(
     val inline: Boolean,
@@ -32,7 +33,9 @@ fun KSPropertyDeclaration.getAnnotationInfo(
     var converterType: KSType? = null
     var propertyEntryType: KSTypeReference? = null
     var type: XmlUnitType = XmlUnitType.UNKNOWN
-    annotations.forEach { annotation ->
+    annotations
+        .filter { it.annotationType.resolve().declaration.packageName.asString() == LIBRARY_PACKAGE }
+        .forEach { annotation ->
         when (val annotationName = annotation.shortName.asString()) {
             Path::class.simpleName -> {
                 annotation.arguments.forEach { arg ->
