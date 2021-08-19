@@ -1,11 +1,16 @@
 package ua.vald_zx.simplexml.ksp
 
+import kotlin.reflect.typeOf
+
+@OptIn(ExperimentalStdlibApi::class)
 object SimpleXml {
     inline fun <reified T : Any> serialize(obj: T): String {
-        return GlobalSerializersLibrary.findSerializers(T::class).serialize(obj)
+        val typeArguments = typeOf<T>().arguments
+        return GlobalSerializersLibrary.findSerializers(T::class).serialize(obj, typeArguments)
     }
 
     inline fun <reified T : Any> deserialize(xml: String): T {
-        return GlobalSerializersLibrary.findSerializers(T::class).deserialize(xml)
+        val typeArguments = typeOf<T>().arguments
+        return GlobalSerializersLibrary.findSerializers(T::class).deserialize(xml, typeArguments)
     }
 }
