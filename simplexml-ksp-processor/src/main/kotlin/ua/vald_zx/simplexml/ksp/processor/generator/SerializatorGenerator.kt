@@ -13,6 +13,7 @@ import ua.vald_zx.simplexml.ksp.xml.model.XmlElement
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
 
+@OptIn(ExperimentalStdlibApi::class)
 fun CodeGenerator.generateSerializer(
     classToGenerate: ClassToGenerate,
     logger: KSPLogger
@@ -23,6 +24,8 @@ fun CodeGenerator.generateSerializer(
     val objectName = beanName + "Serializer"
     logger.info("Generating $packageName.$objectName")
     val serializerClassName = ClassName(packageName, objectName)
+    val listKTypeProjection = ClassName("kotlin.collections", "List")
+        .parameterizedBy(ClassName("kotlin.reflect", "KTypeProjection"))
     val file = FileSpec.builder(packageName, objectName)
         .addImport(XmlSymbolProcessor.LIBRARY_PACKAGE, "GlobalSerializersLibrary")
         .addImport("${XmlSymbolProcessor.LIBRARY_PACKAGE}.xml", "tag")
@@ -54,6 +57,7 @@ fun CodeGenerator.generateSerializer(
                         .addModifiers(KModifier.OVERRIDE)
                         .addParameter("tagFather", TagFather::class)
                         .addParameter("obj", beanClassName)
+                        .addParameter("genericTypeList", listKTypeProjection)
                         .generateSerialization(classToGenerate)
                         .build()
                 ).addFunction(
@@ -63,6 +67,7 @@ fun CodeGenerator.generateSerializer(
                             "element",
                             XmlElement::class.asTypeName().copy(nullable = true)
                         )
+                        .addParameter("genericTypeList", listKTypeProjection)
                         .returns(beanClassName)
                         .generateDeserialization(classToGenerate, logger)
                         .build()
@@ -86,7 +91,7 @@ private fun FileSpec.Builder.declareImportsConverter(classToGenerate: ClassToGen
             property.converterType
         }
         .toSet()
-    if(converters.isNotEmpty()) {
+    if (converters.isNotEmpty()) {
         addImport("${XmlSymbolProcessor.LIBRARY_PACKAGE}.serializers", "ValueSerializer")
         converters.forEach { type ->
             val declaration = type.declaration

@@ -10,17 +10,6 @@ import kotlin.test.assertEquals
 
 class ValidationTest {
 
-    fun SourceFile.compile(): KotlinCompilation.Result {
-        val compilation = KotlinCompilation().apply {
-            sources = listOf(this@compile)
-            symbolProcessorProviders = listOf(XmlSymbolProcessorProvider())
-            inheritClassPath = true
-            verbose = false
-            kspIncremental = true
-        }
-        return compilation.compile()
-    }
-
     @Test
     fun `Compile empty class test`() {
         val result = kotlin(
