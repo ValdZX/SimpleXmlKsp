@@ -1,5 +1,6 @@
 package ua.vald_zx.simplexml.ksp.processor.generator
 
+import com.google.devtools.ksp.symbol.KSTypeReference
 import com.squareup.kotlinpoet.FunSpec
 import ua.vald_zx.simplexml.ksp.processor.ClassToGenerate
 import ua.vald_zx.simplexml.ksp.processor.PropertyElement
@@ -18,19 +19,25 @@ fun FunSpec.Builder.generateAndGetSerializers(classToGenerate: ClassToGenerate):
     val propertyToSerializerName = mutableMapOf<PropertyElement, FieldSerializer>()
     val propertyElements = classToGenerate.propertyElements
     val genericsProperties = mutableListOf<PropertyElement>()
-    val typeParameters = classToGenerate.typeParameters
+    val typeParameters = classToGenerate.typeParameters.toSet()
     if (typeParameters.isNotEmpty()) {
+        val typeMap = mutableMapOf<String, FieldSerializer>()
         typeParameters.forEachIndexed { index, type ->
             val typeName = type.toString()
-            val propertyElement = propertyElements.find { it.propertyType.toString() == typeName }
-            if (propertyElement != null) {
+            propertyElements.filter { it.propertyType.toString() == typeName }.forEach { propertyElement ->
                 genericsProperties.add(propertyElement)
-                val typeForVal = typeName.replaceFirstChar { it.lowercase() }
-                addStatement("val ${typeForVal}Type = genericTypeList[$index].type")
-                addStatement("val ${typeForVal}Args = ${typeForVal}Type?.arguments.orEmpty()")
-                addStatement("val ${typeForVal}Serializer = GlobalSerializersLibrary.findSerializers(${typeForVal}Type?.classifier as KClass<Any>)")
-                val fieldSerializer = FieldSerializer("${typeForVal}Serializer", "${typeForVal}Args")
-                propertyToSerializerName[propertyElement] = fieldSerializer
+                val cachedFieldSerializer = typeMap[propertyElement.propertyType.toString()]
+                if (cachedFieldSerializer == null) {
+                    val typeForVal = typeName.replaceFirstChar { it.lowercase() }
+                    addStatement("val ${typeForVal}Type = genericTypeList[$index].type")
+                    addStatement("val ${typeForVal}Args = ${typeForVal}Type?.arguments.orEmpty()")
+                    addStatement("val ${typeForVal}Serializer = GlobalSerializersLibrary.findSerializers(${typeForVal}Type?.classifier as KClass<Any>)")
+                    val fieldSerializer = FieldSerializer("${typeForVal}Serializer", "${typeForVal}Args")
+                    propertyToSerializerName[propertyElement] = fieldSerializer
+                    typeMap[propertyElement.propertyType.toString()] = fieldSerializer
+                } else {
+                    propertyToSerializerName[propertyElement] = cachedFieldSerializer
+                }
             }
         }
     }

@@ -50,6 +50,38 @@ class GenericTest {
         assertEquals(bean.somObject2, deserializedBean.somObject2)
     }
 
+    @Test
+    fun `GenericBeanWithOneParameter test`() {
+        val bean = GenericBeanWithOneParameter<String>()
+        bean.somObject1 = "String"
+        bean.somObject2 = "27f"
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: GenericBeanWithOneParameter<String> = SimpleXml.deserialize(xml)
+        assertEquals(bean.somObject1, deserializedBean.somObject1)
+        assertEquals(bean.somObject2, deserializedBean.somObject2)
+    }
+
+    @Test
+    fun `GenericThreeBean test`() {
+        val bean = GenericThreeBean<GenericDataClass<Char, Double>, String, Int>()
+        bean.somObject1 = GenericDataClass('$', 4.9)
+        bean.somObject2 = "27f"
+        bean.somObject3 = "27f"
+        bean.somObject4 = 1
+        bean.somObject5 = 2
+        bean.somObject6 = 3
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: GenericThreeBean<GenericDataClass<Char, Double>, String, Int> = SimpleXml.deserialize(xml)
+        assertEquals(bean.somObject1, deserializedBean.somObject1)
+        assertEquals(bean.somObject2, deserializedBean.somObject2)
+        assertEquals(bean.somObject3, deserializedBean.somObject3)
+        assertEquals(bean.somObject4, deserializedBean.somObject4)
+        assertEquals(bean.somObject5, deserializedBean.somObject5)
+        assertEquals(bean.somObject6, deserializedBean.somObject6)
+    }
+
 //    @Test
 //    fun `GenericExtension serialize deserialize test`() {
 //        val bean = GenericExtension()
