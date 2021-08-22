@@ -1,10 +1,7 @@
 package ua.vald_zx.simplexml.ksp.processor
 
 import com.tschuchort.compiletesting.KotlinCompilation
-import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
-import com.tschuchort.compiletesting.kspIncremental
-import com.tschuchort.compiletesting.symbolProcessorProviders
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -61,7 +58,8 @@ class ValidationTest {
     @Test
     fun `Compile SubTagPathAttribute class test`() {
         val result = kotlin(
-            "SubTagPathAttribute.kt", """
+            "SubTagPathAttribute.kt",
+            """
         package test
 
         import ua.vald_zx.simplexml.ksp.Attribute
@@ -82,7 +80,8 @@ class ValidationTest {
     @Test
     fun `Compile Value+Variable class test`() {
         val result = kotlin(
-            "SubTagPathAttribute.kt", """
+            "SubTagPathAttribute.kt",
+            """
         package test
 
         import ua.vald_zx.simplexml.ksp.Element

@@ -2,7 +2,10 @@ package ua.vald_zx.simplexml.ksp.processor.generator
 
 import com.google.devtools.ksp.processing.KSPLogger
 import com.squareup.kotlinpoet.FunSpec
-import ua.vald_zx.simplexml.ksp.processor.*
+import ua.vald_zx.simplexml.ksp.processor.ClassToGenerate
+import ua.vald_zx.simplexml.ksp.processor.DomElement
+import ua.vald_zx.simplexml.ksp.processor.PropertyElement
+import ua.vald_zx.simplexml.ksp.processor.XmlUnitType
 
 
 internal fun FunSpec.Builder.generateDeserialization(
@@ -15,28 +18,39 @@ internal fun FunSpec.Builder.generateDeserialization(
     addStatement("element as TagXmlElement?")
     val fieldToValueMap: MutableMap<String, String> = mutableMapOf()
     generateValues(classToGenerate.dom, fieldToValueMap, "element", 0)
-    addStatement("return ${classToGenerate.name}(")
+
+    val anyGenerics = if (classToGenerate.typeParameters.isNotEmpty()) {
+        buildString {
+            append("<")
+            append(classToGenerate.typeParameters.joinToString(", ") { "Any" })
+            append(">")
+        }
+    } else ""
+    addStatement("return ${classToGenerate.name}$anyGenerics(")
     val propertyElements = classToGenerate.propertyElements
     val propertiesRequiredToConstructor = propertyElements
         .filter { it.isConstructorParameter && !it.hasDefaultValue }
     propertiesRequiredToConstructor.forEach { property ->
         val name = property.propertyName
+        val fieldSerializer = serializersMap[property] ?: error("Not found serializer")
+        val entrySerializerName = fieldSerializer.serializerVariableName
+        val genericTypesVariableName = fieldSerializer.genericTypesVariableName
+        val argumentsFunArgument = if (genericTypesVariableName != null) {
+            ", $genericTypesVariableName"
+        } else ""
         if (property.xmlType == XmlUnitType.LIST) {
-            val entrySerializerName =
-                serializersMap[property] ?: error("Not found serializer")
             beginControlFlow("$name = ${fieldToValueMap[name]}?.map")
-            addDeserializeCallStatement("it", property, entrySerializerName, isNotNull = true)
-            addStatement("$entrySerializerName.readData(it)")
+            addDeserializeCallStatement("it", property, fieldSerializer, isNotNull = true)
+            addStatement("$entrySerializerName.readData(it$argumentsFunArgument)")
             endControlFlow()
             addStatement("?: throw DeserializeException(\"\"\"$className field $name value is required\"\"\"),")
         } else {
-            val serializerName = serializersMap[property] ?: error("Not found serializer")
             addDeserializeCallStatement(
                 prefix = "$name = ",
                 postfix = ",",
                 fieldStatement = "${fieldToValueMap[name]}",
                 property = property,
-                serializerName = serializerName
+                fieldSerializer = fieldSerializer
             )
         }
     }
@@ -49,17 +63,22 @@ internal fun FunSpec.Builder.generateDeserialization(
             val name = property.propertyName
             val parsedValue = fieldToValueMap[name]
             if (property.xmlType == XmlUnitType.LIST) {
-                val entrySerializerName =
+                val fieldSerializer =
                     serializersMap[property] ?: error("Not found serializer")
+                val entrySerializerName = fieldSerializer.serializerVariableName
+                val genericTypesVariableName = fieldSerializer.genericTypesVariableName
+                val argumentsFunArgument = if (genericTypesVariableName != null) {
+                    ", $genericTypesVariableName"
+                } else ""
                 if (!property.required) {
                     beginControlFlow("if ($parsedValue != null)")
                     beginControlFlow("$name = $parsedValue.map")
-                    addStatement("$entrySerializerName.readData(it)")
+                    addStatement("$entrySerializerName.readData(it$argumentsFunArgument)")
                     endControlFlow()
                     endControlFlow()
                 } else {
                     beginControlFlow("$name = $parsedValue.map")
-                    addStatement("$entrySerializerName.readData(it)")
+                    addStatement("$entrySerializerName.readData(it$argumentsFunArgument)")
                     endControlFlow()
                     addStatement("?: throw DeserializeException(\"\"\"$className field $name value is required\"\"\")")
                 }
@@ -138,18 +157,24 @@ private fun FunSpec.Builder.generateValues(
 private fun FunSpec.Builder.addDeserializeCallStatement(
     fieldStatement: String,
     property: PropertyElement,
-    serializerName: String,
+    fieldSerializer: FieldSerializer,
     prefix: String = "",
     postfix: String = "",
     isNotNull: Boolean = false
 ) {
+    val serializerName = fieldSerializer.serializerVariableName
+    val genericTypesVariableName = fieldSerializer.genericTypesVariableName
+    val argumentsFunArgument = if (genericTypesVariableName != null) {
+        ", $genericTypesVariableName"
+    } else ""
+
     if (property.required && !isNotNull) {
         addStatement("$prefix$serializerName.readData(")
-        addStatement("$fieldStatement ?: throw DeserializeException(\"\"\"field ${property.propertyName} value is required\"\"\")")
+        addStatement("$fieldStatement ?: throw DeserializeException(\"\"\"field ${property.propertyName} value is required\"\"\")$argumentsFunArgument")
         addStatement(")$postfix")
     } else if (isNotNull) {
-        addStatement("$prefix$serializerName.readData($fieldStatement)$postfix")
+        addStatement("$prefix$serializerName.readData($fieldStatement$argumentsFunArgument)$postfix")
     } else {
-        addStatement("$prefix$fieldStatement?.let { $serializerName.readData(it) }$postfix")
+        addStatement("$prefix$fieldStatement?.let { $serializerName.readData(it$argumentsFunArgument) }$postfix")
     }
 }

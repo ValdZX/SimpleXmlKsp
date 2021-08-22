@@ -13,14 +13,22 @@ import ua.vald_zx.simplexml.ksp.xml.model.XmlElement
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
 
-@OptIn(ExperimentalStdlibApi::class)
 fun CodeGenerator.generateSerializer(
     classToGenerate: ClassToGenerate,
     logger: KSPLogger
 ): GeneratedSerializerSpec {
+    val typeParameters = classToGenerate.typeParameters
     val beanName = classToGenerate.name
     val packageName = classToGenerate.packagePath
     val beanClassName = ClassName(packageName, beanName)
+    var parameterizedStarsBeanClassName: ParameterizedTypeName? = null
+    var parameterizedAnyBeanClassName: ParameterizedTypeName? = null
+    if (typeParameters.isNotEmpty()) {
+        parameterizedStarsBeanClassName = beanClassName
+            .parameterizedBy(typeParameters.map { STAR })
+        parameterizedAnyBeanClassName = beanClassName
+            .parameterizedBy(typeParameters.map { ANY })
+    }
     val objectName = beanName + "Serializer"
     logger.info("Generating $packageName.$objectName")
     val serializerClassName = ClassName(packageName, objectName)
@@ -28,6 +36,7 @@ fun CodeGenerator.generateSerializer(
         .parameterizedBy(ClassName("kotlin.reflect", "KTypeProjection"))
     val file = FileSpec.builder(packageName, objectName)
         .addImport(XmlSymbolProcessor.LIBRARY_PACKAGE, "GlobalSerializersLibrary")
+        .addImport("kotlin.reflect", "KClass")
         .addImport("${XmlSymbolProcessor.LIBRARY_PACKAGE}.xml", "tag")
         .addImport("${XmlSymbolProcessor.LIBRARY_PACKAGE}.xml.XmlReader", "readXml")
         .addImport("${XmlSymbolProcessor.LIBRARY_PACKAGE}.xml.error", "InvalidXml")
@@ -41,7 +50,7 @@ fun CodeGenerator.generateSerializer(
                     ClassName(
                         "${XmlSymbolProcessor.LIBRARY_PACKAGE}.serializers",
                         "ObjectSerializer"
-                    ).parameterizedBy(beanClassName)
+                    ).parameterizedBy(parameterizedStarsBeanClassName ?: beanClassName)
                 )
                 .addProperty(
                     PropertySpec.builder(
@@ -54,9 +63,10 @@ fun CodeGenerator.generateSerializer(
                 )
                 .addFunction(
                     FunSpec.builder("buildXml")
+                        .uncheckedCastAnnotationIfNeed(typeParameters.isNotEmpty())
                         .addModifiers(KModifier.OVERRIDE)
                         .addParameter("tagFather", TagFather::class)
-                        .addParameter("obj", beanClassName)
+                        .addParameter("obj", parameterizedStarsBeanClassName ?: beanClassName)
                         .addParameter("genericTypeList", listKTypeProjection)
                         .generateSerialization(classToGenerate)
                         .build()
@@ -68,7 +78,7 @@ fun CodeGenerator.generateSerializer(
                             XmlElement::class.asTypeName().copy(nullable = true)
                         )
                         .addParameter("genericTypeList", listKTypeProjection)
-                        .returns(beanClassName)
+                        .returns(parameterizedAnyBeanClassName ?: beanClassName)
                         .generateDeserialization(classToGenerate, logger)
                         .build()
                 ).build()
@@ -83,6 +93,18 @@ fun CodeGenerator.generateSerializer(
         }
     }
     return GeneratedSerializerSpec(beanClassName, serializerClassName, packageName)
+}
+
+private fun FunSpec.Builder.uncheckedCastAnnotationIfNeed(need: Boolean): FunSpec.Builder {
+    return if (need) {
+        addAnnotation(
+            AnnotationSpec.builder(Suppress::class)
+                .addMember("\"UNCHECKED_CAST\"")
+                .build()
+        )
+    } else {
+        this
+    }
 }
 
 private fun FileSpec.Builder.declareImportsConverter(classToGenerate: ClassToGenerate): FileSpec.Builder {

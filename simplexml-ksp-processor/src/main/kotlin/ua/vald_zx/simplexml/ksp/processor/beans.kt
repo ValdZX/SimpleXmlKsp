@@ -1,13 +1,11 @@
 package ua.vald_zx.simplexml.ksp.processor
 
-import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSType
-import com.google.devtools.ksp.symbol.KSTypeReference
-import com.google.devtools.ksp.symbol.Nullability
+import com.google.devtools.ksp.symbol.*
 import com.squareup.kotlinpoet.ClassName
 
 data class ClassToGenerate(
     val bean: KSClassDeclaration,
+    val typeParameters: List<KSTypeParameter>,
     val fullName: String,
     val name: String,
     val rootName: String,

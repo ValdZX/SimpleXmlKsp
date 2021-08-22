@@ -35,6 +35,7 @@ class ElementsVisitor(
                 .firstOrNull()?.arguments?.getOrNull(0)?.value?.toString() ?: parentShortName
             ClassToGenerate(
                 bean = parent,
+                typeParameters = parent.typeParameters,
                 fullName = parentName,
                 name = parentShortName,
                 rootName = rootName,
