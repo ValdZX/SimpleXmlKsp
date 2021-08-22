@@ -4,6 +4,8 @@ import kotlin.reflect.typeOf
 
 @OptIn(ExperimentalStdlibApi::class)
 object SimpleXml {
+    var pretty: Boolean = false
+
     inline fun <reified T : Any> serialize(obj: T): String {
         val typeArguments = typeOf<T>().arguments
         return GlobalSerializersLibrary.findSerializers(T::class).serialize(obj, typeArguments)

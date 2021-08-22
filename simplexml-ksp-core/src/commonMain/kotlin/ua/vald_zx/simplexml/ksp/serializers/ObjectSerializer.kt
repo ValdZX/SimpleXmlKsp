@@ -1,6 +1,7 @@
 package ua.vald_zx.simplexml.ksp.serializers
 
 import ua.vald_zx.simplexml.ksp.Serializer
+import ua.vald_zx.simplexml.ksp.SimpleXml
 import ua.vald_zx.simplexml.ksp.xml.Tag
 import ua.vald_zx.simplexml.ksp.xml.TagFather
 import ua.vald_zx.simplexml.ksp.xml.XmlReader.readXml
@@ -12,7 +13,7 @@ abstract class ObjectSerializer<T> : Serializer<T> {
     protected abstract val rootName: String
 
     override fun serialize(obj: T, genericTypeList: List<KTypeProjection>): String {
-        return tag(rootName) { buildXml(this, obj, genericTypeList) }.render()
+        return tag(rootName, pretty = SimpleXml.pretty) { buildXml(this, obj, genericTypeList) }.render()
     }
 
     override fun buildXml(

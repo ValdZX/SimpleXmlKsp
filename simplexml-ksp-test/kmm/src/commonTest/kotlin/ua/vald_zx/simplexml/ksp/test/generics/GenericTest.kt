@@ -10,6 +10,7 @@ class GenericTest {
 
     @BeforeTest
     fun init() {
+        SimpleXml.pretty = true
         SampleModuleInitializer.setup()
     }
 
