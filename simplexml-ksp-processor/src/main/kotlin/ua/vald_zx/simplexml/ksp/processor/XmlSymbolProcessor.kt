@@ -42,8 +42,8 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
     override fun finish() {
         if (filesToGenerate.isEmpty()) return
 
-        val modulePackageArgument = options["ModulePackage"].orEmpty()
-        val moduleNameArgument = options["ModuleName"].orEmpty()
+        val modulePackageArgument = options["simplexml.ksp.modulepackage"].orEmpty()
+        val moduleNameArgument = options["simplexml.ksp.modulename"].orEmpty()
 
         val serializerSpecList = filesToGenerate.values
             .filter { toGenerate -> toGenerate.isValid(isStrictMode, logger) }

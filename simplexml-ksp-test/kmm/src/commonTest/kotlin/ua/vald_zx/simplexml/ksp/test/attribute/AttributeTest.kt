@@ -4,13 +4,13 @@ import ua.vald_zx.simplexml.ksp.SimpleXml
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleModuleInitializer
+import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleSerializersEnrolment
 
 class AttributeTest {
 
     @BeforeTest
     fun init() {
-        SampleModuleInitializer.setup()
+        SampleSerializersEnrolment.enrol()
     }
 
     @Test

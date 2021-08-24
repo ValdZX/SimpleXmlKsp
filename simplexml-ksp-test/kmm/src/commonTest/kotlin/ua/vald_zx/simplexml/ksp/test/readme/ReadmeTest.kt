@@ -1,7 +1,7 @@
 package ua.vald_zx.simplexml.ksp.test.readme
 
 import ua.vald_zx.simplexml.ksp.SimpleXml
-import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleModuleInitializer
+import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleSerializersEnrolment
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -10,7 +10,7 @@ class ReadmeTest {
 
     @BeforeTest
     fun init() {
-        SampleModuleInitializer.setup()
+        SampleSerializersEnrolment.enrol()
     }
 
     @Test

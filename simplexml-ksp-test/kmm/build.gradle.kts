@@ -9,8 +9,8 @@ plugins {
 version = projectVersion
 
 ksp {
-    arg("ModulePackage", "ua.vald_zx.simplexml.ksp.sample.custompackage")
-    arg("ModuleName", "Sample")
+    arg("simplexml.ksp.modulepackage", "ua.vald_zx.simplexml.ksp.sample.custompackage")
+    arg("simplexml.ksp.modulename", "Sample")
 }
 
 kotlin {

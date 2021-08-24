@@ -17,14 +17,14 @@ fun CodeGenerator.generateModuleInitializer(
     toRegister: List<GeneratedSerializerSpec>,
     logger: KSPLogger
 ) {
-    val fileName = "${moduleName}ModuleInitializer"
+    val fileName = "${moduleName}SerializersEnrolment"
     val file = FileSpec.builder(modulePackage, fileName)
         .addImport(GlobalSerializersLibrary::class, "")
         .addRegistrationImports(toRegister)
         .addType(
             TypeSpec.objectBuilder(fileName)
                 .addFunction(
-                    FunSpec.builder("setup")
+                    FunSpec.builder("enrol")
                         .apply {
                             toRegister.forEach { toRegistration ->
                                 beginControlFlow("GlobalSerializersLibrary.add(${toRegistration.beanClass.simpleName}::class)")

@@ -3,7 +3,7 @@ package ua.vald_zx.simplexml.ksp.test.converter
 import ua.vald_zx.simplexml.ksp.Convert
 import ua.vald_zx.simplexml.ksp.Element
 import ua.vald_zx.simplexml.ksp.SimpleXml
-import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleModuleInitializer
+import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleSerializersEnrolment
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -23,7 +23,7 @@ class MultipleConvertersConstructorFieldTest {
 
     @BeforeTest
     fun init() {
-        SampleModuleInitializer.setup()
+        SampleSerializersEnrolment.enrol()
     }
 
     @Test

@@ -3,14 +3,14 @@ package ua.vald_zx.simplexml.ksp.test.element
 import ua.vald_zx.simplexml.ksp.SimpleXml
 import ua.vald_zx.simplexml.ksp.exception.DeserializeException
 import ua.vald_zx.simplexml.ksp.exception.SerializeException
-import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleModuleInitializer
+import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleSerializersEnrolment
 import kotlin.test.*
 
 class ElementTest {
 
     @BeforeTest
     fun init() {
-        SampleModuleInitializer.setup()
+        SampleSerializersEnrolment.enrol()
     }
 
     @Test

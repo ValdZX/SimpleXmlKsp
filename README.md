@@ -7,18 +7,31 @@ Kotlin Symbol Processing for XML serialization. Generates serializers by annotat
 
 ## Usage
 
+Provide the following arguments to KSP in the module's `build.gradle.ksp`.
+
+```kotlin
+ksp {
+    arg("simplexml.ksp.modulepackage", "com.my.app")
+    arg("simplexml.ksp.modulename", "CurrentModuleName")
+}
+```
+
+Enrol serializers on app startup:
+
+```kotlin
+CurrentModuleNameSerializersEnrolment.enrol()
+```
+
 Required XML:
 
 ```xml
-
 <Package service="GET_INFO">
   <Token>S290bGluIGlzIGF3ZXNvbWU=</Token>
   <Location lat="50.004977" lng="36.231117">Ukraine, Kharkiv</Location>
 </Package>
-
 ```
 
-Kotlin declaration:
+Use [annotations](#annotations) for construct xml structure:
 
 ```kotlin
 @Root("Package")
@@ -68,6 +81,13 @@ plugins {
     id("com.google.devtools.ksp") version 1.5.21-1.0.0-beta07 apply false
 }
 ```
+
+##Annotations
+###@Element
+###@Root
+###@Path
+###@Attribute
+###@ElementList
 
 ### Jvm / Android
 
