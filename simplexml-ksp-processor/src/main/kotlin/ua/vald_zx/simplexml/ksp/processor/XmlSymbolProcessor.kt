@@ -55,7 +55,7 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
             }
         }
         if (serializerSpecList.isNotEmpty()) {
-            codeGenerator.generateModuleInitializer(moduleNameArgument, modulePackage, serializerSpecList)
+            codeGenerator.generateModuleInitializer(moduleNameArgument, modulePackage, serializerSpecList, logger)
         }
         super.finish()
     }

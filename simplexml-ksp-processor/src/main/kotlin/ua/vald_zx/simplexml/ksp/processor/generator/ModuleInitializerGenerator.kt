@@ -2,6 +2,7 @@ package ua.vald_zx.simplexml.ksp.processor.generator
 
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
+import com.google.devtools.ksp.processing.KSPLogger
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.TypeSpec
@@ -13,7 +14,8 @@ import java.nio.charset.StandardCharsets
 fun CodeGenerator.generateModuleInitializer(
     moduleName: String,
     modulePackage: String,
-    toRegister: List<GeneratedSerializerSpec>
+    toRegister: List<GeneratedSerializerSpec>,
+    logger: KSPLogger
 ) {
     val fileName = "${moduleName}ModuleInitializer"
     val file = FileSpec.builder(modulePackage, fileName)
@@ -38,11 +40,10 @@ fun CodeGenerator.generateModuleInitializer(
         fileName
     ).use { stream ->
         OutputStreamWriter(stream, StandardCharsets.UTF_8).use { writer ->
-            file.writeTo(
-                writer
-            )
+            file.writeTo(writer)
         }
     }
+    logger.info("Generated $modulePackage.$fileName")
 }
 
 private fun FileSpec.Builder.addRegistrationImports(toRegister: List<GeneratedSerializerSpec>): FileSpec.Builder {

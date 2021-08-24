@@ -63,7 +63,7 @@ fun CodeGenerator.generateSerializer(
                 )
                 .addFunction(
                     FunSpec.builder("buildXml")
-                        .uncheckedCastAnnotationIfNeed(typeParameters.isNotEmpty())
+                        .suppressAnnotation(typeParameters.isNotEmpty())
                         .addModifiers(KModifier.OVERRIDE)
                         .addParameter("tagFather", TagFather::class)
                         .addParameter("obj", parameterizedStarsBeanClassName ?: beanClassName)
@@ -72,7 +72,11 @@ fun CodeGenerator.generateSerializer(
                         .build()
                 ).addFunction(
                     FunSpec.builder("readData")
-                        .uncheckedCastAnnotationIfNeed(typeParameters.isNotEmpty())
+                        .suppressAnnotation(
+                            uncheckedCast = typeParameters.isNotEmpty(),
+                            senselessComparison = true,
+                            uselessElvis = true
+                        )
                         .addModifiers(KModifier.OVERRIDE)
                         .addParameter(
                             "element",
@@ -96,11 +100,20 @@ fun CodeGenerator.generateSerializer(
     return GeneratedSerializerSpec(beanClassName, serializerClassName, packageName)
 }
 
-private fun FunSpec.Builder.uncheckedCastAnnotationIfNeed(need: Boolean): FunSpec.Builder {
-    return if (need) {
+private fun FunSpec.Builder.suppressAnnotation(
+    uncheckedCast: Boolean,
+    senselessComparison: Boolean = false,
+    uselessElvis: Boolean = false
+): FunSpec.Builder {
+    val names = mutableListOf<String>()
+    if (uncheckedCast) names.add("\"UNCHECKED_CAST\"")
+    if (senselessComparison) names.add("\"SENSELESS_COMPARISON\"")
+    if (uselessElvis) names.add("\"USELESS_ELVIS\"")
+    return if (names.isNotEmpty()) {
+        val namesString = names.joinToString(", ")
         addAnnotation(
             AnnotationSpec.builder(Suppress::class)
-                .addMember("\"UNCHECKED_CAST\"")
+                .addMember(namesString)
                 .build()
         )
     } else {
