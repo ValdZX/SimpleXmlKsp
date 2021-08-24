@@ -1,7 +1,8 @@
 package ua.vald_zx.simplexml.ksp.test.readme
 
 import ua.vald_zx.simplexml.ksp.SimpleXml
-import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleSerializersEnrolment
+import ua.vald_zx.simplexml.ksp.test.custompackage.SampleSerializersEnrolment
+import kotlin.js.JsName
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -14,6 +15,7 @@ class ReadmeTest {
     }
 
     @Test
+    @JsName("PackageDtoTest")
     fun `PackageDto serialization test`() {
         SimpleXml.pretty = true
         val bean = PackageDto(

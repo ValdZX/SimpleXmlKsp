@@ -3,7 +3,8 @@ package ua.vald_zx.simplexml.ksp.test.element
 import ua.vald_zx.simplexml.ksp.SimpleXml
 import ua.vald_zx.simplexml.ksp.exception.DeserializeException
 import ua.vald_zx.simplexml.ksp.exception.SerializeException
-import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleSerializersEnrolment
+import ua.vald_zx.simplexml.ksp.test.custompackage.SampleSerializersEnrolment
+import kotlin.js.JsName
 import kotlin.test.*
 
 class ElementTest {
@@ -23,6 +24,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("RequiredConstructorFieldDeserializeTestEmptySingleTag")
     fun `RequiredConstructorFieldTest deserialize empty single tag`() {
         assertFailsWith(DeserializeException::class) {
             SimpleXml.deserialize<RequiredConstructorField>("<RequiredConstructorField/>")
@@ -30,6 +32,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("RequiredConstructorFieldDeserializeTestEmptyTag")
     fun `RequiredConstructorFieldTest deserialize empty tag`() {
         assertFailsWith(DeserializeException::class) {
             SimpleXml.deserialize<RequiredConstructorField>("<RequiredConstructorField><RequiredConstructorField/>")
@@ -37,6 +40,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("RequiredConstructorFieldDeserializeTestEmptyTagValue")
     fun `RequiredConstructorFieldTest deserialize empty tag value`() {
         val bean =
             SimpleXml.deserialize<RequiredConstructorField>("<RequiredConstructorField><tag></tag><RequiredConstructorField/>")
@@ -53,6 +57,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("RequiredConstructorNullableFieldTestSerializeNullValue")
     fun `RequiredConstructorNullableFieldTest serialize null value`() {
         val bean = RequiredConstructorNullableField(null)
         assertFailsWith(SerializeException::class) {
@@ -61,6 +66,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("RequiredConstructorNullableFieldTestNullValue")
     fun `RequiredConstructorNullableFieldTest null value`() {
         assertFailsWith(DeserializeException::class) {
             SimpleXml.deserialize<RequiredConstructorNullableField>("<RequiredConstructorNullableField/>")
@@ -77,6 +83,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("NotRequiredConstructorNullableFieldNullTest")
     fun `NotRequiredConstructorNullableFieldTest null test`() {
         val xml = "<NotRequiredConstructorNullableField/>"
         val deserializedBean: NotRequiredConstructorNullableField = SimpleXml.deserialize(xml)
@@ -93,6 +100,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("RequiredConstructorFieldWithDefaultTestDefault")
     fun `RequiredConstructorFieldWithDefaultTest default`() {
         val bean = RequiredConstructorFieldWithDefault()
         val xml = SimpleXml.serialize(bean)
@@ -111,6 +119,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("NotRequiredConstructorFieldWithDefaultTestEmpty")
     fun `NotRequiredConstructorFieldWithDefaultTest deserealize empty`() {
         val bean =
             SimpleXml.deserialize<NotRequiredConstructorFieldWithDefault>("<RequiredConstructorFieldWithDefault/>")
@@ -127,6 +136,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("RequiredConstructorNullableFieldWithDefaultTestSerializeNull")
     fun `RequiredConstructorNullableFieldWithDefaultTest serialize value null`() {
         val bean = RequiredConstructorNullableFieldWithDefault(null)
         assertFailsWith(SerializeException::class) {
@@ -135,6 +145,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("RequiredConstructorNullableFieldWithDefaultTestDeserializeNull")
     fun `RequiredConstructorNullableFieldWithDefaultTest deserialize value null`() {
         assertFailsWith(DeserializeException::class) {
             SimpleXml.deserialize<RequiredConstructorNullableFieldWithDefault>("<RequiredConstructorNullableFieldWithDefault/>")
@@ -152,6 +163,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("RequiredFieldTestEmptyTag")
     fun `RequiredFieldTest deserialize empty tag`() {
         assertFailsWith(DeserializeException::class) {
             SimpleXml.deserialize<RequiredField>("<RequiredField/>")
@@ -169,6 +181,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("NotRequiredFieldTestEmptyTag")
     fun `NotRequiredFieldTest deserialize empty tag`() {
         val bean = SimpleXml.deserialize<NotRequiredField>("<NotRequiredField/>")
         assertEquals(bean.tag, "")
@@ -185,6 +198,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("RequiredNullableFieldTestNull")
     fun `RequiredNullableFieldTest serialize null`() {
         val bean = RequiredNullableField()
         bean.tag = null
@@ -194,6 +208,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("RequiredNullableFieldTestEmptyTag")
     fun `RequiredNullableFieldTest deserialize empty tag`() {
         assertFailsWith(DeserializeException::class) {
             SimpleXml.deserialize<RequiredNullableField>("<RequiredNullableField/>")
@@ -211,6 +226,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("NotRequiredNullableFieldTestNull")
     fun `NotRequiredNullableFieldTest serialize null`() {
         val bean = NotRequiredNullableField()
         bean.tag = null
@@ -221,6 +237,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("NotRequiredNullableFieldTestEmptyTag")
     fun `NotRequiredNullableFieldTest deserialize empty tag`() {
         val deserializedBean: NotRequiredNullableField = SimpleXml.deserialize("<NotRequiredNullableField/>")
         assertNull(deserializedBean.tag)
@@ -247,6 +264,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("NotRequiredFieldWithDefaultTestEmpty")
     fun `NotRequiredFieldWithDefaultTest serialize empty`() {
         val bean = NotRequiredFieldWithDefault()
         bean.tag = ""
@@ -257,6 +275,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("NotRequiredFieldWithDefaultTestEmptyTag")
     fun `NotRequiredFieldWithDefaultTest deserialize empty tag`() {
         val deserializedBean: NotRequiredFieldWithDefault = SimpleXml.deserialize("<NotRequiredFieldWithDefault/>")
         assertEquals("Default", deserializedBean.tag)
@@ -273,6 +292,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("RequiredNullableFieldWithDefaultTestNull")
     fun `RequiredNullableFieldWithDefaultTest value null`() {
         val bean = RequiredNullableFieldWithDefault()
         bean.tag = null
@@ -282,6 +302,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("RequiredNullableFieldWithDefaultTestEmptyTag")
     fun `RequiredNullableFieldWithDefaultTest empty tag`() {
         assertFailsWith(DeserializeException::class) {
             SimpleXml.deserialize<RequiredNullableFieldWithDefault>("<RequiredNullableFieldWithDefault/>")
@@ -299,6 +320,7 @@ class ElementTest {
     }
 
     @Test
+    @JsName("NotRequiredNullableFieldWithDefaultTestEmptyTag")
     fun `NotRequiredNullableFieldWithDefaultTest deserialize empty tag`() {
         val deserializedBean: NotRequiredNullableFieldWithDefault =
             SimpleXml.deserialize("<NotRequiredNullableFieldWithDefault/>")

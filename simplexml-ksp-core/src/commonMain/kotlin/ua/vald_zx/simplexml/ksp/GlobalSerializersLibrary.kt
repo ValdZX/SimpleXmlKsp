@@ -24,6 +24,6 @@ object GlobalSerializersLibrary {
 
     fun <T : Any> findSerializers(clazz: KClass<T>): Serializer<T> {
         @Suppress("UNCHECKED_CAST")
-        return library[clazz]?.invoke() as Serializer<T>? ?: error("Serializer not found for ${clazz.qualifiedName}")
+        return library[clazz]?.invoke() as Serializer<T>? ?: error("Serializer not found for $clazz")
     }
 }

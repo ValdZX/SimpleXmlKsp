@@ -3,7 +3,8 @@ package ua.vald_zx.simplexml.ksp.test.converter
 import ua.vald_zx.simplexml.ksp.Convert
 import ua.vald_zx.simplexml.ksp.Element
 import ua.vald_zx.simplexml.ksp.SimpleXml
-import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleSerializersEnrolment
+import ua.vald_zx.simplexml.ksp.test.custompackage.SampleSerializersEnrolment
+import kotlin.js.JsName
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -27,6 +28,7 @@ class MultipleConvertersConstructorFieldTest {
     }
 
     @Test
+    @JsName("MultipleConvertersConstructorFieldTest")
     fun `MultipleConvertersConstructorField serialize deserialize test`() {
         val bean = MultipleConvertersConstructorField(
             "Value1",
@@ -41,9 +43,10 @@ class MultipleConvertersConstructorFieldTest {
     }
 
     @Test
+    @JsName("MultipleConvertersConstructorFieldDeserializeTest")
     fun `MultipleConvertersConstructorField deserialize test`() {
         val deserializedBean: MultipleConvertersConstructorField =
-            SimpleXml.deserialize("<MultipleConvertersConstructorField><tag1>~~~Secret~~~</tag1><tag2>28.0</tag2><tag3>Secret</tag3><tag4>14.0</tag4></MultipleConvertersConstructorField>")
+            SimpleXml.deserialize("<MultipleConvertersConstructorField><tag1>~~~Secret~~~</tag1><tag2>28</tag2><tag3>Secret</tag3><tag4>14</tag4></MultipleConvertersConstructorField>")
         assertEquals("Secret", deserializedBean.tag1)
         assertEquals(14.0, deserializedBean.tag2)
         assertEquals("Secret", deserializedBean.tag3)
@@ -51,12 +54,13 @@ class MultipleConvertersConstructorFieldTest {
     }
 
     @Test
+    @JsName("MultipleConvertersConstructorFieldSerializeTest")
     fun `MultipleConvertersConstructorField serialize test`() {
         val bean = MultipleConvertersConstructorField("Secret", 14.0, "Secret", 14.0)
         val xml = SimpleXml.serialize(bean)
         assertEquals(
             xml,
-            "<MultipleConvertersConstructorField><tag1>~~~Secret~~~</tag1><tag2>28.0</tag2><tag3>Secret</tag3><tag4>14.0</tag4></MultipleConvertersConstructorField>"
+            "<MultipleConvertersConstructorField><tag1>~~~Secret~~~</tag1><tag2>28</tag2><tag3>Secret</tag3><tag4>14</tag4></MultipleConvertersConstructorField>"
         )
     }
 }

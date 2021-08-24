@@ -3,7 +3,8 @@ package ua.vald_zx.simplexml.ksp.test.converter
 import ua.vald_zx.simplexml.ksp.Convert
 import ua.vald_zx.simplexml.ksp.Element
 import ua.vald_zx.simplexml.ksp.SimpleXml
-import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleSerializersEnrolment
+import ua.vald_zx.simplexml.ksp.test.custompackage.SampleSerializersEnrolment
+import kotlin.js.JsName
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -22,6 +23,7 @@ class FieldConverterTest {
     }
 
     @Test
+    @JsName("WithConverterFieldTest")
     fun `WithConverterField serialize deserialize test`() {
         val bean = WithConverterField()
         bean.tag = "WithConverterField"
@@ -32,6 +34,7 @@ class FieldConverterTest {
     }
 
     @Test
+    @JsName("WithConverterFieldDeserializeTest")
     fun `WithConverterField deserialize test`() {
         val deserializedBean: WithConverterField =
             SimpleXml.deserialize("<WithConverterField><tag>~~~Secret~~~</tag></WithConverterField>")
@@ -39,6 +42,7 @@ class FieldConverterTest {
     }
 
     @Test
+    @JsName("WithConverterFieldSerializeTest")
     fun `WithConverterField serialize test`() {
         val bean = WithConverterField()
         bean.tag = "Secret"

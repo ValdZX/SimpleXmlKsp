@@ -3,7 +3,8 @@ package ua.vald_zx.simplexml.ksp.test.converter
 import ua.vald_zx.simplexml.ksp.Convert
 import ua.vald_zx.simplexml.ksp.Element
 import ua.vald_zx.simplexml.ksp.SimpleXml
-import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleSerializersEnrolment
+import ua.vald_zx.simplexml.ksp.test.custompackage.SampleSerializersEnrolment
+import kotlin.js.JsName
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,7 +22,8 @@ class FieldInConstructorConverterTest {
     }
 
     @Test
-    fun `WithConverterConstructorFieldTest serialize deserialize test`() {
+    @JsName("WithConverterConstructorFieldTest")
+    fun `WithConverterConstructorField serialize deserialize test`() {
         val bean = WithConverterConstructorField("WithConverterConstructorField")
         val xml = SimpleXml.serialize(bean)
         println(xml)
@@ -30,13 +32,15 @@ class FieldInConstructorConverterTest {
     }
 
     @Test
-    fun `WithConverterConstructorFieldTest deserialize test`() {
+    @JsName("WithConverterConstructorFieldDeserializeTest")
+    fun `WithConverterConstructorField deserialize test`() {
         val deserializedBean: WithConverterConstructorField =
             SimpleXml.deserialize("<WithConverterConstructorField><tag>~~~Secret~~~</tag></WithConverterConstructorField>")
         assertEquals("Secret", deserializedBean.tag)
     }
 
     @Test
+    @JsName("WithConverterConstructorFieldSerializeTest")
     fun `WithConverterConstructorFieldTest serialize test`() {
         val bean = WithConverterConstructorField("Secret")
         val xml = SimpleXml.serialize(bean)

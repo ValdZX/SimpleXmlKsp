@@ -4,7 +4,8 @@ import ua.vald_zx.simplexml.ksp.SimpleXml
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleSerializersEnrolment
+import ua.vald_zx.simplexml.ksp.test.custompackage.SampleSerializersEnrolment
+import kotlin.js.JsName
 
 class ListTests {
 
@@ -14,6 +15,7 @@ class ListTests {
     }
 
     @Test
+    @JsName("ConstructorFieldListOfStringsTest")
     fun `ConstructorFieldListOfStrings serialize deserialize test`() {
         val bean = ConstructorFieldListOfStrings(listOf("Value1", "Value2", "Value3"))
         val xml = SimpleXml.serialize(bean)
@@ -23,6 +25,7 @@ class ListTests {
     }
 
     @Test
+    @JsName("ConstructorInlineFieldListOfStringsTest")
     fun `ConstructorInlineFieldListOfStrings serialize deserialize test`() {
         val bean = ConstructorInlineFieldListOfStrings(listOf("Value1", "Value2", "Value3"))
         val xml = SimpleXml.serialize(bean)
@@ -32,6 +35,7 @@ class ListTests {
     }
 
     @Test
+    @JsName("ConstructorFieldListOfStringsWithoutNameTest")
     fun `ConstructorFieldListOfStringsWithoutName serialize deserialize test`() {
         val bean = ConstructorFieldListOfStringsWithoutName(listOf("Value1", "Value2", "Value3"))
         val xml = SimpleXml.serialize(bean)
@@ -41,6 +45,7 @@ class ListTests {
     }
 
     @Test
+    @JsName("ConstructorFieldListOfStringsWithoutEntryTest")
     fun `ConstructorFieldListOfStringsWithoutEntry serialize deserialize test`() {
         val bean = ConstructorFieldListOfStringsWithoutEntry(listOf("Value1", "Value2", "Value3"))
         val xml = SimpleXml.serialize(bean)
@@ -50,6 +55,7 @@ class ListTests {
     }
 
     @Test
+    @JsName("ConstructorInlineFieldListOfStringsWithoutEntryTest")
     fun `ConstructorInlineFieldListOfStringsWithoutEntry serialize deserialize test`() {
         val bean = ConstructorInlineFieldListOfStringsWithoutEntry(listOf("Value1", "Value2", "Value3"))
         val xml = SimpleXml.serialize(bean)
@@ -59,6 +65,7 @@ class ListTests {
     }
 
     @Test
+    @JsName("ConstructorFieldListOfObjectsTest")
     fun `ConstructorFieldListOfObjects serialize deserialize test`() {
         val bean = ConstructorFieldListOfObjects(
             listOf(
@@ -74,6 +81,7 @@ class ListTests {
     }
 
     @Test
+    @JsName("ConstructorInlineFieldListOfObjectsTest")
     fun `ConstructorInlineFieldListOfObjects serialize deserialize test`() {
         val bean = ConstructorInlineFieldListOfObjects(
             listOf(
@@ -89,6 +97,7 @@ class ListTests {
     }
 
     @Test
+    @JsName("ConstructorFieldListOfObjectsWithConvertTest")
     fun `ConstructorFieldListOfObjectsWithConvert serialize deserialize test`() {
         val bean = ConstructorFieldListOfObjectsWithConvert(
             listOf(
@@ -104,6 +113,7 @@ class ListTests {
     }
 
     @Test
+    @JsName("FieldListOfStringsTest")
     fun `FieldListOfStrings serialize deserialize test`() {
         val bean = FieldListOfStrings(listOf("Value1", "Value2", "Value3"))
         val xml = SimpleXml.serialize(bean)
@@ -113,6 +123,7 @@ class ListTests {
     }
 
     @Test
+    @JsName("FieldInlineListOfStringsTest")
     fun `FieldInlineListOfStrings serialize deserialize test`() {
         val bean = FieldInlineListOfStrings(listOf("Value1", "Value2", "Value3"))
         val xml = SimpleXml.serialize(bean)

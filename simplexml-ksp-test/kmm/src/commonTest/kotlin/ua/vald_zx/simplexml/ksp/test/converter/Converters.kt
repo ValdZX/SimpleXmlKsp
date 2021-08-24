@@ -14,10 +14,10 @@ class TestStringConverter : Converter<String> {
 
 class TestDoubleConverter : Converter<Double> {
     override fun write(obj: Double): String {
-        return obj.times(2.0).toString()
+        return obj.times(2.0).toLong().toString()
     }
 
     override fun read(raw: String): Double {
-        return raw.toDouble().div(2.0)
+        return raw.toLong().div(2.0)
     }
 }

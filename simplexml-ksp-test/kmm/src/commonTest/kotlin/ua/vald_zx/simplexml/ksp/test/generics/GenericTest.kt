@@ -1,7 +1,8 @@
 package ua.vald_zx.simplexml.ksp.test.generics
 
 import ua.vald_zx.simplexml.ksp.SimpleXml
-import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleSerializersEnrolment
+import ua.vald_zx.simplexml.ksp.test.custompackage.SampleSerializersEnrolment
+import kotlin.js.JsName
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -15,6 +16,7 @@ class GenericTest {
     }
 
     @Test
+    @JsName("GenericDataClassTest")
     fun `GenericDataClass serialize deserialize test`() {
         val bean = GenericDataClass("String1", 25f)
         val xml = SimpleXml.serialize(bean)
@@ -24,6 +26,7 @@ class GenericTest {
     }
 
     @Test
+    @JsName("GenericBeanSerializerTest")
     fun `GenericBeanSerializer test`() {
         val bean = GenericBean<String, Float>()
         bean.somObject1 = "String"
@@ -36,6 +39,7 @@ class GenericTest {
     }
 
     @Test
+    @JsName("GenericBeanSerializerTestObjectTest")
     fun `GenericBeanSerializer with object test`() {
         val bean = GenericBean<GenericBean<Double, Short>, Float>()
         val genericBean = GenericBean<Double, Short>()
@@ -52,6 +56,7 @@ class GenericTest {
     }
 
     @Test
+    @JsName("GenericBeanWithOneParameterTest")
     fun `GenericBeanWithOneParameter test`() {
         val bean = GenericBeanWithOneParameter<String>()
         bean.somObject1 = "String"
@@ -64,6 +69,7 @@ class GenericTest {
     }
 
     @Test
+    @JsName("GenericThreeBeanTest")
     fun `GenericThreeBean test`() {
         val bean = GenericThreeBean<GenericDataClass<Char, Double>, String, Int>()
         bean.somObject1 = GenericDataClass('$', 4.9)

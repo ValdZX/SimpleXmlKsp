@@ -4,7 +4,8 @@ import ua.vald_zx.simplexml.ksp.SimpleXml
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import ua.vald_zx.simplexml.ksp.sample.custompackage.SampleSerializersEnrolment
+import ua.vald_zx.simplexml.ksp.test.custompackage.SampleSerializersEnrolment
+import kotlin.js.JsName
 
 class AttributeTest {
 
@@ -14,6 +15,7 @@ class AttributeTest {
     }
 
     @Test
+    @JsName("RootAttributeTest")
     fun `RootAttribute serialize deserialize test`() {
         val bean = RootAttribute("RootAttribute")
         val xml = SimpleXml.serialize(bean)
@@ -23,6 +25,7 @@ class AttributeTest {
     }
 
     @Test
+    @JsName("PathAttributeTest")
     fun `PathAttribute serialize deserialize test`() {
         val bean = PathAttribute("PathAttribute")
         val xml = SimpleXml.serialize(bean)
@@ -32,6 +35,7 @@ class AttributeTest {
     }
 
     @Test
+    @JsName("TagAttributeTest")
     fun `TagAttribute serialize deserialize test`() {
         val bean = TagAttribute("TagAttributeATTR", "TagAttributeTAG")
         val xml = SimpleXml.serialize(bean)
@@ -41,6 +45,7 @@ class AttributeTest {
     }
 
     @Test
+    @JsName("ListAttributeTest")
     fun `ListAttribute serialize deserialize test`() {
         val bean = ListAttribute("ListAttribute", listOf("Value1", "Value2", "Value3"))
         val xml = SimpleXml.serialize(bean)
@@ -50,6 +55,7 @@ class AttributeTest {
     }
 
     @Test
+    @JsName("NullableTagAttributeTest")
     fun `NullableTagAttribute serialize deserialize test`() {
         val bean = NullableTagAttribute("NullableTagAttributeATTR", "NullableTagAttributeTAG")
         val xml = SimpleXml.serialize(bean)
@@ -59,6 +65,7 @@ class AttributeTest {
     }
 
     @Test
+    @JsName("NullableTagAttributeEmptyTagTest")
     fun `NullableTagAttribute with empty tag serialize deserialize test`() {
         val bean = NullableTagAttribute("NullableTagAttributeATTR")
         val xml = SimpleXml.serialize(bean)

@@ -9,14 +9,19 @@ plugins {
 version = projectVersion
 
 ksp {
-    arg("simplexml.ksp.modulepackage", "ua.vald_zx.simplexml.ksp.sample.custompackage")
+    arg("simplexml.ksp.modulepackage", "ua.vald_zx.simplexml.ksp.test.custompackage")
     arg("simplexml.ksp.modulename", "Sample")
 }
 
 kotlin {
     android()
     jvm()
-
+    js {
+        browser()
+        nodejs()
+    }
+    watchos()
+    macosX64()
     val iosTarget: (String, KotlinNativeTarget.() -> Unit) -> KotlinNativeTarget =
         if (System.getenv("SDK_NAME")?.startsWith("iphoneos") == true)
             ::iosArm64
