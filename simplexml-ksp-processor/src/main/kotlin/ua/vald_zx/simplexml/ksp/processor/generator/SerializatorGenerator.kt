@@ -72,6 +72,7 @@ fun CodeGenerator.generateSerializer(
                         .build()
                 ).addFunction(
                     FunSpec.builder("readData")
+                        .uncheckedCastAnnotationIfNeed(typeParameters.isNotEmpty())
                         .addModifiers(KModifier.OVERRIDE)
                         .addParameter(
                             "element",

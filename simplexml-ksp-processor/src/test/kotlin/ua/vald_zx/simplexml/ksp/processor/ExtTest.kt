@@ -5,20 +5,31 @@ import com.tschuchort.compiletesting.SourceFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class GenericsTest {
+class ExtTest {
 
     @Test
     fun `Compile GenericBean test`() {
         val result = SourceFile.kotlin(
-            "GenericBean.kt", """
+            "ExtBean.kt", """
         import ua.vald_zx.simplexml.ksp.Element
 
-        open class GenericBean<T1, T2> {
+        open class AbsBean<T1, T2> {
             @Element
             var somObject1: T1? = null
         
             @Element
-            var somObject2: T2? = null
+            open var somObject2: T2? = null
+        }
+        
+        open class ExtBean<T1, T2, T3> : AbsBean<T1, T2>() {
+            @Element
+            override var somObject2: T2? = null
+        
+            @Element
+            var somObject3: T2? = null
+        
+            @Element
+            var somObject4: T3? = null
         }
     """
         ).compile()

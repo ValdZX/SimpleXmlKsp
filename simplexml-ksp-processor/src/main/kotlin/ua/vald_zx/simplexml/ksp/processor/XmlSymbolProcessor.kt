@@ -18,7 +18,13 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
     private val options = environment.options
     private val filesToGenerate = mutableMapOf<String, ClassToGenerate>()
     private val isStrictMode = options["strict"]?.toBoolean() ?: false
-    private val visitor = ElementsVisitor(isStrictMode, filesToGenerate, logger)
+    private val scanBeanMode = options["scanBean"]?.toBoolean() ?: true
+    private val visitor = ElementsVisitor(
+        scanBeanMode = scanBeanMode,
+        isStrictMode = isStrictMode,
+        classToGenerateMap = filesToGenerate,
+        logger = logger
+    )
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         listOfNotNull(

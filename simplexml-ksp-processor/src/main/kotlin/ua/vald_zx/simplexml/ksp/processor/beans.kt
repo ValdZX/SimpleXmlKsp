@@ -10,7 +10,7 @@ data class ClassToGenerate(
     val name: String,
     val rootName: String,
     val packagePath: String,
-    val propertyElements: MutableList<PropertyElement> = mutableListOf()
+    val propertyElements: MutableList<PropertyElement>
 ) {
     val dom: List<DomElement> by lazy { makeDom(this) }
 }
