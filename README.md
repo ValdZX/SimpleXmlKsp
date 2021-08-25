@@ -70,19 +70,6 @@ Deserialize:
 val deserializedBean: PackageDto = SimpleXml.deserialize(xml)
 ```
 
-## Add to your project
-
-1. Importing
-   the [KSP plugin](https://github.com/google/ksp/blob/main/docs/quickstart.md#use-your-own-processor-in-a-project) in
-   the project's `build.gradle.kts`
-
-```gradle
-plugins {
-    id("com.google.devtools.ksp") version 1.5.21-1.0.0-beta07 apply false
-}
-```
-
-
 ## Annotations
 
 ### @Element
@@ -96,6 +83,18 @@ plugins {
 ### @ElementList
 
 ### Jvm / Android
+
+## Add to your project
+
+1. Importing
+   the [KSP plugin](https://github.com/google/ksp/blob/main/docs/quickstart.md#use-your-own-processor-in-a-project) in
+   the project's `build.gradle.kts`
+
+```gradle
+plugins {
+    id("com.google.devtools.ksp") version 1.5.21-1.0.0-beta07 apply false
+}
+```
 
 ```kotlin
 plugins {
