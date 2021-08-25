@@ -1,8 +1,10 @@
 package ua.vald_zx.simplexml.ksp
 
+import kotlin.native.concurrent.ThreadLocal
 import kotlin.reflect.typeOf
 
 @OptIn(ExperimentalStdlibApi::class)
+@ThreadLocal
 object SimpleXml {
     var pretty: Boolean = false
 
