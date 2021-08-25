@@ -82,8 +82,6 @@ val deserializedBean: PackageDto = SimpleXml.deserialize(xml)
 
 ### @ElementList
 
-### Jvm / Android
-
 ## Add to your project
 
 1. Importing
@@ -95,6 +93,8 @@ plugins {
     id("com.google.devtools.ksp") version 1.5.21-1.0.0-beta07 apply false
 }
 ```
+
+### Jvm / Android
 
 ```kotlin
 plugins {
