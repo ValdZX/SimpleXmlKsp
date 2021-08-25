@@ -97,8 +97,8 @@ plugins {
 }
 
 dependencies {
-    implementation("io.github.valdzx:simplexml-ksp-core:1.0.0-dev03")
-    ksp("io.github.valdzx:simplexml-ksp-processor:1.0.0-dev03")
+    implementation("io.github.valdzx:simplexml-ksp-core:1.0.0-dev04")
+    ksp("io.github.valdzx:simplexml-ksp-processor:1.0.0-dev04")
 }
 ```
 
@@ -112,7 +112,7 @@ repository {
 
 ### Multiplatform
 
-Available for JVM, Android, iOS
+Available for JVM, Android, iOS, JavaScript, macosX64
 
 ```kotlin
 plugins {
@@ -121,8 +121,8 @@ plugins {
 }
 val commonMain by getting {
     dependencies {
-        implementation("io.github.valdzx:simplexml-ksp-core:1.0.0-dev03")
-        configurations["ksp"].dependencies.add(project.dependencies.create("io.github.valdzx:simplexml-ksp-processor:1.0.0-dev03"))
+        implementation("io.github.valdzx:simplexml-ksp-core:1.0.0-dev04")
+        configurations["ksp"].dependencies.add(project.dependencies.create("io.github.valdzx:simplexml-ksp-processor:1.0.0-dev04"))
     }
 }
 ```
