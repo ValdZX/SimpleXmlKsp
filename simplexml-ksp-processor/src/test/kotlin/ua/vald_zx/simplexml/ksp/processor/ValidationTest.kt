@@ -96,4 +96,40 @@ class ValidationTest {
         ).compile()
         assertEquals(result.exitCode, KotlinCompilation.ExitCode.OK)
     }
+
+    @Test
+    fun `Compile MutableList class test`() {
+        val result = kotlin(
+            "RequiredConstructorMutableList.kt",
+            """
+        package test
+
+        import ua.vald_zx.simplexml.ksp.ElementList
+
+        data class RequiredConstructorMutableList(
+            @ElementList(required = true)
+            val list: MutableList<String>,
+        )
+    """,
+        ).compile()
+        assertEquals(result.exitCode, KotlinCompilation.ExitCode.OK)
+    }
+
+    @Test
+    fun `Compile Map class test`() {
+        val result = kotlin(
+            "ConstructorFieldMapOfStrings.kt",
+            """
+        package test
+
+        import ua.vald_zx.simplexml.ksp.ElementMap
+
+        data class ConstructorFieldMapOfStrings(
+            @ElementMap(name = "Map", key = "Key", value = "Value")
+            val map: Map<String, Int>
+        )
+    """,
+        ).compile()
+        assertEquals(result.exitCode, KotlinCompilation.ExitCode.OK)
+    }
 }

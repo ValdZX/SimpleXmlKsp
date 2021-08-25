@@ -84,7 +84,7 @@ fun CodeGenerator.generateSerializer(
                         )
                         .addParameter("genericTypeList", listKTypeProjection)
                         .returns(parameterizedAnyBeanClassName ?: beanClassName)
-                        .generateDeserialization(classToGenerate, logger)
+                        .generateDeserialization(classToGenerate)
                         .build()
                 ).build()
         ).build()

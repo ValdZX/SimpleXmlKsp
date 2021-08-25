@@ -1,10 +1,8 @@
 package ua.vald_zx.simplexml.ksp.processor
 
+import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.processing.KSPLogger
-import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSPropertyDeclaration
-import com.google.devtools.ksp.symbol.KSVisitorVoid
-import com.google.devtools.ksp.symbol.Nullability
+import com.google.devtools.ksp.symbol.*
 import ua.vald_zx.simplexml.ksp.Root
 
 class ElementsVisitor(
@@ -16,20 +14,30 @@ class ElementsVisitor(
     override fun visitPropertyDeclaration(property: KSPropertyDeclaration, data: Unit) {
         val parent = property.parentDeclaration
         if (parent !is KSClassDeclaration) return
-        val parentName = parent.fullName
         if (scanBeanMode) {
-            if (classToGenerateMap.contains(parentName)) return
-            val propertyElements = parent.getAllProperties().mapNotNull { property ->
-                property.toElement(parent)
-            }.toMutableList()
-            val classToGenerate = parent.toGenerate(propertyElements)
-            classToGenerateMap[parentName] = classToGenerate
+            readClassDeclaration(parent)
         } else {
+            val parentName = parent.fullName
             val propertyElement = property.toElement(parent) ?: return
             classToGenerateMap
                 .getOrPut(parentName) { parent.toGenerate() }
                 .propertyElements.add(propertyElement)
         }
+    }
+
+    override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
+        readClassDeclaration(classDeclaration)
+    }
+
+    private fun readClassDeclaration(classDeclaration: KSClassDeclaration) {
+        val parentName = classDeclaration.fullName
+        if (classToGenerateMap.contains(parentName)) return
+        if (classDeclaration.isAbstract()) return
+        val propertyElements = classDeclaration.getAllProperties().mapNotNull { property ->
+            property.toElement(classDeclaration)
+        }.toMutableList()
+        val classToGenerate = classDeclaration.toGenerate(propertyElements)
+        classToGenerateMap[parentName] = classToGenerate
     }
 
     private fun KSClassDeclaration.toGenerate(propertyElements: MutableList<PropertyElement> = mutableListOf()): ClassToGenerate {
@@ -57,6 +65,7 @@ class ElementsVisitor(
         val constructorParameters = parent.primaryConstructor?.parameters
         val constructorParameter = constructorParameters?.find { it.name?.asString() == propertyName }
         val isVariable = isMutable
+        val isMutableCollection = type.isMutableCollection()
         val isConstructorParameter = constructorParameter != null
         val hasDefaultValue = constructorParameter?.hasDefault ?: false
         val requiredToConstructor = constructorParameter?.hasDefault?.not() ?: false
@@ -67,16 +76,26 @@ class ElementsVisitor(
             propertyName = propertyName,
             xmlName = annotationInfo.elementName,
             listEntryName = annotationInfo.entryListName,
+            keyMapName = annotationInfo.keyMapName,
+            valueMapName = annotationInfo.valueMapName,
             xmlType = annotationInfo.type,
             propertyType = propertyType,
             xmlPath = annotationInfo.path,
             required = annotationInfo.required,
             isVariable = isVariable,
+            isMutableCollection = isMutableCollection,
             isConstructorParameter = isConstructorParameter,
             hasDefaultValue = hasDefaultValue,
             inlineList = annotationInfo.inline,
             converterType = annotationInfo.converterType,
-            propertyEntryType = annotationInfo.propertyEntryType
+            propertyEntryType = annotationInfo.propertyEntryType,
+            propertyKeyType = annotationInfo.propertyKeyType,
+            propertyValueType = annotationInfo.propertyValueType
         )
+    }
+
+    private fun KSTypeReference.isMutableCollection(): Boolean {
+        val typeSimpleName = resolve().declaration.simpleName.asString()
+        return typeSimpleName == "MutableList" || typeSimpleName == "MutableMap"
     }
 }

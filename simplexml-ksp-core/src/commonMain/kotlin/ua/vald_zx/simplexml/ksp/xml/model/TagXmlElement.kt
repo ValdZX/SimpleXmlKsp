@@ -1,5 +1,7 @@
 package ua.vald_zx.simplexml.ksp.xml.model
 
+import kotlin.math.min
+
 open class TagXmlElement(
     override var name: String,
     var parent: TagXmlElement? = null,
@@ -57,6 +59,14 @@ open class TagXmlElement(
 
     operator fun get(tagName: String): TagXmlElement? {
         return this.children.firstOrNull { it.name == tagName }
+    }
+
+    fun getPairs(key: String, value: String): List<Pair<TagXmlElement, TagXmlElement>> {
+        val keys = getAll(key)
+        val values = getAll(value)
+        return (0 until min(keys.size, values.size)).map { index ->
+            keys[index] to values[index]
+        }
     }
 
     override fun toString(): String {

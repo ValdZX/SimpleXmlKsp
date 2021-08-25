@@ -25,6 +25,16 @@ class ListTests {
     }
 
     @Test
+    @JsName("ConstructorFieldListOfStringsNullableTest")
+    fun `ConstructorFieldListOfStringsNullable serialize deserialize test`() {
+        val bean = ConstructorFieldListOfStringsNullable(listOf("Value1", "Value2", "Value3"))
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: ConstructorFieldListOfStringsNullable = SimpleXml.deserialize(xml)
+        assertEquals(bean, deserializedBean)
+    }
+
+    @Test
     @JsName("ConstructorInlineFieldListOfStringsTest")
     fun `ConstructorInlineFieldListOfStrings serialize deserialize test`() {
         val bean = ConstructorInlineFieldListOfStrings(listOf("Value1", "Value2", "Value3"))
@@ -131,4 +141,34 @@ class ListTests {
         val deserializedBean: FieldInlineListOfStrings = SimpleXml.deserialize(xml)
         assertEquals(bean.list, deserializedBean.list)
     }
+
+    @Test
+    @JsName("ConstructorFieldMutableListOfStringsTest")
+    fun `ConstructorFieldMutableListOfStrings serialize deserialize test`() {
+        val bean = ConstructorFieldMutableListOfStrings(mutableListOf("Value1", "Value2", "Value3"))
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: ConstructorFieldMutableListOfStrings = SimpleXml.deserialize(xml)
+        assertEquals(bean, deserializedBean)
+    }
+
+    @Test
+    @JsName("ConstructorFieldMutableListOfStringsWithAttributeTest")
+    fun `ConstructorFieldMutableListOfStringsWithAttribute serialize deserialize test`() {
+        val bean = ConstructorFieldMutableListOfStringsWithAttribute(mutableListOf("Value1", "Value2", "Value3"), 3)
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: ConstructorFieldMutableListOfStringsWithAttribute = SimpleXml.deserialize(xml)
+        assertEquals(bean, deserializedBean)
+    }
+
+//    @Test
+//    @JsName("ConstructorFieldListOfStringsNullableWithAttributeTest")
+//    fun `ConstructorFieldListOfStringsNullableWithAttribute serialize deserialize test`() {
+//        val bean = ConstructorFieldListOfStringsNullableWithAttribute(listOf("Value1", "Value2", "Value3"))
+//        val xml = SimpleXml.serialize(bean)
+//        println(xml)
+//        val deserializedBean: ConstructorFieldListOfStringsNullableWithAttribute = SimpleXml.deserialize(xml)
+//        assertEquals(bean, deserializedBean)
+//    }
 }

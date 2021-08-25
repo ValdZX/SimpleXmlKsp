@@ -22,7 +22,8 @@ private fun PropertyElement.isValid(isStrictMode: Boolean, logger: KSPLogger, pa
         }
     }
     if (xmlType == XmlUnitType.LIST) {
-        if (propertyType.resolve().declaration.simpleName.asString() != "List") {
+        val typeSimpleName = propertyType.resolve().declaration.simpleName.asString()
+        if (typeSimpleName != "List" && typeSimpleName != "MutableList") {
             val message =
                 "$parentName failure. Illegal annotation on $propertyName. ElementList only for kotlin.collections.List"
             if (isStrictMode) {

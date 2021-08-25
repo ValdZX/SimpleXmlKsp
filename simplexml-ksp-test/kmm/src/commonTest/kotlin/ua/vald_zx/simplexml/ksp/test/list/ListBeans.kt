@@ -1,9 +1,6 @@
 package ua.vald_zx.simplexml.ksp.test.list
 
-import ua.vald_zx.simplexml.ksp.Convert
-import ua.vald_zx.simplexml.ksp.Converter
-import ua.vald_zx.simplexml.ksp.Element
-import ua.vald_zx.simplexml.ksp.ElementList
+import ua.vald_zx.simplexml.ksp.*
 
 /*
 <ConstructorFieldListOfStrings>
@@ -17,6 +14,20 @@ import ua.vald_zx.simplexml.ksp.ElementList
 data class ConstructorFieldListOfStrings(
     @ElementList(name = "List", entry = "Entry")
     val list: List<String>
+)
+
+/*
+<ConstructorFieldListOfStringsNullable>
+    <List>
+        <Entry>Value1</Entry>
+        <Entry>Value2</Entry>
+        <Entry>Value3</Entry>
+    </List>
+</ConstructorFieldListOfStringsNullable>
+ */
+data class ConstructorFieldListOfStringsNullable(
+    @ElementList(name = "List", entry = "Entry")
+    var list: List<String>?
 )
 
 /*
@@ -163,3 +174,51 @@ data class FieldInlineListOfStrings(
     @ElementList(entry = "Entry", inline = true)
     val list: List<String>
 )
+
+/*
+<ConstructorFieldMutableListOfStrings>
+    <List>
+        <Entry>Value1</Entry>
+        <Entry>Value2</Entry>
+        <Entry>Value3</Entry>
+    </List>
+</ConstructorFieldMutableListOfStrings>
+ */
+data class ConstructorFieldMutableListOfStrings(
+    @ElementList(name = "List", entry = "Entry")
+    val list: MutableList<String>
+)
+
+/*
+<ConstructorFieldMutableListOfStrings>
+    <List size="3">
+        <Entry>Value1</Entry>
+        <Entry>Value2</Entry>
+        <Entry>Value3</Entry>
+    </List>
+</ConstructorFieldMutableListOfStrings>
+ */
+data class ConstructorFieldMutableListOfStringsWithAttribute(
+    @ElementList(name = "List", entry = "Entry")
+    val list: MutableList<String>,
+    @Path("List")
+    @Attribute
+    val size: Int
+)
+
+/*
+<ConstructorFieldListOfStringsNullableWithAttribute>
+    <List size="3">
+        <Entry>Value1</Entry>
+        <Entry>Value2</Entry>
+        <Entry>Value3</Entry>
+    </List>
+</ConstructorFieldListOfStringsNullableWithAttribute>
+ */
+//data class ConstructorFieldListOfStringsNullableWithAttribute(
+//    @ElementList(name = "List", entry = "Entry")
+//    var list: List<String>?,
+//    @Path("List")
+//    @Attribute
+//    val size: Int
+//)

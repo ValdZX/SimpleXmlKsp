@@ -24,4 +24,13 @@ annotation class ElementList(
 )
 
 @Target(AnnotationTarget.FIELD)
+annotation class ElementMap(
+    val name: String = "",
+    val key: String = "",
+    val value: String = "",
+    val inline: Boolean = false,
+    val required: Boolean = true
+)
+
+@Target(AnnotationTarget.FIELD)
 annotation class Convert(val converter: KClass<out Converter<*>>)

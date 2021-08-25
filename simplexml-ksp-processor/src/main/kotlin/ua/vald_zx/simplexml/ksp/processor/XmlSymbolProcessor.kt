@@ -6,9 +6,7 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.validate
-import ua.vald_zx.simplexml.ksp.Attribute
-import ua.vald_zx.simplexml.ksp.Element
-import ua.vald_zx.simplexml.ksp.ElementList
+import ua.vald_zx.simplexml.ksp.*
 import ua.vald_zx.simplexml.ksp.processor.generator.generateModuleInitializer
 import ua.vald_zx.simplexml.ksp.processor.generator.generateSerializer
 
@@ -31,6 +29,8 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
             Element::class.qualifiedName,
             Attribute::class.qualifiedName,
             ElementList::class.qualifiedName,
+            ElementMap::class.qualifiedName,
+            Root::class.qualifiedName,
         ).forEach { annotationName ->
             resolver.getSymbolsWithAnnotation(annotationName)
                 .filter { it is KSPropertyDeclaration && it.validate() }

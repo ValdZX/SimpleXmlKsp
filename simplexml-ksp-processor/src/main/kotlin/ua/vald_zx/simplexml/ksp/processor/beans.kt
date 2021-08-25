@@ -23,12 +23,17 @@ data class PropertyElement(
     val xmlPath: String,
     val required: Boolean,
     val isVariable: Boolean,
+    val isMutableCollection: Boolean,
     val isConstructorParameter: Boolean,
     val hasDefaultValue: Boolean,
     val listEntryName: String,
+    val keyMapName: String,
+    val valueMapName: String,
     val inlineList: Boolean,
     val converterType: KSType?,
-    val propertyEntryType: KSTypeReference? = null
+    val propertyEntryType: KSTypeReference? = null,
+    val propertyKeyType: KSTypeReference? = null,
+    val propertyValueType: KSTypeReference? = null
 )
 
 data class DomElement(
@@ -40,6 +45,10 @@ data class DomElement(
 ) {
     val entryName: String
         get() = property?.listEntryName.orEmpty()
+    val keyName: String
+        get() = property?.keyMapName.orEmpty()
+    val valueName: String
+        get() = property?.valueMapName.orEmpty()
     val inlineList: Boolean
         get() = property?.inlineList ?: false
     val isNullable: Boolean
@@ -56,6 +65,7 @@ data class GeneratedSerializerSpec(
 enum class XmlUnitType {
     TAG,
     LIST,
+    MAP,
     ATTRIBUTE,
     UNKNOWN
 }
