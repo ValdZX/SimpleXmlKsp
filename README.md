@@ -83,10 +83,15 @@ plugins {
 ```
 
 ##Annotations
+
 ###@Element
+
 ###@Root
+
 ###@Path
+
 ###@Attribute
+
 ###@ElementList
 
 ### Jvm / Android
