@@ -2,9 +2,7 @@ package ua.vald_zx.simplexml.ksp.processor.generator
 
 import com.squareup.kotlinpoet.FunSpec
 import ua.vald_zx.simplexml.ksp.processor.ClassToGenerate
-import ua.vald_zx.simplexml.ksp.processor.DomElement
-import ua.vald_zx.simplexml.ksp.processor.PropertyElement
-import ua.vald_zx.simplexml.ksp.processor.XmlUnitType
+import ua.vald_zx.simplexml.ksp.processor.Field
 
 
 internal fun FunSpec.Builder.generateSerialization(classToGenerate: ClassToGenerate): FunSpec.Builder {
@@ -16,102 +14,91 @@ internal fun FunSpec.Builder.generateSerialization(classToGenerate: ClassToGener
 }
 
 private fun FunSpec.Builder.renderChildren(
-    elements: Iterable<DomElement>,
-    serializersMap: Map<PropertyElement, FieldSerializer>
+    fields: Iterable<Field>,
+    serializersMap: Map<Field, FieldSerializer>
 ) {
-    elements.forEach { element ->
-        val fieldSerializer = serializersMap[element.property]
+    fields.forEach { field ->
+        val fieldSerializer = serializersMap.toMutableMap()[field]
         val serializerName = fieldSerializer?.serializerVariableName
         val genericTypesVariableName = fieldSerializer?.genericTypesVariableName
         val argumentsFunArgument = if (genericTypesVariableName != null) {
             ", $genericTypesVariableName"
         } else ""
-        if (element.isNullable) {
-            if (element.children.isNotEmpty()) {
-                addStatement("val ${element.propertyName} = obj.${element.propertyName}")
-                beginControlFlow("if (${element.propertyName} != null)")
-                beginControlFlow("$serializerName.buildXml(this, \"${element.xmlName}\", ${element.propertyName}$argumentsFunArgument)")
-                renderChildren(element.children, serializersMap)
-                endControlFlow()
-                nextControlFlow("else")
-                beginControlFlow("tag(\"${element.xmlName}\")")
-                renderChildren(element.children, serializersMap)
-                endControlFlow()
-                endControlFlow()
-            } else {
-                when (element.type) {
-                    XmlUnitType.TAG -> tagNullableValue(serializerName, argumentsFunArgument, element)
-                    XmlUnitType.ATTRIBUTE -> attributeNullableValue(serializerName, element)
-                    XmlUnitType.LIST -> listNullableValue(serializerName, argumentsFunArgument, element)
-                    XmlUnitType.MAP -> mapNullableValue(fieldSerializer, element)
-                    else -> error("Not supported type ${element.type}")
-                }
-            }
-        } else {
-            if (element.children.isNotEmpty()) {
-                when (element.type) {
-                    XmlUnitType.TAG -> tagWithChildren(serializerName, argumentsFunArgument, element, serializersMap)
-                    XmlUnitType.LIST -> listWithAttributes(
-                        serializerName,
-                        argumentsFunArgument,
-                        element,
-                        serializersMap
-                    )
-                    XmlUnitType.MAP -> mapWithAttributes(fieldSerializer, element, serializersMap)
-                    else -> error("Not supported XmlUnitType ${element.type}")
-                }
-            } else {
-                when (element.type) {
-                    XmlUnitType.TAG -> tag(serializerName, argumentsFunArgument, element)
-                    XmlUnitType.ATTRIBUTE -> attribute(serializerName, element)
-                    XmlUnitType.LIST -> list(serializerName, argumentsFunArgument, element)
-                    XmlUnitType.MAP -> map(fieldSerializer, element)
-                    else -> error("Not supported XmlUnitType ${element.type}")
-                }
-            }
+        when (field) {
+            is Field.Tag -> tag(serializerName, argumentsFunArgument, field, serializersMap)
+            is Field.Attribute -> attribute(serializerName, field)
+            is Field.List -> list(serializerName, argumentsFunArgument, field, serializersMap)
+            is Field.Map -> map(fieldSerializer, field, serializersMap)
+            else -> error("Not supported XmlUnitType $field")
         }
     }
 }
 
 private fun FunSpec.Builder.printListForeach(
-    element: DomElement,
+    element: Field.List,
     entrySerializerName: String?,
     argumentsFunArgument: String
 ) {
-    beginControlFlow("obj.${element.propertyName}.forEach")
+    beginControlFlow("obj.${element.fieldName}.forEach")
     addStatement("$entrySerializerName.buildXml(this, \"${element.entryName}\", it$argumentsFunArgument)")
     endControlFlow()
 }
 
 private fun FunSpec.Builder.printMapForeach(
-    element: DomElement,
+    element: Field.Map,
     keySerializerName: String?,
     keyArgumentsFunArgument: String?,
     valueSerializerName: String?,
     valueArgumentsFunArgument: String?,
-    propertyName: String
+    fieldName: String
 ) {
-    beginControlFlow("$propertyName.forEach")
+    beginControlFlow("$fieldName.forEach")
     addStatement("(key, value) ->")
     addStatement("$keySerializerName.buildXml(this, \"${element.keyName}\", key${keyArgumentsFunArgument.orEmpty()})")
-    addStatement("$valueSerializerName.buildXml(this, \"${element.valueName}\", value${valueArgumentsFunArgument.orEmpty()})")
+    addStatement("$valueSerializerName.buildXml(this, \"${element.entryName}\", value${valueArgumentsFunArgument.orEmpty()})")
     endControlFlow()
 }
 
-private fun FunSpec.Builder.tag(serializerName: String?, argumentsFunArgument: String, element: DomElement) {
-    addStatement("${serializerName}.buildXml(this, \"${element.xmlName}\", obj.${element.propertyName})$argumentsFunArgument")
+private fun FunSpec.Builder.tag(
+    serializerName: String?,
+    argumentsFunArgument: String,
+    field: Field.Tag,
+    serializersMap: Map<Field, FieldSerializer>
+) {
+    if (field.isNullable) {
+        if (field.children.isNotEmpty()) {
+            addStatement("val ${field.fieldName} = obj.${field.fieldName}")
+            beginControlFlow("if (${field.fieldName} != null)")
+            beginControlFlow("$serializerName.buildXml(this, \"${field.tagName}\", ${field.fieldName}$argumentsFunArgument)")
+            renderChildren(field.children, serializersMap)
+            endControlFlow()
+            nextControlFlow("else")
+            beginControlFlow("tag(\"${field.tagName}\")")
+            renderChildren(field.children, serializersMap)
+            endControlFlow()
+            endControlFlow()
+        } else {
+            tagNullableValue(serializerName, argumentsFunArgument, field)
+        }
+    } else {
+        if (field.children.isNotEmpty()) {
+            tagWithChildren(serializerName, argumentsFunArgument, field, serializersMap)
+        } else {
+            addStatement("${serializerName}.buildXml(this, \"${field.tagName}\", obj.${field.fieldName})$argumentsFunArgument")
+        }
+    }
 }
 
 private fun FunSpec.Builder.tagWithChildren(
     serializerName: String?,
     argumentsFunArgument: String,
-    element: DomElement,
-    serializersMap: Map<PropertyElement, FieldSerializer>
+    element: Field.Tag,
+    serializersMap: Map<Field, FieldSerializer>
 ) {
-    if (element.propertyName.isEmpty()) {
-        beginControlFlow("tag(\"${element.xmlName}\")")
+    if (element.fieldName.isEmpty()) {
+        beginControlFlow("tag(\"${element.tagName}\")")
     } else {
-        beginControlFlow("$serializerName.buildXml(this, \"${element.xmlName}\", obj.${element.propertyName}$argumentsFunArgument)")
+        beginControlFlow("$serializerName.buildXml(this, \"${element.tagName}\", obj.${element.fieldName}$argumentsFunArgument)")
     }
     renderChildren(element.children, serializersMap)
     endControlFlow()
@@ -120,116 +107,124 @@ private fun FunSpec.Builder.tagWithChildren(
 private fun FunSpec.Builder.tagNullableValue(
     serializerName: String?,
     argumentsFunArgument: String,
-    element: DomElement
+    element: Field.Tag
 ) {
-    if (element.property?.required == true) {
-        addStatement("val ${element.propertyName} = obj.${element.propertyName}?: throw SerializeException(\"\"\"field ${element.xmlName} value is required\"\"\")")
-        addStatement("$serializerName.buildXml(this, \"${element.xmlName}\", ${element.propertyName}$argumentsFunArgument)")
+    if (element.required) {
+        addStatement("val ${element.fieldName} = obj.${element.fieldName}?: throw SerializeException(\"\"\"field ${element.tagName} value is required\"\"\")")
+        addStatement("$serializerName.buildXml(this, \"${element.tagName}\", ${element.fieldName}$argumentsFunArgument)")
     } else {
-        beginControlFlow("obj.${element.propertyName}?.let")
-        addStatement("$serializerName.buildXml(this, \"${element.xmlName}\", it$argumentsFunArgument)")
+        beginControlFlow("obj.${element.fieldName}?.let")
+        addStatement("$serializerName.buildXml(this, \"${element.tagName}\", it$argumentsFunArgument)")
         endControlFlow()
     }
 }
 
-private fun FunSpec.Builder.attribute(serializerName: String?, element: DomElement) {
-    val serializeCall = "$serializerName.serialize(obj.${element.propertyName})"
-    addStatement("attr(\"${element.xmlName}\", $serializeCall)")
+private fun FunSpec.Builder.attribute(serializerName: String?, field: Field.Attribute) {
+    if (field.isNullable) {
+        attributeNullableValue(serializerName, field)
+    } else {
+        val serializeCall = "$serializerName.serialize(obj.${field.fieldName})"
+        addStatement("attr(\"${field.attributeName}\", $serializeCall)")
+    }
 }
 
-private fun FunSpec.Builder.attributeNullableValue(serializerName: String?, element: DomElement) {
+private fun FunSpec.Builder.attributeNullableValue(serializerName: String?, element: Field.Attribute) {
     val serializeCall = "$serializerName.serialize(it)"
-    beginControlFlow("obj.${element.propertyName}?.let")
-    addStatement("attr(\"${element.xmlName}\", $serializeCall)")
+    beginControlFlow("obj.${element.fieldName}?.let")
+    addStatement("attr(\"${element.attributeName}\", $serializeCall)")
     endControlFlow()
 }
 
-private fun FunSpec.Builder.list(serializerName: String?, argumentsFunArgument: String, element: DomElement) {
-    if (element.inlineList) {
-        printListForeach(element, serializerName, argumentsFunArgument)
-    } else {
-        beginControlFlow("tag(\"${element.xmlName}\") {")
-        printListForeach(element, serializerName, argumentsFunArgument)
-        endControlFlow()
-    }
-}
-
-private fun FunSpec.Builder.map(fieldSerializer: FieldSerializer?, element: DomElement) {
-    val keySerializerName = fieldSerializer?.serializerVariableName
-    val keyGenericTypesVariableName = fieldSerializer?.genericTypesVariableName
-    val valueSerializerVariableName = fieldSerializer?.valueSerializerVariableName
-    val valueGenericTypesVariableName = fieldSerializer?.valueGenericTypesVariableName
-    if (!element.inlineList) {
-        beginControlFlow("tag(\"${element.xmlName}\") {")
-    }
-    printMapForeach(
-        element,
-        keySerializerName,
-        keyGenericTypesVariableName,
-        valueSerializerVariableName,
-        valueGenericTypesVariableName,
-        "obj.${element.propertyName}"
-    )
-    if (!element.inlineList) {
-        endControlFlow()
-    }
-}
-
-private fun FunSpec.Builder.listWithAttributes(
+private fun FunSpec.Builder.list(
     serializerName: String?,
     argumentsFunArgument: String,
-    element: DomElement,
-    serializersMap: Map<PropertyElement, FieldSerializer>
+    field: Field.List,
+    serializersMap: Map<Field, FieldSerializer>
 ) {
-    if (element.inlineList) {
-        printListForeach(element, serializerName, argumentsFunArgument)
+    if (field.isNullable) {
+        listNullableValue(serializerName, argumentsFunArgument, field)
     } else {
-        beginControlFlow("tag(\"${element.xmlName}\") {")
-        renderChildren(element.children, serializersMap)
-        printListForeach(element, serializerName, argumentsFunArgument)
-        endControlFlow()
+        if (field.children.isNotEmpty()) {
+            if (field.isInline) {
+                printListForeach(field, serializerName, argumentsFunArgument)
+            } else {
+                beginControlFlow("tag(\"${field.tagName}\") {")
+                renderChildren(field.children, serializersMap)
+                printListForeach(field, serializerName, argumentsFunArgument)
+                endControlFlow()
+            }
+        } else {
+            if (field.isInline) {
+                printListForeach(field, serializerName, argumentsFunArgument)
+            } else {
+                beginControlFlow("tag(\"${field.tagName}\") {")
+                printListForeach(field, serializerName, argumentsFunArgument)
+                endControlFlow()
+            }
+        }
     }
 }
 
-private fun FunSpec.Builder.mapWithAttributes(
+private fun FunSpec.Builder.map(
     fieldSerializer: FieldSerializer?,
-    element: DomElement,
-    serializersMap: Map<PropertyElement, FieldSerializer>
+    field: Field.Map,
+    serializersMap: Map<Field, FieldSerializer>
 ) {
-    val keySerializerName = fieldSerializer?.serializerVariableName
-    val keyGenericTypesVariableName = fieldSerializer?.genericTypesVariableName
-    val valueSerializerVariableName = fieldSerializer?.valueSerializerVariableName
-    val valueGenericTypesVariableName = fieldSerializer?.valueGenericTypesVariableName
-    if (!element.inlineList) {
-        beginControlFlow("tag(\"${element.xmlName}\") {")
-        renderChildren(element.children, serializersMap)
-    }
-    printMapForeach(
-        element,
-        keySerializerName,
-        keyGenericTypesVariableName,
-        valueSerializerVariableName,
-        valueGenericTypesVariableName,
-        "obj.${element.propertyName}"
-    )
-    if (!element.inlineList) {
-        endControlFlow()
+    if (field.isNullable) {
+        mapNullableValue(fieldSerializer, field)
+    } else {
+        val keySerializerName = fieldSerializer?.serializerVariableName
+        val keyGenericTypesVariableName = fieldSerializer?.genericTypesVariableName
+        val valueSerializerVariableName = fieldSerializer?.valueSerializerVariableName
+        val valueGenericTypesVariableName = fieldSerializer?.valueGenericTypesVariableName
+        if (field.children.isNotEmpty()) {
+            if (!field.isInline) {
+                beginControlFlow("tag(\"${field.tagName}\") {")
+                renderChildren(field.children, serializersMap)
+            }
+            printMapForeach(
+                field,
+                keySerializerName,
+                keyGenericTypesVariableName,
+                valueSerializerVariableName,
+                valueGenericTypesVariableName,
+                "obj.${field.fieldName}"
+            )
+            if (!field.isInline) {
+                endControlFlow()
+            }
+        } else {
+            if (!field.isInline) {
+                beginControlFlow("tag(\"${field.tagName}\") {")
+            }
+            printMapForeach(
+                field,
+                keySerializerName,
+                keyGenericTypesVariableName,
+                valueSerializerVariableName,
+                valueGenericTypesVariableName,
+                "obj.${field.fieldName}"
+            )
+            if (!field.isInline) {
+                endControlFlow()
+            }
+        }
     }
 }
 
 private fun FunSpec.Builder.listNullableValue(
     serializerName: String?,
     argumentsFunArgument: String,
-    element: DomElement
+    element: Field.List
 ) {
-    if (element.inlineList) {
-        beginControlFlow("obj.${element.propertyName}?.forEach")
+    if (element.isInline) {
+        beginControlFlow("obj.${element.fieldName}?.forEach")
         addStatement("$serializerName.buildXml(this, \"${element.entryName}\", it$argumentsFunArgument)")
         endControlFlow()
     } else {
-        beginControlFlow("obj.${element.propertyName}?.let")
+        beginControlFlow("obj.${element.fieldName}?.let")
         addStatement("list ->")
-        beginControlFlow("tag(\"${element.xmlName}\") {")
+        beginControlFlow("tag(\"${element.tagName}\") {")
         beginControlFlow("list.forEach {")
         addStatement("$serializerName.buildXml(this, \"${element.entryName}\", it$argumentsFunArgument)")
         endControlFlow()
@@ -238,14 +233,14 @@ private fun FunSpec.Builder.listNullableValue(
     }
 }
 
-private fun FunSpec.Builder.mapNullableValue(fieldSerializer: FieldSerializer?, element: DomElement) {
+private fun FunSpec.Builder.mapNullableValue(fieldSerializer: FieldSerializer?, element: Field.Map) {
     val keySerializerName = fieldSerializer?.serializerVariableName
     val keyGenericTypesVariableName = fieldSerializer?.genericTypesVariableName
     val valueSerializerVariableName = fieldSerializer?.valueSerializerVariableName
     val valueGenericTypesVariableName = fieldSerializer?.valueGenericTypesVariableName
 
-    if (element.inlineList) {
-        beginControlFlow("obj.${element.propertyName}?.forEach")
+    if (element.isInline) {
+        beginControlFlow("obj.${element.fieldName}?.forEach")
         printMapForeach(
             element,
             keySerializerName,
@@ -256,9 +251,9 @@ private fun FunSpec.Builder.mapNullableValue(fieldSerializer: FieldSerializer?, 
         )
         endControlFlow()
     } else {
-        beginControlFlow("obj.${element.propertyName}?.let")
+        beginControlFlow("obj.${element.fieldName}?.let")
         addStatement("map ->")
-        beginControlFlow("tag(\"${element.xmlName}\") {")
+        beginControlFlow("tag(\"${element.tagName}\") {")
         printMapForeach(
             element,
             keySerializerName,

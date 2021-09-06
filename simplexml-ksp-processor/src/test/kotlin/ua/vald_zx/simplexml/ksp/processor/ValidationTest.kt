@@ -132,4 +132,26 @@ class ValidationTest {
         ).compile()
         assertEquals(result.exitCode, KotlinCompilation.ExitCode.OK)
     }
+
+    @Test
+    fun `NullableTagAttribute class test`() {
+        val result = kotlin(
+            "ConstructorFieldMapOfStrings.kt",
+            """
+        package test
+
+        import ua.vald_zx.simplexml.ksp.Attribute
+        import ua.vald_zx.simplexml.ksp.Path
+        import ua.vald_zx.simplexml.ksp.Element
+
+        data class NullableTagAttribute(
+            @field:[Path("Tag") Attribute]
+            var attr: String,
+            @Element(name = "Tag", required = false)
+            var tag: String? = null
+        )
+    """,
+        ).compile()
+        assertEquals(result.exitCode, KotlinCompilation.ExitCode.OK)
+    }
 }

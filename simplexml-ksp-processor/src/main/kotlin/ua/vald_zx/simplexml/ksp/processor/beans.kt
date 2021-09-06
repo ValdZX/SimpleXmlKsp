@@ -1,6 +1,9 @@
 package ua.vald_zx.simplexml.ksp.processor
 
-import com.google.devtools.ksp.symbol.*
+import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.KSTypeParameter
+import com.google.devtools.ksp.symbol.KSTypeReference
 import com.squareup.kotlinpoet.ClassName
 
 data class ClassToGenerate(
@@ -10,50 +13,107 @@ data class ClassToGenerate(
     val name: String,
     val rootName: String,
     val packagePath: String,
-    val propertyElements: MutableList<PropertyElement>
+    val fields: MutableList<Field>
 ) {
-    val dom: List<DomElement> by lazy { makeDom(this) }
+    val dom: List<Field> by lazy { makeDom(this) }
 }
 
-data class PropertyElement(
-    val propertyName: String,
-    val propertyType: KSTypeReference,
-    val xmlName: String,
-    val xmlType: XmlUnitType,
-    val xmlPath: String,
-    val required: Boolean,
-    val isVariable: Boolean,
-    val isMutableCollection: Boolean,
-    val isConstructorParameter: Boolean,
-    val hasDefaultValue: Boolean,
-    val listEntryName: String,
-    val keyMapName: String,
-    val valueMapName: String,
-    val inlineList: Boolean,
-    val converterType: KSType?,
-    val propertyEntryType: KSTypeReference? = null,
-    val propertyKeyType: KSTypeReference? = null,
-    val propertyValueType: KSTypeReference? = null
-)
-
-data class DomElement(
-    val property: PropertyElement? = null,
-    val xmlName: String = property?.xmlName.orEmpty(),
-    val propertyName: String = property?.propertyName.orEmpty(),
-    val type: XmlUnitType = property?.xmlType ?: XmlUnitType.TAG,
-    val children: MutableList<DomElement> = mutableListOf()
-) {
-    val entryName: String
-        get() = property?.listEntryName.orEmpty()
-    val keyName: String
-        get() = property?.keyMapName.orEmpty()
-    val valueName: String
-        get() = property?.valueMapName.orEmpty()
-    val inlineList: Boolean
-        get() = property?.inlineList ?: false
+sealed interface Field {
+    val required: Boolean
+    val hasDefaultValue: Boolean
     val isNullable: Boolean
-        get() = property?.let { it.propertyType.resolve().nullability != Nullability.NOT_NULL }
-            ?: false
+    val isMutable: Boolean
+    val isConstructorParameter: Boolean
+    val path: String
+    val fieldName: String
+    val fieldType: KSTypeReference?
+    val converterType: KSType?
+
+    interface IsTag : Field {
+        val tagName: String
+        val children: MutableList<Field>
+    }
+
+    data class Tag(
+        override val tagName: String,
+        override val required: Boolean = false,
+        override val isNullable: Boolean = false,
+        override val isMutable: Boolean = false,
+        override val isConstructorParameter: Boolean = false,
+        override val path: String = "",
+        override val fieldName: String = "",
+        override val converterType: KSType? = null,
+        override val hasDefaultValue: Boolean = false,
+        override val fieldType: KSTypeReference? = null,
+        override val children: MutableList<Field> = mutableListOf()
+    ) : IsTag
+
+    data class Attribute(
+        override val required: Boolean,
+        override val hasDefaultValue: Boolean,
+        override val isNullable: Boolean,
+        override val isMutable: Boolean,
+        override val isConstructorParameter: Boolean,
+        override val path: String,
+        override val fieldName: String,
+        override val converterType: KSType?,
+        override val fieldType: KSTypeReference,
+        val attributeName: String
+    ) : Field
+
+    data class Text(
+        override val required: Boolean,
+        override val hasDefaultValue: Boolean,
+        override val isNullable: Boolean,
+        override val isMutable: Boolean,
+        override val isConstructorParameter: Boolean,
+        override val converterType: KSType?,
+        override val fieldName: String,
+        override val fieldType: KSTypeReference? = null,
+    ) : Field {
+        override val path: String = ""
+    }
+
+    data class List(
+        override val required: Boolean,
+        override val hasDefaultValue: Boolean,
+        override val isNullable: Boolean,
+        override val isMutable: Boolean,
+        override val isConstructorParameter: Boolean,
+        override val path: String,
+        override val tagName: String,
+        override val fieldName: String,
+        override val fieldType: KSTypeReference,
+        override val children: MutableList<Field> = mutableListOf(),
+        override val converterType: KSType?,
+        val isInline: Boolean,
+        val isMutableCollection: Boolean,
+        val entryName: String,
+        val attributes: MutableList<Attribute> = mutableListOf(),
+        val entryType: KSTypeReference? = null,
+    ) : IsTag
+
+    data class Map(
+        override val required: Boolean,
+        override val hasDefaultValue: Boolean,
+        override val isNullable: Boolean,
+        override val isMutable: Boolean,
+        override val isConstructorParameter: Boolean,
+        override val tagName: String,
+        override val path: String,
+        override val fieldName: String,
+        override val fieldType: KSTypeReference,
+        override val children: MutableList<Field> = mutableListOf(),
+        override val converterType: KSType?,
+        val isInline: Boolean,
+        val isAttribute: Boolean,
+        val isMutableCollection: Boolean,
+        val attributes: MutableList<Attribute> = mutableListOf(),
+        val keyName: String,
+        val keyType: KSTypeReference? = null,
+        val entryName: String,
+        val entryType: KSTypeReference? = null
+    ) : IsTag
 }
 
 data class GeneratedSerializerSpec(
@@ -61,11 +121,3 @@ data class GeneratedSerializerSpec(
     val serializerClass: ClassName,
     val packageName: String,
 )
-
-enum class XmlUnitType {
-    TAG,
-    LIST,
-    MAP,
-    ATTRIBUTE,
-    UNKNOWN
-}

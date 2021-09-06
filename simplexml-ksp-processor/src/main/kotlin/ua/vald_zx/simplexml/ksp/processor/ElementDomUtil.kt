@@ -1,50 +1,45 @@
 package ua.vald_zx.simplexml.ksp.processor
 
 
-internal fun makeDom(toGenerate: ClassToGenerate): List<DomElement> {
-    val propertyElements = toGenerate.propertyElements
+internal fun makeDom(toGenerate: ClassToGenerate): List<Field> {
+    val propertyElements = toGenerate.fields
     val firstLayerFields = propertyElements
-        .filter { it.xmlPath.isEmpty() }
-        .map { DomElement(it) }.toMutableList()
+        .filter { it.path.isEmpty() }
+        .toMutableList()
 
     propertyElements.filter {
-        it.xmlPath.isNotEmpty()
+        it.path.isNotEmpty()
     }.map { field ->
-        val path = field.xmlPath.split("/")
+        val path = field.path.split("/")
         addLayer(firstLayerFields, path[0], path.subList(1, path.size), field)
     }
     return firstLayerFields
 }
 
 private fun addLayer(
-    currentLayerFields: MutableList<DomElement>,
+    currentLayerFields: MutableList<Field>,
     currentPath: String,
     path: List<String>,
-    property: PropertyElement
+    property: Field
 ) {
-    if (currentPath.isEmpty()) {
-        val layerField = currentLayerFields.find { it.xmlName == property.xmlName }
-        if (layerField != null && (layerField.propertyName.isNotEmpty() || layerField.children.any { it.type != XmlUnitType.ATTRIBUTE })) {
-            error("already has data tag with name ${property.xmlName}")
-        } else if (layerField?.propertyName?.isEmpty() == true) {
+    if (currentPath.isEmpty() && property is Field.IsTag) {
+        val layerField =
+            currentLayerFields.find { it is Field.IsTag && it.tagName == property.tagName }
+        if (layerField != null && layerField is Field.IsTag && (layerField.fieldName.isNotEmpty() || layerField.children.any { it !is Field.Attribute })) {
+            error("already has data tag with name ${property.tagName}")
+        } else if (layerField?.fieldName?.isEmpty() == true && layerField is Field.IsTag) {
             val itemIndex = currentLayerFields.indexOf(layerField)
-            currentLayerFields[itemIndex] =
-                DomElement(
-                    property = property,
-                    children = layerField.children
-                )
+            property.children.addAll(layerField.children)
+            currentLayerFields[itemIndex] = property
         } else {
-            currentLayerFields.add(
-                DomElement(property = property)
-            )
+            currentLayerFields.add(property)
         }
     } else {
-        val currentPathUnit = currentLayerFields.find { it.xmlName == currentPath }
-            ?: DomElement(xmlName = currentPath).apply { currentLayerFields.add(this) }
-        if (property.xmlType == XmlUnitType.ATTRIBUTE && path.isEmpty()) {
-            currentPathUnit.children.add(
-                DomElement(property = property)
-            )
+        val currentPathUnit =
+            (currentLayerFields.find { it is Field.IsTag && it.tagName == currentPath } as Field.IsTag?)
+                ?: Field.Tag(tagName = currentPath).apply { currentLayerFields.add(this) }
+        if (property is Field.Attribute && path.isEmpty()) {
+            currentPathUnit.children.add(property)
         } else if (path.isEmpty()) {
             addLayer(currentPathUnit.children, "", emptyList(), property)
         } else {

@@ -2,7 +2,7 @@ package ua.vald_zx.simplexml.ksp.processor.generator
 
 import com.squareup.kotlinpoet.FunSpec
 import ua.vald_zx.simplexml.ksp.processor.ClassToGenerate
-import ua.vald_zx.simplexml.ksp.processor.PropertyElement
+import ua.vald_zx.simplexml.ksp.processor.Field
 
 data class SerializerDeclaration(
     val className: String,
@@ -16,28 +16,29 @@ data class FieldSerializer(
     val valueGenericTypesVariableName: String? = null
 )
 
-fun FunSpec.Builder.generateAndGetSerializers(classToGenerate: ClassToGenerate): Map<PropertyElement, FieldSerializer> {
-    val propertyToSerializerName = mutableMapOf<PropertyElement, FieldSerializer>()
-    val propertyElements = classToGenerate.propertyElements
-    val genericsProperties = mutableListOf<PropertyElement>()
+fun FunSpec.Builder.generateAndGetSerializers(classToGenerate: ClassToGenerate): Map<Field, FieldSerializer> {
+    val propertyToSerializerName = mutableMapOf<Field, FieldSerializer>()
+    val propertyElements = classToGenerate.fields
+    val genericsProperties = mutableListOf<Field>()
     val typeParameters = classToGenerate.typeParameters.toSet()
     if (typeParameters.isNotEmpty()) {
         val typeMap = mutableMapOf<String, FieldSerializer>()
         typeParameters.forEachIndexed { index, type ->
             val typeName = type.toString()
-            propertyElements.filter { it.propertyType.toString() == typeName }.forEach { propertyElement ->
-                genericsProperties.add(propertyElement)
-                val cachedFieldSerializer = typeMap[propertyElement.propertyType.toString()]
+            propertyElements.filter { it.fieldType?.toString() == typeName }.forEach { field ->
+                genericsProperties.add(field)
+                val fieldType = field.fieldType
+                val cachedFieldSerializer = typeMap[fieldType.toString()]
                 if (cachedFieldSerializer == null) {
                     val typeForVal = typeName.replaceFirstChar { it.lowercase() }
                     addStatement("val ${typeForVal}Type = genericTypeList[$index].type")
                     addStatement("val ${typeForVal}Args = ${typeForVal}Type?.arguments.orEmpty()")
                     addStatement("val ${typeForVal}Serializer = GlobalSerializersLibrary.findSerializers(${typeForVal}Type?.classifier as KClass<Any>)")
                     val fieldSerializer = FieldSerializer("${typeForVal}Serializer", "${typeForVal}Args")
-                    propertyToSerializerName[propertyElement] = fieldSerializer
-                    typeMap[propertyElement.propertyType.toString()] = fieldSerializer
+                    propertyToSerializerName[field] = fieldSerializer
+                    typeMap[fieldType.toString()] = fieldSerializer
                 } else {
-                    propertyToSerializerName[propertyElement] = cachedFieldSerializer
+                    propertyToSerializerName[field] = cachedFieldSerializer
                 }
             }
         }
@@ -46,17 +47,17 @@ fun FunSpec.Builder.generateAndGetSerializers(classToGenerate: ClassToGenerate):
         .filter { property -> property.converterType == null }
     val propertyToTypeSerializer = objectProperties
         .associateWith { property ->
-            when (val className = property.propertyType.toString()) {
-                "List", "MutableList" -> {
-                    val entryClassName = property.propertyEntryType.toString()
+            when (property) {
+                is Field.List -> {
+                    val entryClassName = property.entryType.toString()
                     val declaration = SerializerDeclaration(
                         entryClassName,
                         entryClassName.replaceFirstChar { it.lowercase() } + "Serializer")
                     listOf(declaration)
                 }
-                "Map", "MutableMap" -> {
-                    val keyClassName = property.propertyKeyType.toString()
-                    val valueClassName = property.propertyValueType.toString()
+                is Field.Map -> {
+                    val keyClassName = property.keyType.toString()
+                    val valueClassName = property.entryType.toString()
                     val keyDeclaration = SerializerDeclaration(
                         keyClassName,
                         keyClassName.replaceFirstChar { it.lowercase() } + "Serializer",
@@ -68,6 +69,7 @@ fun FunSpec.Builder.generateAndGetSerializers(classToGenerate: ClassToGenerate):
                     listOf(keyDeclaration, valueDeclaration)
                 }
                 else -> {
+                    val className = property.fieldType.toString()
                     val declaration = SerializerDeclaration(
                         className,
                         className.replaceFirstChar { it.lowercase() } + "Serializer")

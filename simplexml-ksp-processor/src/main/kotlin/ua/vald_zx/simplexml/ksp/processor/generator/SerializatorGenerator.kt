@@ -122,7 +122,7 @@ private fun FunSpec.Builder.suppressAnnotation(
 }
 
 private fun FileSpec.Builder.declareImportsConverter(classToGenerate: ClassToGenerate): FileSpec.Builder {
-    val converters = classToGenerate.propertyElements
+    val converters = classToGenerate.fields
         .mapNotNull { property ->
             property.converterType
         }
@@ -138,8 +138,8 @@ private fun FileSpec.Builder.declareImportsConverter(classToGenerate: ClassToGen
 }
 
 private fun FileSpec.Builder.declareImportsOfFields(classToGenerate: ClassToGenerate): FileSpec.Builder {
-    classToGenerate.propertyElements.map { property ->
-        val type = property.propertyType.resolve()
+    classToGenerate.fields.mapNotNull { property ->
+        val type = property.fieldType?.resolve() ?: return@mapNotNull null
         val packageName = type.declaration.packageName.asString()
         val simpleName = type.declaration.simpleName.asString()
         packageName to simpleName

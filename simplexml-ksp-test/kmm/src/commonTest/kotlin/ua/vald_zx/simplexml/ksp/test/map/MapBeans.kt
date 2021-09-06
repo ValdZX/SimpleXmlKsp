@@ -15,7 +15,7 @@ import ua.vald_zx.simplexml.ksp.Path
 </ConstructorFieldListOfStrings>
  */
 data class ConstructorFieldMapOfStrings(
-    @ElementMap(name = "Map", key = "Key", value = "Value")
+    @ElementMap(name = "Map", key = "Key", entry = "Value")
     val map: Map<String, Int>
 )
 
@@ -30,7 +30,7 @@ data class ConstructorFieldMapOfStrings(
 </ConstructorFieldMapOfStringsNullable>
  */
 data class ConstructorFieldMapOfStringsNullable(
-    @ElementMap(name = "Map", key = "Key", value = "Value")
+    @ElementMap(name = "Map", key = "Key", entry = "Value")
     val map: Map<String, Int>?
 )
 
@@ -45,7 +45,7 @@ data class ConstructorFieldMapOfStringsNullable(
 </ConstructorFieldMapOfStringsNullableDefaultNull>
  */
 data class ConstructorFieldMapOfStringsNullableDefaultNull(
-    @ElementMap(name = "Map", key = "Key", value = "Value")
+    @ElementMap(name = "Map", key = "Key", entry = "Value")
     var map: Map<String, Int>? = null
 )
 
@@ -61,7 +61,7 @@ data class ConstructorFieldMapOfStringsNullableDefaultNull(
  */
 class FieldMapOfStringsWithDefault {
 
-    @ElementMap(name = "Map", key = "Key", value = "Value")
+    @ElementMap(name = "Map", key = "Key", entry = "Value")
     var map: Map<String, Int> = mutableMapOf()
 }
 
@@ -77,7 +77,7 @@ class FieldMapOfStringsWithDefault {
  */
 class FieldMapOfStringsNullable {
 
-    @ElementMap(name = "Map", key = "Key", value = "Value")
+    @ElementMap(name = "Map", key = "Key", entry = "Value")
     var map: Map<String, Int>? = null
 }
 
@@ -113,7 +113,7 @@ class FieldMapOfStringsNullable {
  */
 class FieldMapOfStringsDefaultWithAttribute {
 
-    @ElementMap(name = "Map", key = "Key", value = "Value")
+    @ElementMap(name = "Map", key = "Key", entry = "Value")
     var map: Map<String, Int> = mutableMapOf()
 
     @Path("Map")

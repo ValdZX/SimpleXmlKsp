@@ -6,6 +6,9 @@ import kotlin.reflect.KClass
 @Target(AnnotationTarget.CLASS)
 annotation class Root(val name: String)
 
+@Target(AnnotationTarget.CLASS)
+annotation class Text
+
 @Target(AnnotationTarget.FIELD)
 annotation class Attribute(val name: String = "", val required: Boolean = true)
 
@@ -27,8 +30,9 @@ annotation class ElementList(
 annotation class ElementMap(
     val name: String = "",
     val key: String = "",
-    val value: String = "",
+    val entry: String = "",
     val inline: Boolean = false,
+    val attribute: Boolean = false,
     val required: Boolean = true
 )
 

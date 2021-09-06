@@ -17,7 +17,8 @@ java {
 }
 
 dependencies {
-    implementation("io.github.valdzx:simplexml-ksp-core-jvm:$projectVersion")
+//    implementation("io.github.valdzx:simplexml-ksp-core-jvm:$projectVersion")
+    implementation(project(":simplexml-ksp-core"))
     implementation("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
     implementation("com.squareup:kotlinpoet:1.8.0")
     testImplementation(kotlin("test"))

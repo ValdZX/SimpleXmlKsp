@@ -1,74 +1,49 @@
 package ua.vald_zx.simplexml.ksp.processor
 
 import com.google.devtools.ksp.processing.KSPLogger
-import com.google.devtools.ksp.symbol.KSAnnotation
-import com.google.devtools.ksp.symbol.KSPropertyDeclaration
-import com.google.devtools.ksp.symbol.KSType
-import com.google.devtools.ksp.symbol.KSTypeReference
+import com.google.devtools.ksp.symbol.*
 import ua.vald_zx.simplexml.ksp.*
 import ua.vald_zx.simplexml.ksp.processor.XmlSymbolProcessor.Companion.LIBRARY_PACKAGE
 
-data class AnnotationInfo(
-    val inline: Boolean,
-    val required: Boolean,
-    val elementName: String,
-    val entryListName: String,
-    val keyMapName: String,
-    val valueMapName: String,
-    val path: String,
-    val type: XmlUnitType,
-    val converterType: KSType?,
-    val propertyEntryType: KSTypeReference?,
-    val propertyKeyType: KSTypeReference?,
-    val propertyValueType: KSTypeReference?,
-)
-
-fun KSPropertyDeclaration.getAnnotationInfo(
-    logger: KSPLogger,
-    isStrictMode: Boolean,
-    propertyType: KSTypeReference,
-    parentName: String,
-    propertyName: String,
-): AnnotationInfo {
-    return AnnotationIndoReader(
-        logger,
-        isStrictMode,
-        propertyType,
-        parentName,
-        propertyName,
-        annotations
-    ).read()
+private enum class XmlUnitType {
+    TEXT,
+    TAG,
+    LIST,
+    MAP,
+    ATTRIBUTE,
+    UNKNOWN
 }
 
-private class AnnotationIndoReader(
+class AnnotationIndoReader(
+    private val property: KSPropertyDeclaration,
+    private val parent: KSClassDeclaration,
     private val logger: KSPLogger,
     private val isStrictMode: Boolean,
-    private val propertyType: KSTypeReference,
-    private val parentName: String,
-    private val propertyName: String,
-    private val annotations: Sequence<KSAnnotation>,
 ) {
-    var path = ""
-    var entryListName = ""
-    var keyMapName = ""
-    var valueMapName = ""
-    var elementName = ""
-    var required = true
-    var inline = false
-    var converterType: KSType? = null
-    var propertyEntryType: KSTypeReference? = null
-    var propertyKeyType: KSTypeReference? = null
-    var propertyValueType: KSTypeReference? = null
-    var type: XmlUnitType = XmlUnitType.UNKNOWN
+    private val propertyName = property.simpleName.asString()
+    private val propertyType = property.type
+    private val parentName = parent.fullName
+    private var path = ""
+    private var entryName = ""
+    private var keyName = ""
+    private var isAttribute = false
+    private var elementName = ""
+    private var required = true
+    private var isInline = false
+    private var converterType: KSType? = null
+    private var entryType: KSTypeReference? = null
+    private var keyType: KSTypeReference? = null
+    private var xmlUnitType: XmlUnitType = XmlUnitType.UNKNOWN
 
-    fun read(): AnnotationInfo {
-        annotations
+    fun read(): Field {
+        property.annotations
             .filter { it.annotationType.resolve().declaration.packageName.asString() == LIBRARY_PACKAGE }
             .forEach { annotation ->
                 when (annotation.shortName.asString()) {
-                    Path::class.simpleName -> readPath(annotation)
                     Element::class.simpleName -> readElement(annotation)
                     Attribute::class.simpleName -> readAttribute(annotation)
+                    Path::class.simpleName -> readPath(annotation)
+                    Text::class.simpleName -> xmlUnitType = XmlUnitType.TEXT
                     ElementList::class.simpleName -> readList(annotation)
                     ElementMap::class.simpleName -> readMap(annotation)
                     Convert::class.simpleName -> {
@@ -76,20 +51,95 @@ private class AnnotationIndoReader(
                     }
                 }
             }
-        return AnnotationInfo(
-            inline = inline,
-            required = required,
-            elementName = elementName,
-            entryListName = entryListName,
-            keyMapName = keyMapName,
-            valueMapName = valueMapName,
-            path = path,
-            type = type,
-            converterType = converterType,
-            propertyEntryType = propertyEntryType,
-            propertyKeyType = propertyKeyType,
-            propertyValueType = propertyValueType,
-        )
+        val constructorParameters = parent.primaryConstructor?.parameters
+        val constructorParameter = constructorParameters?.find { it.name?.asString() == propertyName }
+        val isVariable = property.isMutable
+        val isNullable = property.type.resolve().nullability != Nullability.NOT_NULL
+        val isMutableCollection = property.type.isMutableCollection()
+        val isConstructorParameter = constructorParameter != null
+        val hasDefaultValue = constructorParameter?.hasDefault ?: false
+        val requiredToConstructor = constructorParameter?.hasDefault?.not() ?: false
+        if (requiredToConstructor && !required && !isNullable) {
+            error("$parentName::$propertyName is not required without default value")
+        }
+
+        return when (xmlUnitType) {
+            XmlUnitType.TAG -> Field.Tag(
+                hasDefaultValue = hasDefaultValue,
+                isNullable = isNullable,
+                isMutable = isVariable,
+                isConstructorParameter = isConstructorParameter,
+                path = path,
+                converterType = converterType,
+                required = required,
+                tagName = elementName,
+                fieldName = propertyName,
+                fieldType = propertyType
+            )
+            XmlUnitType.ATTRIBUTE -> Field.Attribute(
+                hasDefaultValue = hasDefaultValue,
+                isNullable = isNullable,
+                isMutable = isVariable,
+                isConstructorParameter = isConstructorParameter,
+                path = path,
+                converterType = converterType,
+                required = required,
+                attributeName = elementName,
+                fieldName = propertyName,
+                fieldType = propertyType
+            )
+            XmlUnitType.TEXT -> Field.Text(
+                hasDefaultValue = hasDefaultValue,
+                isNullable = isNullable,
+                isMutable = isVariable,
+                isConstructorParameter = isConstructorParameter,
+                converterType = converterType,
+                required = required,
+                fieldName = propertyName,
+                fieldType = propertyType,
+            )
+            XmlUnitType.LIST -> Field.List(
+                hasDefaultValue = hasDefaultValue,
+                isNullable = isNullable,
+                isMutable = isVariable,
+                isConstructorParameter = isConstructorParameter,
+                path = path,
+                fieldName = propertyName,
+                fieldType = propertyType,
+                converterType = converterType,
+                required = required,
+                tagName = elementName,
+                isInline = isInline,
+                isMutableCollection = isMutableCollection,
+                entryName = entryName,
+                entryType = entryType,
+            )
+            XmlUnitType.MAP -> Field.Map(
+                hasDefaultValue = hasDefaultValue,
+                isNullable = isNullable,
+                isMutable = isVariable,
+                isConstructorParameter = isConstructorParameter,
+                path = path,
+                fieldName = propertyName,
+                fieldType = propertyType,
+                converterType = converterType,
+                required = required,
+                tagName = elementName,
+                isAttribute = isAttribute,
+                isInline = isInline,
+                isMutableCollection = isMutableCollection,
+                keyName = keyName,
+                keyType = keyType,
+                entryName = entryName,
+                entryType = entryType,
+            )
+            XmlUnitType.UNKNOWN -> TODO()
+        }
+    }
+
+    private fun KSTypeReference.isMutableCollection(): Boolean {
+        val typeSimpleName = resolve().declaration.simpleName.asString()
+        return typeSimpleName == "MutableList" || typeSimpleName == "MutableMap"
     }
 
     private fun readDataUnit(annotation: KSAnnotation) {
@@ -108,12 +158,12 @@ private class AnnotationIndoReader(
 
     private fun readElement(annotation: KSAnnotation) {
         readDataUnit(annotation)
-        type = XmlUnitType.TAG
+        xmlUnitType = XmlUnitType.TAG
     }
 
     private fun readAttribute(annotation: KSAnnotation) {
         readDataUnit(annotation)
-        type = XmlUnitType.ATTRIBUTE
+        xmlUnitType = XmlUnitType.ATTRIBUTE
     }
 
     private fun readList(annotation: KSAnnotation) {
@@ -124,21 +174,21 @@ private class AnnotationIndoReader(
                     elementName = arg.value.asString(default = propertyName)
                 }
                 "entry" -> {
-                    entryListName = arg.value.asString()
+                    entryName = arg.value.asString()
                 }
                 "required" -> {
                     required = arg.value.asBoolean(default = true)
                 }
                 "inline" -> {
-                    inline = arg.value.asBoolean()
+                    isInline = arg.value.asBoolean()
                 }
             }
         }
-        if (entryListName.isEmpty()) {
-            entryListName = propertyType.getArgumentShortName(0)
+        if (entryName.isEmpty()) {
+            entryName = propertyType.getArgumentShortName(0)
         }
-        type = XmlUnitType.LIST
-        propertyEntryType = propertyType.element?.typeArguments?.first()?.type
+        xmlUnitType = XmlUnitType.LIST
+        entryType = propertyType.element?.typeArguments?.first()?.type
     }
 
     private fun readMap(annotation: KSAnnotation) {
@@ -149,32 +199,35 @@ private class AnnotationIndoReader(
                     elementName = arg.value.asString(default = propertyName)
                 }
                 "key" -> {
-                    keyMapName = arg.value.asString()
+                    keyName = arg.value.asString()
                 }
-                "value" -> {
-                    valueMapName = arg.value.asString()
+                "entry" -> {
+                    entryName = arg.value.asString()
+                }
+                "attribute" -> {
+                    isAttribute = arg.value.asBoolean(default = false)
                 }
                 "required" -> {
                     required = arg.value.asBoolean(default = true)
                 }
                 "inline" -> {
-                    inline = arg.value.asBoolean()
+                    isInline = arg.value.asBoolean()
                 }
             }
         }
-        if (keyMapName.isEmpty()) {
-            keyMapName = propertyType.getArgumentShortName(0)
+        if (keyName.isEmpty()) {
+            keyName = propertyType.getArgumentShortName(0)
         }
-        if (valueMapName.isEmpty()) {
-            valueMapName = propertyType.getArgumentShortName(1)
+        if (entryName.isEmpty()) {
+            entryName = propertyType.getArgumentShortName(1)
         }
-        type = XmlUnitType.MAP
-        propertyKeyType = propertyType.element?.typeArguments?.get(0)?.type
-        propertyValueType = propertyType.element?.typeArguments?.get(1)?.type
+        xmlUnitType = XmlUnitType.MAP
+        keyType = propertyType.element?.typeArguments?.get(0)?.type
+        entryType = propertyType.element?.typeArguments?.get(1)?.type
     }
 
     private fun checkType() {
-        if (type != XmlUnitType.UNKNOWN) {
+        if (xmlUnitType != XmlUnitType.UNKNOWN) {
             if (isStrictMode) {
                 error("$parentName failure. Illegal annotation on $propertyName")
             } else {

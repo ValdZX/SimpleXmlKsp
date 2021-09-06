@@ -1,10 +1,7 @@
 package ua.vald_zx.simplexml.ksp.processor.generator
 
 import com.squareup.kotlinpoet.FunSpec
-import ua.vald_zx.simplexml.ksp.processor.ClassToGenerate
-import ua.vald_zx.simplexml.ksp.processor.DomElement
-import ua.vald_zx.simplexml.ksp.processor.PropertyElement
-import ua.vald_zx.simplexml.ksp.processor.XmlUnitType
+import ua.vald_zx.simplexml.ksp.processor.*
 
 
 internal fun FunSpec.Builder.generateDeserialization(
@@ -24,50 +21,54 @@ internal fun FunSpec.Builder.generateDeserialization(
         }
     } else ""
     addStatement("return ${classToGenerate.name}$anyGenerics(")
-    val propertyElements = classToGenerate.propertyElements
+    val propertyElements = classToGenerate.fields
     val propertiesRequiredToConstructor = propertyElements
         .filter { it.isConstructorParameter && !it.hasDefaultValue }
     propertiesRequiredToConstructor.forEach { property ->
-        val name = property.propertyName
+        val name = property.fieldName
         val fieldSerializer = serializersMap[property] ?: error("Not found serializer")
-        if (property.xmlType == XmlUnitType.LIST) {
-            beginControlFlow("$name = ${fieldToValueMap[name]}?.map")
-            addDeserializeCallStatement("it", property, fieldSerializer, isNotNull = true)
-            endControlFlow()
-            if (property.isMutableCollection) {
-                addStatement("?.toMutableList()")
+        when (property) {
+            is Field.List -> {
+                beginControlFlow("$name = ${fieldToValueMap[name]}?.map")
+                addDeserializeCallStatement("it", property, fieldSerializer, isNotNull = true)
+                endControlFlow()
+                if (property.isMutableCollection) {
+                    addStatement("?.toMutableList()")
+                }
+                addStatement("?: throw DeserializeException(\"\"\"$className field $name value is required\"\"\"),")
             }
-            addStatement("?: throw DeserializeException(\"\"\"$className field $name value is required\"\"\"),")
-        } else if (property.xmlType == XmlUnitType.MAP) {
-            val keySerializerName = fieldSerializer.serializerVariableName
-            val valueSerializerName = fieldSerializer.valueSerializerVariableName
-            val keyGenericTypesVariableName = fieldSerializer.genericTypesVariableName
-            val keyArgumentsFunArgument = if (keyGenericTypesVariableName != null) {
-                ", $keyGenericTypesVariableName"
-            } else ""
-            val valueGenericTypesVariableName = fieldSerializer.valueGenericTypesVariableName
-            val valueArgumentsFunArgument = if (valueGenericTypesVariableName != null) {
-                ", $valueGenericTypesVariableName"
-            } else ""
-            beginControlFlow("$name = ${fieldToValueMap[name]}?.map")
-            addStatement("(keyElement, valueElement) ->")
-            addStatement("val keyData = $keySerializerName.readData(keyElement$keyArgumentsFunArgument)")
-            addStatement("val valueData = $valueSerializerName.readData(valueElement$valueArgumentsFunArgument)")
-            addStatement("keyData to valueData")
-            endControlFlow()
-            addStatement("?.toMap() ?: throw DeserializeException(\"\"\"$className field $name value is required\"\"\")")
-            if (property.isMutableCollection) {
-                addStatement("?.toMutableList()")
+            is Field.Map -> {
+                val keySerializerName = fieldSerializer.serializerVariableName
+                val valueSerializerName = fieldSerializer.valueSerializerVariableName
+                val keyGenericTypesVariableName = fieldSerializer.genericTypesVariableName
+                val keyArgumentsFunArgument = if (keyGenericTypesVariableName != null) {
+                    ", $keyGenericTypesVariableName"
+                } else ""
+                val valueGenericTypesVariableName = fieldSerializer.valueGenericTypesVariableName
+                val valueArgumentsFunArgument = if (valueGenericTypesVariableName != null) {
+                    ", $valueGenericTypesVariableName"
+                } else ""
+                beginControlFlow("$name = ${fieldToValueMap[name]}?.map")
+                addStatement("(keyElement, valueElement) ->")
+                addStatement("val keyData = $keySerializerName.readData(keyElement$keyArgumentsFunArgument)")
+                addStatement("val valueData = $valueSerializerName.readData(valueElement$valueArgumentsFunArgument)")
+                addStatement("keyData to valueData")
+                endControlFlow()
+                addStatement("?.toMap() ?: throw DeserializeException(\"\"\"$className field $name value is required\"\"\")")
+                if (property.isMutableCollection) {
+                    addStatement("?.toMutableList()")
+                }
+                addStatement("?: throw DeserializeException(\"\"\"$className field $name value is required\"\"\"),")
             }
-            addStatement("?: throw DeserializeException(\"\"\"$className field $name value is required\"\"\"),")
-        } else {
-            addDeserializeCallStatement(
-                prefix = "$name = ",
-                postfix = ",",
-                fieldStatement = "${fieldToValueMap[name]}",
-                property = property,
-                fieldSerializer = fieldSerializer
-            )
+            else -> {
+                addDeserializeCallStatement(
+                    prefix = "$name = ",
+                    postfix = ",",
+                    fieldStatement = "${fieldToValueMap[name]}",
+                    property = property,
+                    fieldSerializer = fieldSerializer
+                )
+            }
         }
     }
     val propertiesDynamics = propertyElements.subtract(propertiesRequiredToConstructor)
@@ -76,9 +77,9 @@ internal fun FunSpec.Builder.generateDeserialization(
     } else {
         beginControlFlow(").apply")
         propertiesDynamics.forEach { property ->
-            val name = property.propertyName
+            val name = property.fieldName
             val parsedValue = fieldToValueMap[name]
-            if (property.xmlType == XmlUnitType.LIST) {
+            if (property is Field.List) {
                 val fieldSerializer =
                     serializersMap[property] ?: error("Not found serializer")
                 val entrySerializerName = fieldSerializer.serializerVariableName
@@ -98,7 +99,7 @@ internal fun FunSpec.Builder.generateDeserialization(
                     endControlFlow()
                     addStatement("?: throw DeserializeException(\"\"\"$className field $name value is required\"\"\")")
                 }
-            } else if (property.xmlType == XmlUnitType.MAP) {
+            } else if (property is Field.Map) {
                 val fieldSerializer =
                     serializersMap[property] ?: error("Not found serializer")
                 val keySerializerName = fieldSerializer.serializerVariableName
@@ -147,7 +148,7 @@ internal fun FunSpec.Builder.generateDeserialization(
 }
 
 private fun FunSpec.Builder.generateValues(
-    dom: List<DomElement>,
+    dom: List<Field>,
     fieldToValueMap: MutableMap<String, String>,
     parentValueName: String,
     layer: Int,
@@ -159,37 +160,40 @@ private fun FunSpec.Builder.generateValues(
         }
     }.iterator()
 ) {
-    dom.forEach { element ->
-        when (element.type) {
-            XmlUnitType.TAG -> {
+    dom.forEach { field ->
+        when (field) {
+            is Field.Text -> {
+                TODO()
+            }
+            is Field.Tag -> {
                 val currentValueName = "layer${layer}Tag${iterator.next()}"
-                addStatement("val $currentValueName = $parentValueName?.get(\"${element.xmlName}\")")
-                fieldToValueMap[element.propertyName] = currentValueName
+                addStatement("val $currentValueName = $parentValueName?.get(\"${field.tagName}\")")
+                fieldToValueMap[field.fieldName] = currentValueName
                 generateValues(
-                    element.children,
+                    field.children,
                     fieldToValueMap,
                     currentValueName,
                     layer + 1,
                     iterator
                 )
             }
-            XmlUnitType.ATTRIBUTE -> {
+            is Field.Attribute -> {
                 val currentValueName = "layer${layer}Attribute${iterator.next()}"
-                addStatement("val $currentValueName = $parentValueName?.attribute(\"${element.xmlName}\")")
-                fieldToValueMap[element.propertyName] = currentValueName
+                addStatement("val $currentValueName = $parentValueName?.attribute(\"${field.attributeName}\")")
+                fieldToValueMap[field.fieldName] = currentValueName
             }
-            XmlUnitType.LIST -> {
+            is Field.List -> {
                 val currentValueName = "layer${layer}Tag${iterator.next()}"
-                if (element.inlineList) {
-                    addStatement("val $currentValueName = $parentValueName?.getAll(\"${element.entryName}\")")
-                    fieldToValueMap[element.propertyName] = currentValueName
+                if (field.isInline) {
+                    addStatement("val $currentValueName = $parentValueName?.getAll(\"${field.entryName}\")")
+                    fieldToValueMap[field.fieldName] = currentValueName
                 } else {
-                    addStatement("val $currentValueName = $parentValueName?.get(\"${element.xmlName}\")")
+                    addStatement("val $currentValueName = $parentValueName?.get(\"${field.tagName}\")")
                     val entryValuesName = "layer${layer}List${iterator.next()}"
-                    addStatement("val $entryValuesName = $currentValueName?.getAll(\"${element.entryName}\")")
-                    fieldToValueMap[element.propertyName] = entryValuesName
+                    addStatement("val $entryValuesName = $currentValueName?.getAll(\"${field.entryName}\")")
+                    fieldToValueMap[field.fieldName] = entryValuesName
                     generateValues(
-                        element.children.filter { it.type == XmlUnitType.ATTRIBUTE },
+                        field.children.filterIsInstance<Field.Attribute>(),
                         fieldToValueMap,
                         currentValueName,
                         layer + 1,
@@ -197,18 +201,18 @@ private fun FunSpec.Builder.generateValues(
                     )
                 }
             }
-            XmlUnitType.MAP -> {
+            is Field.Map -> {
                 val currentValueName = "layer${layer}Tag${iterator.next()}"
-                if (element.inlineList) {
-                    addStatement("val $currentValueName = $parentValueName?.getPairs(\"${element.keyName}\", \"${element.valueName}\")")
-                    fieldToValueMap[element.propertyName] = currentValueName
+                if (field.isInline) {
+                    addStatement("val $currentValueName = $parentValueName?.getPairs(\"${field.keyName}\", \"${field.entryName}\")")
+                    fieldToValueMap[field.fieldName] = currentValueName
                 } else {
-                    addStatement("val $currentValueName = $parentValueName?.get(\"${element.xmlName}\")")
+                    addStatement("val $currentValueName = $parentValueName?.get(\"${field.tagName}\")")
                     val mapName = "layer${layer}Map${iterator.next()}"
-                    addStatement("val $mapName = $currentValueName?.getPairs(\"${element.keyName}\", \"${element.valueName}\")")
-                    fieldToValueMap[element.propertyName] = mapName
+                    addStatement("val $mapName = $currentValueName?.getPairs(\"${field.keyName}\", \"${field.entryName}\")")
+                    fieldToValueMap[field.fieldName] = mapName
                     generateValues(
-                        element.children.filter { it.type == XmlUnitType.ATTRIBUTE },
+                        field.children.filterIsInstance<Field.Attribute>(),
                         fieldToValueMap,
                         currentValueName,
                         layer + 1,
@@ -216,14 +220,13 @@ private fun FunSpec.Builder.generateValues(
                     )
                 }
             }
-            else -> error("Not supported XmlUnitType ${element.type}")
         }
     }
 }
 
 private fun FunSpec.Builder.addDeserializeCallStatement(
     fieldStatement: String,
-    property: PropertyElement,
+    property: Field,
     fieldSerializer: FieldSerializer,
     prefix: String = "",
     postfix: String = "",
@@ -237,7 +240,7 @@ private fun FunSpec.Builder.addDeserializeCallStatement(
 
     if (property.required && !isNotNull) {
         addStatement("$prefix$serializerName.readData(")
-        addStatement("$fieldStatement ?: throw DeserializeException(\"\"\"field ${property.propertyName} value is required\"\"\")$argumentsFunArgument")
+        addStatement("$fieldStatement ?: throw DeserializeException(\"\"\"field ${property.fieldName} value is required\"\"\")$argumentsFunArgument")
         addStatement(")$postfix")
     } else if (isNotNull) {
         addStatement("$prefix$serializerName.readData($fieldStatement$argumentsFunArgument)$postfix")
