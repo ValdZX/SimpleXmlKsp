@@ -1,5 +1,5 @@
 const val projectGroup =  "io.github.valdzx"
-const val projectVersion = "1.0.0-dev05"
+const val projectVersion = "1.0.0-dev06"
 
-const val kotlinVersion = "1.5.21"
-const val kspVersion = "1.5.21-1.0.0-beta07"
+const val kotlinVersion = "1.5.30"
+const val kspVersion = "1.5.30-1.0.0"
