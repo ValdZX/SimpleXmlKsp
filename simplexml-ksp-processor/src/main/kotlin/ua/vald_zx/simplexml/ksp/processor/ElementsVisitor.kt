@@ -18,7 +18,7 @@ class ElementsVisitor(
             readClassDeclaration(parent)
         } else {
             val parentName = parent.fullName
-            val propertyElement = property.toElement(parent) ?: return
+            val propertyElement = property.toElement(parent)
             classToGenerateMap
                 .getOrPut(parentName) { parent.toGenerate() }
                 .fields.add(propertyElement)

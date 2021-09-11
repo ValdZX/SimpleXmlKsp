@@ -8,7 +8,6 @@ internal class AttributeSerializationGenerator(private val field: Field.Attribut
 
     private var serializerName: String? = null
     private lateinit var genericArguments: String
-    private lateinit var serializersMap: Map<Field, FieldSerializer>
 
     override fun render(
         funBuilder: FunSpec.Builder,
@@ -18,8 +17,6 @@ internal class AttributeSerializationGenerator(private val field: Field.Attribut
         serializerName = fieldSerializer?.serializerVariableName
         val genericTypesVariableName = fieldSerializer?.genericTypesVariableName
         this.genericArguments = if (genericTypesVariableName != null) ", $genericTypesVariableName" else ""
-        this.serializersMap = serializersMap
-
         if (field.isNullable) {
             funBuilder.nullableValue()
         } else {

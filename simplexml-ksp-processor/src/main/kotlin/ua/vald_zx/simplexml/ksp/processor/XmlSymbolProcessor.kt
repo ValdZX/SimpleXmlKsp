@@ -30,6 +30,7 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
             Attribute::class.qualifiedName,
             ElementList::class.qualifiedName,
             ElementMap::class.qualifiedName,
+            Text::class.qualifiedName,
             Root::class.qualifiedName,
         ).forEach { annotationName ->
             resolver.getSymbolsWithAnnotation(annotationName)

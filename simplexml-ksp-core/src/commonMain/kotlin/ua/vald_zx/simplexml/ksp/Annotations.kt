@@ -6,8 +6,8 @@ import kotlin.reflect.KClass
 @Target(AnnotationTarget.CLASS)
 annotation class Root(val name: String)
 
-@Target(AnnotationTarget.CLASS)
-annotation class Text
+@Target(AnnotationTarget.FIELD)
+annotation class Text(val required: Boolean = true)
 
 @Target(AnnotationTarget.FIELD)
 annotation class Attribute(val name: String = "", val required: Boolean = true)

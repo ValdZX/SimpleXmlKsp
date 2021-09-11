@@ -32,7 +32,7 @@ internal class TagDeserializationGenerator(private val field: Field.Tag) : Eleme
             prefix = "$fieldName = ",
             postfix = ",",
             fieldStatement = currentValueName,
-            property = field,
+            field = field,
             fieldSerializer = fieldSerializer
         )
     }

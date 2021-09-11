@@ -64,7 +64,7 @@ internal fun FunSpec.Builder.generateFieldsValues(
 
 internal fun FunSpec.Builder.addDeserializeCallStatement(
     fieldStatement: String,
-    property: Field,
+    field: Field,
     fieldSerializer: FieldSerializer,
     prefix: String = "",
     postfix: String = "",
@@ -76,9 +76,9 @@ internal fun FunSpec.Builder.addDeserializeCallStatement(
         ", $genericTypesVariableName"
     } else ""
 
-    if (property.required && !isNotNull) {
+    if (field.required && !isNotNull) {
         addStatement("$prefix$serializerName.readData(")
-        addStatement("$fieldStatement ?: throw DeserializeException(\"\"\"field ${property.fieldName} value is required\"\"\")$argumentsFunArgument")
+        addStatement("$fieldStatement ?: throw DeserializeException(\"\"\"field ${field.fieldName} value is required\"\"\")$argumentsFunArgument")
         addStatement(")$postfix")
     } else if (isNotNull) {
         addStatement("$prefix$serializerName.readData($fieldStatement$argumentsFunArgument)$postfix")

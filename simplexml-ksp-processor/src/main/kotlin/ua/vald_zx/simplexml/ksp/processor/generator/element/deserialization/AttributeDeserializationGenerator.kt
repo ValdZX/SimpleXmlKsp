@@ -25,7 +25,7 @@ internal class AttributeDeserializationGenerator(private val field: Field.Attrib
             prefix = "${field.fieldName} = ",
             postfix = ",",
             fieldStatement = currentValueName,
-            property = field,
+            field = field,
             fieldSerializer = fieldSerializer
         )
     }

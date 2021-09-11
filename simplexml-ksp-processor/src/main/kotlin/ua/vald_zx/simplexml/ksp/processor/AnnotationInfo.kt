@@ -43,7 +43,7 @@ class AnnotationIndoReader(
                     Element::class.simpleName -> readElement(annotation)
                     Attribute::class.simpleName -> readAttribute(annotation)
                     Path::class.simpleName -> readPath(annotation)
-                    Text::class.simpleName -> xmlUnitType = XmlUnitType.TEXT
+                    Text::class.simpleName -> readText(annotation)
                     ElementList::class.simpleName -> readList(annotation)
                     ElementMap::class.simpleName -> readMap(annotation)
                     Convert::class.simpleName -> {
@@ -164,6 +164,16 @@ class AnnotationIndoReader(
     private fun readAttribute(annotation: KSAnnotation) {
         readDataUnit(annotation)
         xmlUnitType = XmlUnitType.ATTRIBUTE
+    }
+
+    private fun readText(annotation: KSAnnotation) {
+        checkType()
+        annotation.arguments.forEach { arg ->
+            if (arg.name?.getShortName() == "required") {
+                required = arg.value.asBoolean(default = true)
+            }
+        }
+        xmlUnitType = XmlUnitType.TEXT
     }
 
     private fun readList(annotation: KSAnnotation) {
