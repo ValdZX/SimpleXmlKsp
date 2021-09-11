@@ -19,6 +19,7 @@ class FieldInConstructorConverterTest {
     @BeforeTest
     fun init() {
         SampleSerializersEnrolment.enrol()
+        SimpleXml.pretty = false
     }
 
     @Test

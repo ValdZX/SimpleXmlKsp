@@ -25,6 +25,7 @@ class MultipleConvertersConstructorFieldTest {
     @BeforeTest
     fun init() {
         SampleSerializersEnrolment.enrol()
+        SimpleXml.pretty = false
     }
 
     @Test
