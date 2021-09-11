@@ -3,6 +3,7 @@ package ua.vald_zx.simplexml.ksp.processor.generator.element
 import com.squareup.kotlinpoet.FunSpec
 import ua.vald_zx.simplexml.ksp.processor.Field
 import ua.vald_zx.simplexml.ksp.processor.generator.FieldSerializer
+import ua.vald_zx.simplexml.ksp.processor.generator.generateValues
 import ua.vald_zx.simplexml.ksp.processor.generator.renderChildren
 
 class MapGenerator(private val field: Field.Map) : ElementGenerator {
@@ -10,7 +11,7 @@ class MapGenerator(private val field: Field.Map) : ElementGenerator {
     private var fieldSerializer: FieldSerializer? = null
     private lateinit var serializersMap: Map<Field, FieldSerializer>
 
-    override fun render(
+    override fun renderSerialization(
         funBuilder: FunSpec.Builder,
         fieldSerializer: FieldSerializer?,
         serializersMap: Map<Field, FieldSerializer>
@@ -18,6 +19,32 @@ class MapGenerator(private val field: Field.Map) : ElementGenerator {
         this.fieldSerializer = fieldSerializer
         this.serializersMap = serializersMap
         funBuilder.map()
+    }
+
+    override fun renderDeserializationVariable(
+        funBuilder: FunSpec.Builder,
+        fieldToValueMap: MutableMap<String, String>,
+        parentValueName: String,
+        layer: Int,
+        numberIterator: Iterator<Int>
+    ) {
+        val currentValueName = "layer${layer}Tag${numberIterator.next()}"
+        if (field.isInline) {
+            funBuilder.addStatement("val $currentValueName = $parentValueName?.getPairs(\"${field.keyName}\", \"${field.entryName}\")")
+            fieldToValueMap[field.fieldName] = currentValueName
+        } else {
+            funBuilder.addStatement("val $currentValueName = $parentValueName?.get(\"${field.tagName}\")")
+            val mapName = "layer${layer}Map${numberIterator.next()}"
+            funBuilder.addStatement("val $mapName = $currentValueName?.getPairs(\"${field.keyName}\", \"${field.entryName}\")")
+            fieldToValueMap[field.fieldName] = mapName
+            funBuilder.generateValues(
+                field.children.filterIsInstance<Field.Attribute>(),
+                fieldToValueMap,
+                currentValueName,
+                layer + 1,
+                numberIterator
+            )
+        }
     }
 
     private fun FunSpec.Builder.map() {

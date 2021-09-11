@@ -1,7 +1,8 @@
 package ua.vald_zx.simplexml.ksp.processor.generator
 
 import com.squareup.kotlinpoet.FunSpec
-import ua.vald_zx.simplexml.ksp.processor.*
+import ua.vald_zx.simplexml.ksp.processor.ClassToGenerate
+import ua.vald_zx.simplexml.ksp.processor.Field
 
 internal fun FunSpec.Builder.generateDeserialization(
     classToGenerate: ClassToGenerate
@@ -10,7 +11,13 @@ internal fun FunSpec.Builder.generateDeserialization(
     val serializersMap = generateAndGetSerializers(classToGenerate)
     addStatement("element as TagXmlElement?")
     val fieldToValueMap: MutableMap<String, String> = mutableMapOf()
-    generateValues(classToGenerate.dom, fieldToValueMap, "element", 0)
+    generateValues(classToGenerate.dom, fieldToValueMap, "element", 0, sequence {
+        var counter = 0
+        while (true) {
+            yield(counter)
+            counter++
+        }
+    }.iterator())
 
     val anyGenerics = if (classToGenerate.typeParameters.isNotEmpty()) {
         buildString {
@@ -146,80 +153,15 @@ internal fun FunSpec.Builder.generateDeserialization(
     return this
 }
 
-private fun FunSpec.Builder.generateValues(
+fun FunSpec.Builder.generateValues(
     dom: List<Field>,
     fieldToValueMap: MutableMap<String, String>,
     parentValueName: String,
     layer: Int,
-    iterator: Iterator<Int> = sequence {
-        var counter = 0
-        while (true) {
-            yield(counter)
-            counter++
-        }
-    }.iterator()
+    numberIterator: Iterator<Int>
 ) {
     dom.forEach { field ->
-        when (field) {
-            is Field.Text -> {
-                TODO()
-            }
-            is Field.Tag -> {
-                val currentValueName = "layer${layer}Tag${iterator.next()}"
-                addStatement("val $currentValueName = $parentValueName?.get(\"${field.tagName}\")")
-                fieldToValueMap[field.fieldName] = currentValueName
-                generateValues(
-                    field.children,
-                    fieldToValueMap,
-                    currentValueName,
-                    layer + 1,
-                    iterator
-                )
-            }
-            is Field.Attribute -> {
-                val currentValueName = "layer${layer}Attribute${iterator.next()}"
-                addStatement("val $currentValueName = $parentValueName?.attribute(\"${field.attributeName}\")")
-                fieldToValueMap[field.fieldName] = currentValueName
-            }
-            is Field.List -> {
-                val currentValueName = "layer${layer}Tag${iterator.next()}"
-                if (field.isInline) {
-                    addStatement("val $currentValueName = $parentValueName?.getAll(\"${field.entryName}\")")
-                    fieldToValueMap[field.fieldName] = currentValueName
-                } else {
-                    addStatement("val $currentValueName = $parentValueName?.get(\"${field.tagName}\")")
-                    val entryValuesName = "layer${layer}List${iterator.next()}"
-                    addStatement("val $entryValuesName = $currentValueName?.getAll(\"${field.entryName}\")")
-                    fieldToValueMap[field.fieldName] = entryValuesName
-                    generateValues(
-                        field.children.filterIsInstance<Field.Attribute>(),
-                        fieldToValueMap,
-                        currentValueName,
-                        layer + 1,
-                        iterator
-                    )
-                }
-            }
-            is Field.Map -> {
-                val currentValueName = "layer${layer}Tag${iterator.next()}"
-                if (field.isInline) {
-                    addStatement("val $currentValueName = $parentValueName?.getPairs(\"${field.keyName}\", \"${field.entryName}\")")
-                    fieldToValueMap[field.fieldName] = currentValueName
-                } else {
-                    addStatement("val $currentValueName = $parentValueName?.get(\"${field.tagName}\")")
-                    val mapName = "layer${layer}Map${iterator.next()}"
-                    addStatement("val $mapName = $currentValueName?.getPairs(\"${field.keyName}\", \"${field.entryName}\")")
-                    fieldToValueMap[field.fieldName] = mapName
-                    generateValues(
-                        field.children.filterIsInstance<Field.Attribute>(),
-                        fieldToValueMap,
-                        currentValueName,
-                        layer + 1,
-                        iterator
-                    )
-                }
-            }
-        }
+        field.generator.renderDeserializationVariable(this, fieldToValueMap, parentValueName, layer, numberIterator)
     }
 }
 

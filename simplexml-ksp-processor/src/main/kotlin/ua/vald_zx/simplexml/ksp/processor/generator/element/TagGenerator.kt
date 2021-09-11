@@ -3,6 +3,7 @@ package ua.vald_zx.simplexml.ksp.processor.generator.element
 import com.squareup.kotlinpoet.FunSpec
 import ua.vald_zx.simplexml.ksp.processor.Field
 import ua.vald_zx.simplexml.ksp.processor.generator.FieldSerializer
+import ua.vald_zx.simplexml.ksp.processor.generator.generateValues
 import ua.vald_zx.simplexml.ksp.processor.generator.renderChildren
 
 internal class TagGenerator(private val field: Field.Tag) : ElementGenerator {
@@ -14,7 +15,7 @@ internal class TagGenerator(private val field: Field.Tag) : ElementGenerator {
     private val fieldName = field.fieldName
     private val children = field.children
 
-    override fun render(
+    override fun renderSerialization(
         funBuilder: FunSpec.Builder,
         fieldSerializer: FieldSerializer?,
         serializersMap: Map<Field, FieldSerializer>
@@ -38,6 +39,25 @@ internal class TagGenerator(private val field: Field.Tag) : ElementGenerator {
                 funBuilder.valueWithChildren()
             }
         }
+    }
+
+    override fun renderDeserializationVariable(
+        funBuilder: FunSpec.Builder,
+        fieldToValueMap: MutableMap<String, String>,
+        parentValueName: String,
+        layer: Int,
+        numberIterator: Iterator<Int>
+    ) {
+        val currentValueName = "layer${layer}Tag${numberIterator.next()}"
+        funBuilder.addStatement("val $currentValueName = $parentValueName?.get(\"${field.tagName}\")")
+        fieldToValueMap[field.fieldName] = currentValueName
+        funBuilder.generateValues(
+            field.children,
+            fieldToValueMap,
+            currentValueName,
+            layer + 1,
+            numberIterator
+        )
     }
 
     private fun FunSpec.Builder.value() {

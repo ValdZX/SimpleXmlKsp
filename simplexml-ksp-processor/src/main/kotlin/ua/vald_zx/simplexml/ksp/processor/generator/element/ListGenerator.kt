@@ -3,6 +3,7 @@ package ua.vald_zx.simplexml.ksp.processor.generator.element
 import com.squareup.kotlinpoet.FunSpec
 import ua.vald_zx.simplexml.ksp.processor.Field
 import ua.vald_zx.simplexml.ksp.processor.generator.FieldSerializer
+import ua.vald_zx.simplexml.ksp.processor.generator.generateValues
 import ua.vald_zx.simplexml.ksp.processor.generator.renderChildren
 
 class ListGenerator(private val field: Field.List) : ElementGenerator {
@@ -11,7 +12,7 @@ class ListGenerator(private val field: Field.List) : ElementGenerator {
     private lateinit var genericArguments: String
     private lateinit var serializersMap: Map<Field, FieldSerializer>
 
-    override fun render(
+    override fun renderSerialization(
         funBuilder: FunSpec.Builder,
         fieldSerializer: FieldSerializer?,
         serializersMap: Map<Field, FieldSerializer>
@@ -42,6 +43,32 @@ class ListGenerator(private val field: Field.List) : ElementGenerator {
                     funBuilder.endControlFlow()
                 }
             }
+        }
+    }
+
+    override fun renderDeserializationVariable(
+        funBuilder: FunSpec.Builder,
+        fieldToValueMap: MutableMap<String, String>,
+        parentValueName: String,
+        layer: Int,
+        numberIterator: Iterator<Int>
+    ) {
+        val currentValueName = "layer${layer}Tag${numberIterator.next()}"
+        if (field.isInline) {
+            funBuilder.addStatement("val $currentValueName = $parentValueName?.getAll(\"${field.entryName}\")")
+            fieldToValueMap[field.fieldName] = currentValueName
+        } else {
+            funBuilder.addStatement("val $currentValueName = $parentValueName?.get(\"${field.tagName}\")")
+            val entryValuesName = "layer${layer}List${numberIterator.next()}"
+            funBuilder.addStatement("val $entryValuesName = $currentValueName?.getAll(\"${field.entryName}\")")
+            fieldToValueMap[field.fieldName] = entryValuesName
+            funBuilder.generateValues(
+                field.children.filterIsInstance<Field.Attribute>(),
+                fieldToValueMap,
+                currentValueName,
+                layer + 1,
+                numberIterator
+            )
         }
     }
 
