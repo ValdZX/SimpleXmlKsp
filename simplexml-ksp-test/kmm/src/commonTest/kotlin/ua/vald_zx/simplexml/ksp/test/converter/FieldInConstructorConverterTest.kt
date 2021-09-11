@@ -3,7 +3,7 @@ package ua.vald_zx.simplexml.ksp.test.converter
 import ua.vald_zx.simplexml.ksp.Convert
 import ua.vald_zx.simplexml.ksp.Element
 import ua.vald_zx.simplexml.ksp.SimpleXml
-import ua.vald_zx.simplexml.ksp.test.custompackage.SampleSerializersEnrolment
+import ua.vald_zx.simplexml.ksp.test.custompackage.TestSerializersEnrolment
 import kotlin.js.JsName
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -18,7 +18,7 @@ class FieldInConstructorConverterTest {
 
     @BeforeTest
     fun init() {
-        SampleSerializersEnrolment.enrol()
+        TestSerializersEnrolment.enrol()
         SimpleXml.pretty = false
     }
 

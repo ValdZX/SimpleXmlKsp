@@ -10,7 +10,7 @@ version = projectVersion
 
 ksp {
     arg("simplexml.ksp.modulepackage", "ua.vald_zx.simplexml.ksp.test.custompackage")
-    arg("simplexml.ksp.modulename", "Sample")
+    arg("simplexml.ksp.modulename", "Test")
 }
 
 kotlin {

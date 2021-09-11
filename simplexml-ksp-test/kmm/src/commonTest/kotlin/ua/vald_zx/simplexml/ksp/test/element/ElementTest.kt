@@ -3,7 +3,7 @@ package ua.vald_zx.simplexml.ksp.test.element
 import ua.vald_zx.simplexml.ksp.SimpleXml
 import ua.vald_zx.simplexml.ksp.exception.DeserializeException
 import ua.vald_zx.simplexml.ksp.exception.SerializeException
-import ua.vald_zx.simplexml.ksp.test.custompackage.SampleSerializersEnrolment
+import ua.vald_zx.simplexml.ksp.test.custompackage.TestSerializersEnrolment
 import kotlin.js.JsName
 import kotlin.test.*
 
@@ -11,7 +11,7 @@ class ElementTest {
 
     @BeforeTest
     fun init() {
-        SampleSerializersEnrolment.enrol()
+        TestSerializersEnrolment.enrol()
     }
 
     @Test

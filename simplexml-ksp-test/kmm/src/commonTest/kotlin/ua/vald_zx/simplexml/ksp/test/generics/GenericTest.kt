@@ -1,7 +1,7 @@
 package ua.vald_zx.simplexml.ksp.test.generics
 
 import ua.vald_zx.simplexml.ksp.SimpleXml
-import ua.vald_zx.simplexml.ksp.test.custompackage.SampleSerializersEnrolment
+import ua.vald_zx.simplexml.ksp.test.custompackage.TestSerializersEnrolment
 import kotlin.js.JsName
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -12,7 +12,7 @@ class GenericTest {
     @BeforeTest
     fun init() {
         SimpleXml.pretty = true
-        SampleSerializersEnrolment.enrol()
+        TestSerializersEnrolment.enrol()
     }
 
     @Test
