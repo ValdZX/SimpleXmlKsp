@@ -13,7 +13,7 @@ internal fun FunSpec.Builder.generateSerialization(classToGenerate: ClassToGener
     return this
 }
 
-private fun FunSpec.Builder.renderChildren(
+internal fun FunSpec.Builder.renderChildren(
     fields: Iterable<Field>,
     serializersMap: Map<Field, FieldSerializer>
 ) {
@@ -25,7 +25,7 @@ private fun FunSpec.Builder.renderChildren(
             ", $genericTypesVariableName"
         } else ""
         when (field) {
-            is Field.Tag -> tag(serializerName, argumentsFunArgument, field, serializersMap)
+            is Field.Tag -> renderTag(serializerName, argumentsFunArgument, field, serializersMap)
             is Field.Attribute -> attribute(serializerName, field)
             is Field.List -> list(serializerName, argumentsFunArgument, field, serializersMap)
             is Field.Map -> map(fieldSerializer, field, serializersMap)
@@ -57,66 +57,6 @@ private fun FunSpec.Builder.printMapForeach(
     addStatement("$keySerializerName.buildXml(this, \"${element.keyName}\", key${keyArgumentsFunArgument.orEmpty()})")
     addStatement("$valueSerializerName.buildXml(this, \"${element.entryName}\", value${valueArgumentsFunArgument.orEmpty()})")
     endControlFlow()
-}
-
-private fun FunSpec.Builder.tag(
-    serializerName: String?,
-    argumentsFunArgument: String,
-    field: Field.Tag,
-    serializersMap: Map<Field, FieldSerializer>
-) {
-    if (field.isNullable) {
-        if (field.children.isNotEmpty()) {
-            addStatement("val ${field.fieldName} = obj.${field.fieldName}")
-            beginControlFlow("if (${field.fieldName} != null)")
-            beginControlFlow("$serializerName.buildXml(this, \"${field.tagName}\", ${field.fieldName}$argumentsFunArgument)")
-            renderChildren(field.children, serializersMap)
-            endControlFlow()
-            nextControlFlow("else")
-            beginControlFlow("tag(\"${field.tagName}\")")
-            renderChildren(field.children, serializersMap)
-            endControlFlow()
-            endControlFlow()
-        } else {
-            tagNullableValue(serializerName, argumentsFunArgument, field)
-        }
-    } else {
-        if (field.children.isNotEmpty()) {
-            tagWithChildren(serializerName, argumentsFunArgument, field, serializersMap)
-        } else {
-            addStatement("${serializerName}.buildXml(this, \"${field.tagName}\", obj.${field.fieldName})$argumentsFunArgument")
-        }
-    }
-}
-
-private fun FunSpec.Builder.tagWithChildren(
-    serializerName: String?,
-    argumentsFunArgument: String,
-    element: Field.Tag,
-    serializersMap: Map<Field, FieldSerializer>
-) {
-    if (element.fieldName.isEmpty()) {
-        beginControlFlow("tag(\"${element.tagName}\")")
-    } else {
-        beginControlFlow("$serializerName.buildXml(this, \"${element.tagName}\", obj.${element.fieldName}$argumentsFunArgument)")
-    }
-    renderChildren(element.children, serializersMap)
-    endControlFlow()
-}
-
-private fun FunSpec.Builder.tagNullableValue(
-    serializerName: String?,
-    argumentsFunArgument: String,
-    element: Field.Tag
-) {
-    if (element.required) {
-        addStatement("val ${element.fieldName} = obj.${element.fieldName}?: throw SerializeException(\"\"\"field ${element.tagName} value is required\"\"\")")
-        addStatement("$serializerName.buildXml(this, \"${element.tagName}\", ${element.fieldName}$argumentsFunArgument)")
-    } else {
-        beginControlFlow("obj.${element.fieldName}?.let")
-        addStatement("$serializerName.buildXml(this, \"${element.tagName}\", it$argumentsFunArgument)")
-        endControlFlow()
-    }
 }
 
 private fun FunSpec.Builder.attribute(serializerName: String?, field: Field.Attribute) {
