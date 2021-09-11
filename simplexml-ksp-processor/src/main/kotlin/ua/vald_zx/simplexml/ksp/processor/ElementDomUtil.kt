@@ -7,9 +7,7 @@ internal fun makeDom(toGenerate: ClassToGenerate): List<Field> {
         .filter { it.path.isEmpty() }
         .toMutableList()
 
-    propertyElements.filter {
-        it.path.isNotEmpty()
-    }.map { field ->
+    propertyElements.filter { it.path.isNotEmpty() }.map { field ->
         val path = field.path.split("/")
         addLayer(firstLayerFields, path[0], path.subList(1, path.size), field)
     }

@@ -1,18 +1,17 @@
-package ua.vald_zx.simplexml.ksp.processor.generator.element
+package ua.vald_zx.simplexml.ksp.processor.generator.element.serialization
 
 import com.squareup.kotlinpoet.FunSpec
 import ua.vald_zx.simplexml.ksp.processor.Field
 import ua.vald_zx.simplexml.ksp.processor.generator.FieldSerializer
-import ua.vald_zx.simplexml.ksp.processor.generator.generateValues
 import ua.vald_zx.simplexml.ksp.processor.generator.renderChildren
 
-class ListGenerator(private val field: Field.List) : ElementGenerator {
+class ListSerializationGenerator(private val field: Field.List) : ElementSerializationGenerator {
 
     private var serializerName: String? = null
     private lateinit var genericArguments: String
     private lateinit var serializersMap: Map<Field, FieldSerializer>
 
-    override fun renderSerialization(
+    override fun render(
         funBuilder: FunSpec.Builder,
         fieldSerializer: FieldSerializer?,
         serializersMap: Map<Field, FieldSerializer>
@@ -45,33 +44,6 @@ class ListGenerator(private val field: Field.List) : ElementGenerator {
             }
         }
     }
-
-    override fun renderDeserializationVariable(
-        funBuilder: FunSpec.Builder,
-        fieldToValueMap: MutableMap<String, String>,
-        parentValueName: String,
-        layer: Int,
-        numberIterator: Iterator<Int>
-    ) {
-        val currentValueName = "layer${layer}Tag${numberIterator.next()}"
-        if (field.isInline) {
-            funBuilder.addStatement("val $currentValueName = $parentValueName?.getAll(\"${field.entryName}\")")
-            fieldToValueMap[field.fieldName] = currentValueName
-        } else {
-            funBuilder.addStatement("val $currentValueName = $parentValueName?.get(\"${field.tagName}\")")
-            val entryValuesName = "layer${layer}List${numberIterator.next()}"
-            funBuilder.addStatement("val $entryValuesName = $currentValueName?.getAll(\"${field.entryName}\")")
-            fieldToValueMap[field.fieldName] = entryValuesName
-            funBuilder.generateValues(
-                field.children.filterIsInstance<Field.Attribute>(),
-                fieldToValueMap,
-                currentValueName,
-                layer + 1,
-                numberIterator
-            )
-        }
-    }
-
 
     private fun FunSpec.Builder.printListForeach() {
         beginControlFlow("obj.${field.fieldName}.forEach")

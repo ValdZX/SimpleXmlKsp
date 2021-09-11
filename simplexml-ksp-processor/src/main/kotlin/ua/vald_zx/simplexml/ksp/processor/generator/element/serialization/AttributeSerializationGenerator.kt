@@ -1,16 +1,16 @@
-package ua.vald_zx.simplexml.ksp.processor.generator.element
+package ua.vald_zx.simplexml.ksp.processor.generator.element.serialization
 
 import com.squareup.kotlinpoet.FunSpec
 import ua.vald_zx.simplexml.ksp.processor.Field
 import ua.vald_zx.simplexml.ksp.processor.generator.FieldSerializer
 
-internal class AttributeGenerator(private val field: Field.Attribute) : ElementGenerator {
+internal class AttributeSerializationGenerator(private val field: Field.Attribute) : ElementSerializationGenerator {
 
     private var serializerName: String? = null
     private lateinit var genericArguments: String
     private lateinit var serializersMap: Map<Field, FieldSerializer>
 
-    override fun renderSerialization(
+    override fun render(
         funBuilder: FunSpec.Builder,
         fieldSerializer: FieldSerializer?,
         serializersMap: Map<Field, FieldSerializer>
@@ -25,18 +25,6 @@ internal class AttributeGenerator(private val field: Field.Attribute) : ElementG
         } else {
             funBuilder.value()
         }
-    }
-
-    override fun renderDeserializationVariable(
-        funBuilder: FunSpec.Builder,
-        fieldToValueMap: MutableMap<String, String>,
-        parentValueName: String,
-        layer: Int,
-        numberIterator: Iterator<Int>
-    ) {
-        val currentValueName = "layer${layer}Attribute${numberIterator.next()}"
-        funBuilder.addStatement("val $currentValueName = $parentValueName?.attribute(\"${field.attributeName}\")")
-        fieldToValueMap[field.fieldName] = currentValueName
     }
 
     private fun FunSpec.Builder.value() {

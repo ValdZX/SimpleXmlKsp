@@ -5,7 +5,11 @@ import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.squareup.kotlinpoet.ClassName
-import ua.vald_zx.simplexml.ksp.processor.generator.element.*
+import ua.vald_zx.simplexml.ksp.processor.generator.element.deserialization.*
+import ua.vald_zx.simplexml.ksp.processor.generator.element.deserialization.AttributeDeserializationGenerator
+import ua.vald_zx.simplexml.ksp.processor.generator.element.deserialization.TagDeserializationGenerator
+import ua.vald_zx.simplexml.ksp.processor.generator.element.serialization.*
+import ua.vald_zx.simplexml.ksp.processor.generator.element.serialization.AttributeSerializationGenerator
 
 data class ClassToGenerate(
     val bean: KSClassDeclaration,
@@ -29,7 +33,8 @@ sealed interface Field {
     val fieldName: String
     val fieldType: KSTypeReference?
     val converterType: KSType?
-    val generator: ElementGenerator
+    val serializationGenerator: ElementSerializationGenerator
+    val deserializationGenerator: ElementDeserializationGenerator
 
     interface IsTag : Field {
         val tagName: String
@@ -49,8 +54,8 @@ sealed interface Field {
         override val fieldType: KSTypeReference? = null,
         override val children: MutableList<Field> = mutableListOf()
     ) : IsTag {
-        override val generator: ElementGenerator
-            get() = TagGenerator(this)
+        override val serializationGenerator: ElementSerializationGenerator =TagSerializationGenerator(this)
+        override val deserializationGenerator: ElementDeserializationGenerator =TagDeserializationGenerator(this)
     }
 
     data class Attribute(
@@ -65,8 +70,8 @@ sealed interface Field {
         override val fieldType: KSTypeReference,
         val attributeName: String
     ) : Field {
-        override val generator: ElementGenerator
-            get() = AttributeGenerator(this)
+        override val serializationGenerator: ElementSerializationGenerator =AttributeSerializationGenerator(this)
+        override val deserializationGenerator: ElementDeserializationGenerator =AttributeDeserializationGenerator(this)
     }
 
     data class Text(
@@ -80,8 +85,8 @@ sealed interface Field {
         override val fieldType: KSTypeReference? = null,
     ) : Field {
         override val path: String = ""
-        override val generator: ElementGenerator
-            get() = TextGenerator(this)
+        override val serializationGenerator: ElementSerializationGenerator =TextSerializationGenerator(this)
+        override val deserializationGenerator: ElementDeserializationGenerator =TextDeserializationGenerator(this)
     }
 
     data class List(
@@ -102,8 +107,8 @@ sealed interface Field {
         val attributes: MutableList<Attribute> = mutableListOf(),
         val entryType: KSTypeReference? = null,
     ) : IsTag {
-        override val generator: ElementGenerator
-            get() = ListGenerator(this)
+        override val serializationGenerator: ElementSerializationGenerator =ListSerializationGenerator(this)
+        override val deserializationGenerator: ElementDeserializationGenerator =ListDeserializationGenerator(this)
     }
 
     data class Map(
@@ -127,8 +132,8 @@ sealed interface Field {
         val entryName: String,
         val entryType: KSTypeReference? = null
     ) : IsTag {
-        override val generator: ElementGenerator
-            get() = MapGenerator(this)
+        override val serializationGenerator: ElementSerializationGenerator =MapSerializationGenerator(this)
+        override val deserializationGenerator: ElementDeserializationGenerator =MapDeserializationGenerator(this)
     }
 }
 

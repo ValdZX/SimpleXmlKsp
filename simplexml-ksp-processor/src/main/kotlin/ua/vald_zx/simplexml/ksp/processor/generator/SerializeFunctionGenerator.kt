@@ -19,6 +19,6 @@ internal fun FunSpec.Builder.renderChildren(
 ) {
     fields.forEach { field ->
         val fieldSerializer = serializersMap.toMutableMap()[field]
-        field.generator.renderSerialization(this, fieldSerializer, serializersMap)
+        field.serializationGenerator.render(this, fieldSerializer, serializersMap)
     }
 }
