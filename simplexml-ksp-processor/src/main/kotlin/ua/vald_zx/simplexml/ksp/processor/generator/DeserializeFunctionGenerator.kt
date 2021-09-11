@@ -3,7 +3,6 @@ package ua.vald_zx.simplexml.ksp.processor.generator
 import com.squareup.kotlinpoet.FunSpec
 import ua.vald_zx.simplexml.ksp.processor.*
 
-
 internal fun FunSpec.Builder.generateDeserialization(
     classToGenerate: ClassToGenerate
 ): FunSpec.Builder {

@@ -5,6 +5,7 @@ import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.squareup.kotlinpoet.ClassName
+import ua.vald_zx.simplexml.ksp.processor.generator.element.*
 
 data class ClassToGenerate(
     val bean: KSClassDeclaration,
@@ -28,6 +29,7 @@ sealed interface Field {
     val fieldName: String
     val fieldType: KSTypeReference?
     val converterType: KSType?
+    val generator: ElementGenerator
 
     interface IsTag : Field {
         val tagName: String
@@ -46,7 +48,10 @@ sealed interface Field {
         override val hasDefaultValue: Boolean = false,
         override val fieldType: KSTypeReference? = null,
         override val children: MutableList<Field> = mutableListOf()
-    ) : IsTag
+    ) : IsTag {
+        override val generator: ElementGenerator
+            get() = TagGenerator(this)
+    }
 
     data class Attribute(
         override val required: Boolean,
@@ -59,7 +64,10 @@ sealed interface Field {
         override val converterType: KSType?,
         override val fieldType: KSTypeReference,
         val attributeName: String
-    ) : Field
+    ) : Field {
+        override val generator: ElementGenerator
+            get() = AttributeGenerator(this)
+    }
 
     data class Text(
         override val required: Boolean,
@@ -72,6 +80,8 @@ sealed interface Field {
         override val fieldType: KSTypeReference? = null,
     ) : Field {
         override val path: String = ""
+        override val generator: ElementGenerator
+            get() = TextGenerator(this)
     }
 
     data class List(
@@ -91,7 +101,10 @@ sealed interface Field {
         val entryName: String,
         val attributes: MutableList<Attribute> = mutableListOf(),
         val entryType: KSTypeReference? = null,
-    ) : IsTag
+    ) : IsTag {
+        override val generator: ElementGenerator
+            get() = ListGenerator(this)
+    }
 
     data class Map(
         override val required: Boolean,
@@ -113,7 +126,10 @@ sealed interface Field {
         val keyType: KSTypeReference? = null,
         val entryName: String,
         val entryType: KSTypeReference? = null
-    ) : IsTag
+    ) : IsTag {
+        override val generator: ElementGenerator
+            get() = MapGenerator(this)
+    }
 }
 
 data class GeneratedSerializerSpec(
