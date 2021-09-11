@@ -74,6 +74,8 @@ val deserializedBean: PackageDto = SimpleXml.deserialize(xml)
 
 ### @Element
 
+### @Text
+
 ### @Root
 
 ### @Path
@@ -88,9 +90,9 @@ val deserializedBean: PackageDto = SimpleXml.deserialize(xml)
    the [KSP plugin](https://github.com/google/ksp/blob/main/docs/quickstart.md#use-your-own-processor-in-a-project) in
    the project's `build.gradle.kts`
 
-```gradle
+```kotlin
 plugins {
-    id("com.google.devtools.ksp") version 1.5.21-1.0.0-beta07 apply false
+    id("com.google.devtools.ksp") version "1.5.30-1.0.0" apply false
 }
 ```
 
@@ -102,8 +104,8 @@ plugins {
 }
 
 dependencies {
-    implementation("io.github.valdzx:simplexml-ksp-core:1.0.0-dev04")
-    ksp("io.github.valdzx:simplexml-ksp-processor:1.0.0-dev04")
+    implementation("io.github.valdzx:simplexml-ksp-core:1.0.0-dev06")
+    ksp("io.github.valdzx:simplexml-ksp-processor:1.0.0-dev06")
 }
 ```
 
@@ -115,7 +117,7 @@ repository {
 }
 ```
 
-### Multiplatform
+###Kotlin multiplatform multiverse
 
 Available for JVM, Android, iOS, JavaScript, macosX64
 
@@ -126,8 +128,8 @@ plugins {
 }
 val commonMain by getting {
     dependencies {
-        implementation("io.github.valdzx:simplexml-ksp-core:1.0.0-dev04")
-        configurations["ksp"].dependencies.add(project.dependencies.create("io.github.valdzx:simplexml-ksp-processor:1.0.0-dev04"))
+        implementation("io.github.valdzx:simplexml-ksp-core:1.0.0-dev06")
+        configurations["ksp"].dependencies.add(project.dependencies.create("io.github.valdzx:simplexml-ksp-processor:1.0.0-dev06"))
     }
 }
 ```
@@ -139,18 +141,25 @@ val commonMain by getting {
 You should set manually the source sets of the generated files, like
 described [here](https://github.com/google/ksp/issues/37).
 
-```gradle
-buildTypes {
-    debug {
-        sourceSets {
-            main.java.srcDirs += 'build/generated/ksp/debug/kotlin/'
-        }
-    }
-    release {
-        sourceSets {
-            main.java.srcDirs += 'build/generated/ksp/release/kotlin/'
-        }
-    }
+###Kotlin multiplatform multiverse:
+```kotlin
+kotlin {
+   ...
+   sourceSets.all {
+      kotlin.srcDir("build/generated/ksp/$name/kotlin")
+   }
+}
+```
+
+###Android:
+```kotlin
+applicationVariants.all {
+   val variantName = name
+   sourceSets {
+      getByName("main") {
+          java.srcDir(File("build/generated/ksp/$variantName/kotlin"))
+      }
+   }
 }
 ```
 

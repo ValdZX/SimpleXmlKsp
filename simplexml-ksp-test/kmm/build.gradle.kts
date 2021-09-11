@@ -62,6 +62,9 @@ kotlin {
         val iosMain by getting
         val iosTest by getting
     }
+    sourceSets.all {
+        kotlin.srcDir("build/generated/ksp/$name/kotlin")
+    }
 }
 
 android {
