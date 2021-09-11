@@ -31,6 +31,7 @@ data class TagFather(
     override var name: String,
     override val attributes: MutableList<Attribute> = mutableListOf(),
     val tags: MutableList<Tag> = mutableListOf(),
+    private var value: String? = null,
     val pretty: Boolean = false
 ) : Tag {
     fun tag(name: String, block: TagFather.() -> Unit = {}) =
@@ -39,11 +40,16 @@ data class TagFather(
     fun tag(name: String, value: String, block: TagValue.() -> Unit = {}) =
         tags.add(TagValue(name.clean(), value.unescapeHtml(), pretty = pretty).apply(block))
 
+    fun text(value: String) {
+        this.value = value
+    }
+
     override fun render(margin: Int): String = StringBuilder().apply {
+        val isClosed = tags.isEmpty() && value == null
         if (pretty) {
-            appendLine(TAB.repeat(margin) + renderStartTeg(tags.isEmpty()))
+            appendLine(TAB.repeat(margin) + renderStartTeg())
         } else {
-            append(renderStartTeg(tags.isEmpty()))
+            append(renderStartTeg(isClosed))
         }
         if (tags.isNotEmpty()) {
             if (pretty) {
@@ -53,6 +59,11 @@ data class TagFather(
                 tags.forEach { append(it.render(margin + 1)) }
                 append("</$name>")
             }
+        }
+        if (value != null) {
+            if (tags.isNotEmpty()) throw IllegalStateException("text() or tag()")
+            append(value)
+            append("</$name>")
         }
     }.toString()
 }

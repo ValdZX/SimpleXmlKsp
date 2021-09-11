@@ -46,4 +46,12 @@ class XmlBuilderTest {
         }.render()
         assertEquals(xmlString, lineXml)
     }
+    @Test
+    fun buildTextXml() {
+        val xmlString = tag("Auth") {
+            attr("lang", "ru")
+            text("1234")
+        }.render()
+        assertEquals(xmlString, "<Auth lang=\"ru\">1234</Auth>")
+    }
 }
