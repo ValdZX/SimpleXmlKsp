@@ -93,6 +93,21 @@ class MapTests {
     }
 
     @Test
+    @JsName("FieldMapOfStringsNullableWithAttributeTest")
+    fun `FieldMapOfStringsNullableWithAttribute serialize deserialize test`() {
+        SimpleXml.pretty = true
+        val bean = FieldMapOfStringsNullableWithAttribute()
+        bean.map = mapOf(
+            "DataSize" to 2048,
+            "ErrorCode" to 201
+        )
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: FieldMapOfStringsNullableWithAttribute = SimpleXml.deserialize(xml)
+        assertEquals(bean.map, deserializedBean.map)
+    }
+
+    @Test
     @JsName("FieldMapOfStringsDefaultWithAttributeTest")
     fun `FieldMapOfStringsDefaultWithAttribute serialize deserialize test`() {
         SimpleXml.pretty = true

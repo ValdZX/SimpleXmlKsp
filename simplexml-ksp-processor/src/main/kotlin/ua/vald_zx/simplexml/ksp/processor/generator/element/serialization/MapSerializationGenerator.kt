@@ -9,106 +9,104 @@ class MapSerializationGenerator(private val field: Field.Map) : ElementSerializa
 
     private var fieldSerializer: FieldSerializer? = null
     private lateinit var serializersMap: Map<Field, FieldSerializer>
+    private var keySerializerName: String? = null
+    private var keyGenericTypesVariableName: String? = null
+    private var valueSerializerVariableName: String? = null
+    private var valueGenericTypesVariableName: String? = null
 
     override fun render(
         funBuilder: FunSpec.Builder,
         fieldSerializer: FieldSerializer?,
         serializersMap: Map<Field, FieldSerializer>
     ) {
+        keySerializerName = fieldSerializer?.serializerVariableName
+        keyGenericTypesVariableName = fieldSerializer?.genericTypesVariableName
+        valueSerializerVariableName = fieldSerializer?.valueSerializerVariableName
+        valueGenericTypesVariableName = fieldSerializer?.valueGenericTypesVariableName
         this.fieldSerializer = fieldSerializer
         this.serializersMap = serializersMap
-        funBuilder.map()
-    }
-
-    private fun FunSpec.Builder.map() {
-        if (field.isNullable) {
-            mapNullableValue(fieldSerializer, field)
-        } else {
-            val keySerializerName = fieldSerializer?.serializerVariableName
-            val keyGenericTypesVariableName = fieldSerializer?.genericTypesVariableName
-            val valueSerializerVariableName = fieldSerializer?.valueSerializerVariableName
-            val valueGenericTypesVariableName = fieldSerializer?.valueGenericTypesVariableName
-            if (field.children.isNotEmpty()) {
-                if (!field.isInline) {
-                    beginControlFlow("tag(\"${field.tagName}\") {")
-                    renderChildren(field.children, serializersMap)
-                }
-                printMapForeach(
-                    field,
-                    keySerializerName,
-                    keyGenericTypesVariableName,
-                    valueSerializerVariableName,
-                    valueGenericTypesVariableName,
-                    "obj.${field.fieldName}"
-                )
-                if (!field.isInline) {
-                    endControlFlow()
+        if (field.isInline) {
+            if (field.isNullable) {
+                if (field.children.isNotEmpty()) {
+                    throw error("Inline Map is have not children")
+                } else {
+                    funBuilder.nullableValueInline()
                 }
             } else {
-                if (!field.isInline) {
-                    beginControlFlow("tag(\"${field.tagName}\") {")
+                if (field.children.isNotEmpty()) {
+                    funBuilder.valueWithChildInline()
+                } else {
+                    funBuilder.valueInline()
                 }
-                printMapForeach(
-                    field,
-                    keySerializerName,
-                    keyGenericTypesVariableName,
-                    valueSerializerVariableName,
-                    valueGenericTypesVariableName,
-                    "obj.${field.fieldName}"
-                )
-                if (!field.isInline) {
-                    endControlFlow()
+            }
+        } else {
+            if (field.isNullable) {
+                if (field.children.isNotEmpty()) {
+                    funBuilder.nullableValueWithChild()
+                } else {
+                    funBuilder.nullableValue()
+                }
+            } else {
+                if (field.children.isNotEmpty()) {
+                    funBuilder.valueWithChild()
+                } else {
+                    funBuilder.value()
                 }
             }
         }
     }
 
-    private fun FunSpec.Builder.mapNullableValue(fieldSerializer: FieldSerializer?, element: Field.Map) {
-        val keySerializerName = fieldSerializer?.serializerVariableName
-        val keyGenericTypesVariableName = fieldSerializer?.genericTypesVariableName
-        val valueSerializerVariableName = fieldSerializer?.valueSerializerVariableName
-        val valueGenericTypesVariableName = fieldSerializer?.valueGenericTypesVariableName
-
-        if (element.isInline) {
-            beginControlFlow("obj.${element.fieldName}?.forEach")
-            printMapForeach(
-                element,
-                keySerializerName,
-                keyGenericTypesVariableName,
-                valueSerializerVariableName,
-                valueGenericTypesVariableName,
-                "it"
-            )
-            endControlFlow()
-        } else {
-            beginControlFlow("obj.${element.fieldName}?.let")
-            addStatement("map ->")
-            beginControlFlow("tag(\"${element.tagName}\") {")
-            printMapForeach(
-                element,
-                keySerializerName,
-                keyGenericTypesVariableName,
-                valueSerializerVariableName,
-                valueGenericTypesVariableName,
-                "map"
-            )
-            endControlFlow()
-            endControlFlow()
-        }
+    private fun FunSpec.Builder.value() {
+        beginControlFlow("tag(\"${field.tagName}\") {")
+        printMapForeach("obj.${field.fieldName}")
+        endControlFlow()
     }
 
-    private fun FunSpec.Builder.printMapForeach(
-        element: Field.Map,
-        keySerializerName: String?,
-        keyArgumentsFunArgument: String?,
-        valueSerializerName: String?,
-        valueArgumentsFunArgument: String?,
-        fieldName: String
-    ) {
-        beginControlFlow("$fieldName.forEach")
+    private fun FunSpec.Builder.valueInline() {
+        printMapForeach("obj.${field.fieldName}")
+    }
+
+    private fun FunSpec.Builder.valueWithChild() {
+        beginControlFlow("tag(\"${field.tagName}\") {")
+        renderChildren(field.children, serializersMap)
+        printMapForeach("obj.${field.fieldName}")
+        endControlFlow()
+    }
+
+    private fun FunSpec.Builder.valueWithChildInline() {
+        printMapForeach("obj.${field.fieldName}")
+    }
+
+    private fun FunSpec.Builder.nullableValue() {
+        beginControlFlow("obj.${field.fieldName}?.let")
+        addStatement("map ->")
+        beginControlFlow("tag(\"${field.tagName}\") {")
+        printMapForeach("map")
+        endControlFlow()
+        endControlFlow()
+    }
+
+    private fun FunSpec.Builder.nullableValueWithChild() {
+        beginControlFlow("obj.${field.fieldName}?.let")
+        addStatement("map ->")
+        beginControlFlow("tag(\"${field.tagName}\") {")
+        renderChildren(field.children, serializersMap)
+        printMapForeach("map")
+        endControlFlow()
+        endControlFlow()
+    }
+
+    private fun FunSpec.Builder.nullableValueInline() {
+        beginControlFlow("obj.${field.fieldName}?.forEach")
+        printMapForeach("it")
+        endControlFlow()
+    }
+
+    private fun FunSpec.Builder.printMapForeach(objectName: String) {
+        beginControlFlow("$objectName.forEach")
         addStatement("(key, value) ->")
-        addStatement("$keySerializerName.buildXml(this, \"${element.keyName}\", key${keyArgumentsFunArgument.orEmpty()})")
-        addStatement("$valueSerializerName.buildXml(this, \"${element.entryName}\", value${valueArgumentsFunArgument.orEmpty()})")
+        addStatement("$keySerializerName.buildXml(this, \"${field.keyName}\", key${keyGenericTypesVariableName.orEmpty()})")
+        addStatement("$valueSerializerVariableName.buildXml(this, \"${field.entryName}\", value${valueGenericTypesVariableName.orEmpty()})")
         endControlFlow()
     }
 }

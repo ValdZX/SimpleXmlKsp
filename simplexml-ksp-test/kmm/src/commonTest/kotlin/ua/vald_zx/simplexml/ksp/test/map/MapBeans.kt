@@ -91,15 +91,15 @@ class FieldMapOfStringsNullable {
     </Map>
 </FieldMapOfStringsNullable>
  */
-//class FieldMapOfStringsNullableWithAttribute {
-//
-//    @ElementMap(name = "Map", key = "Key", value = "Value")
-//    var map: Map<String, Int>? = null
-//
-//    @Path("Map")
-//    @Attribute
-//    var count: Int = 0
-//}
+class FieldMapOfStringsNullableWithAttribute {
+
+    @ElementMap(name = "Map", key = "Key", entry = "Value")
+    var map: Map<String, Int>? = null
+
+    @Path("Map")
+    @Attribute
+    var count: Int = 0
+}
 
 /*
 <FieldMapOfStringsNullable>
