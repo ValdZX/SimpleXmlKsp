@@ -249,3 +249,17 @@ class NullableFieldMutableListOfStrings {
     @ElementList(name = "List", entry = "Entry")
     var list: MutableList<String>? = null
 }
+
+/*
+<GenericNullableFieldMutableListOfStrings>
+    <List>
+        <Entry>Value1</Entry>
+        <Entry>Value2</Entry>
+        <Entry>Value3</Entry>
+    </List>
+</GenericNullableFieldMutableListOfStrings>
+ */
+//class  GenericNullableFieldMutableListOfStrings<T> {
+//    @ElementList(name = "List", entry = "Generic")
+//    var list: MutableList<T>? = null
+//}

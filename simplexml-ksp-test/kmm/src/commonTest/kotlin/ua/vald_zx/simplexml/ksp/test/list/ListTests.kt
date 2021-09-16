@@ -193,4 +193,15 @@ class ListTests {
         val deserializedBean: NullableFieldMutableListOfStrings = SimpleXml.deserialize(xml)
         assertEquals(bean.list, deserializedBean.list)
     }
+
+//    @Test
+//    @JsName("GenericNullableFieldMutableListOfStringsTest")
+//    fun `GenericNullableFieldMutableListOfStrings serialize deserialize test`() {
+//        val bean = GenericNullableFieldMutableListOfStrings<String>()
+//        bean.list = mutableListOf("Value1", "Value2", "Value3")
+//        val xml = SimpleXml.serialize(bean)
+//        println(xml)
+//        val deserializedBean: GenericNullableFieldMutableListOfStrings<String> = SimpleXml.deserialize(xml)
+//        assertEquals(bean.list, deserializedBean.list)
+//    }
 }
