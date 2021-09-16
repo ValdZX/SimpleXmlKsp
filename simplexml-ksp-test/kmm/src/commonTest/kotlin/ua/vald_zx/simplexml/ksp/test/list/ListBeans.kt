@@ -215,10 +215,37 @@ data class ConstructorFieldMutableListOfStringsWithAttribute(
     </List>
 </ConstructorFieldListOfStringsNullableWithAttribute>
  */
-//data class ConstructorFieldListOfStringsNullableWithAttribute(
-//    @ElementList(name = "List", entry = "Entry")
-//    var list: List<String>?,
-//    @Path("List")
-//    @Attribute
-//    val size: Int
-//)
+data class ConstructorFieldListOfStringsNullableWithAttribute(
+    @ElementList(name = "List", entry = "Entry")
+    var list: List<String>?,
+    @Path("List")
+    @Attribute
+    val size: Int
+)
+/*
+<FieldMutableListOfStrings>
+    <List>
+        <Entry>Value1</Entry>
+        <Entry>Value2</Entry>
+        <Entry>Value3</Entry>
+    </List>
+</FieldMutableListOfStrings>
+ */
+class FieldMutableListOfStrings {
+    @ElementList(name = "List", entry = "Entry")
+    var list: MutableList<String> = mutableListOf()
+}
+
+/*
+<NullableFieldMutableListOfStrings>
+    <List>
+        <Entry>Value1</Entry>
+        <Entry>Value2</Entry>
+        <Entry>Value3</Entry>
+    </List>
+</NullableFieldMutableListOfStrings>
+ */
+class NullableFieldMutableListOfStrings {
+    @ElementList(name = "List", entry = "Entry")
+    var list: MutableList<String>? = null
+}

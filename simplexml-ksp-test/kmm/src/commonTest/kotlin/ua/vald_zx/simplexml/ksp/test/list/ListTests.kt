@@ -1,11 +1,11 @@
 package ua.vald_zx.simplexml.ksp.test.list
 
 import ua.vald_zx.simplexml.ksp.SimpleXml
+import ua.vald_zx.simplexml.ksp.test.custompackage.TestSerializersEnrolment
+import kotlin.js.JsName
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import ua.vald_zx.simplexml.ksp.test.custompackage.TestSerializersEnrolment
-import kotlin.js.JsName
 
 class ListTests {
 
@@ -162,13 +162,35 @@ class ListTests {
         assertEquals(bean, deserializedBean)
     }
 
-//    @Test
-//    @JsName("ConstructorFieldListOfStringsNullableWithAttributeTest")
-//    fun `ConstructorFieldListOfStringsNullableWithAttribute serialize deserialize test`() {
-//        val bean = ConstructorFieldListOfStringsNullableWithAttribute(listOf("Value1", "Value2", "Value3"))
-//        val xml = SimpleXml.serialize(bean)
-//        println(xml)
-//        val deserializedBean: ConstructorFieldListOfStringsNullableWithAttribute = SimpleXml.deserialize(xml)
-//        assertEquals(bean, deserializedBean)
-//    }
+    @Test
+    @JsName("ConstructorFieldListOfStringsNullableWithAttributeTest")
+    fun `ConstructorFieldListOfStringsNullableWithAttribute serialize deserialize test`() {
+        val bean = ConstructorFieldListOfStringsNullableWithAttribute(listOf("Value1", "Value2", "Value3"), 3)
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: ConstructorFieldListOfStringsNullableWithAttribute = SimpleXml.deserialize(xml)
+        assertEquals(bean, deserializedBean)
+    }
+
+    @Test
+    @JsName("FieldMutableListOfStringsTest")
+    fun `FieldMutableListOfStrings serialize deserialize test`() {
+        val bean = FieldMutableListOfStrings()
+        bean.list = mutableListOf("Value1", "Value2", "Value3")
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: FieldMutableListOfStrings = SimpleXml.deserialize(xml)
+        assertEquals(bean.list, deserializedBean.list)
+    }
+
+    @Test
+    @JsName("NullableFieldMutableListOfStringsTest")
+    fun `NullableFieldMutableListOfStrings serialize deserialize test`() {
+        val bean = NullableFieldMutableListOfStrings()
+        bean.list = mutableListOf("Value1", "Value2", "Value3")
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: NullableFieldMutableListOfStrings = SimpleXml.deserialize(xml)
+        assertEquals(bean.list, deserializedBean.list)
+    }
 }

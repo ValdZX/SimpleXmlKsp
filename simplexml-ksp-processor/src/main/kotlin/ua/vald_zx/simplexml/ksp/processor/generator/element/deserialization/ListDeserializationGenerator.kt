@@ -54,11 +54,17 @@ class ListDeserializationGenerator(private val field: Field.List) : ElementDeser
             funBuilder.beginControlFlow("$fieldName = $valueName.map")
             funBuilder.addStatement("$entrySerializerName.readData(it$argumentsFunArgument)")
             funBuilder.endControlFlow()
+            if (field.isMutableCollection) {
+                funBuilder.addStatement("?.toMutableList()")
+            }
             funBuilder.endControlFlow()
         } else {
-            funBuilder.beginControlFlow("$fieldName = $valueName.map")
+            funBuilder.beginControlFlow("$fieldName = $valueName?.map")
             funBuilder.addStatement("$entrySerializerName.readData(it$argumentsFunArgument)")
             funBuilder.endControlFlow()
+            if (field.isMutableCollection) {
+                funBuilder.addStatement("?.toMutableList()")
+            }
             funBuilder.addStatement("?: throw DeserializeException(\"\"\"${field.fieldType.parent.toString()} field $fieldName value is required\"\"\")")
         }
     }
