@@ -1,107 +1,171 @@
 package ua.vald_zx.simplexml.ksp.processor.generator
 
+import com.google.devtools.ksp.symbol.KSTypeReference
 import com.squareup.kotlinpoet.FunSpec
 import ua.vald_zx.simplexml.ksp.processor.ClassToGenerate
 import ua.vald_zx.simplexml.ksp.processor.Field
 
-data class SerializerDeclaration(
-    val className: String,
-    val valueName: String
+data class ValSerializer(
+    val serializerVariableName: String,
+    val genericTypesVariableName: String? = null,
 )
 
 data class FieldSerializer(
-    val serializerVariableName: String,
-    val genericTypesVariableName: String? = null,
-    val valueSerializerVariableName: String? = null,
-    val valueGenericTypesVariableName: String? = null
+    val firstValSerializer: ValSerializer,
+    val secondValSerializer: ValSerializer? = null
 )
 
 fun FunSpec.Builder.generateAndGetSerializers(classToGenerate: ClassToGenerate): Map<Field, FieldSerializer> {
     val propertyToSerializerName = mutableMapOf<Field, FieldSerializer>()
-    val propertyElements = classToGenerate.fields
-    val genericsProperties = mutableListOf<Field>()
+    val fields = classToGenerate.fields
+    val genericFields = mutableListOf<Field>()
     val typeParameters = classToGenerate.typeParameters.toSet()
+    val typeParametersNames = typeParameters.map { it.toString() }.toSet()
     if (typeParameters.isNotEmpty()) {
-        val typeMap = mutableMapOf<String, FieldSerializer>()
-        typeParameters.forEachIndexed { index, type ->
-            val typeName = type.toString()
-            propertyElements.filter { it.fieldType?.toString() == typeName }.forEach { field ->
-                genericsProperties.add(field)
-                val fieldType = field.fieldType
-                val cachedFieldSerializer = typeMap[fieldType.toString()]
-                if (cachedFieldSerializer == null) {
-                    val typeForVal = typeName.replaceFirstChar { it.lowercase() }
-                    addStatement("val ${typeForVal}Type = genericTypeList[$index].type")
-                    addStatement("val ${typeForVal}Args = ${typeForVal}Type?.arguments.orEmpty()")
-                    addStatement("val ${typeForVal}Serializer = GlobalSerializersLibrary.findSerializers(${typeForVal}Type?.classifier as KClass<Any>)")
-                    val fieldSerializer = FieldSerializer("${typeForVal}Serializer", "${typeForVal}Args")
-                    propertyToSerializerName[field] = fieldSerializer
-                    typeMap[fieldType.toString()] = fieldSerializer
-                } else {
-                    propertyToSerializerName[field] = cachedFieldSerializer
+        val typeMap = mutableMapOf<String, ValSerializer>()
+        fields
+            .filter { hasGenericArg(it, typeParametersNames) }
+            .forEach { field ->
+                genericFields.add(field)
+                val (firstType, secondType) = when (field) {
+                    is Field.List -> field.entryType to null
+                    is Field.Map -> field.keyType to field.entryType
+                    else -> field.fieldType to null
                 }
+                if (firstType != null) {
+                    genericValSerializer(
+                        field,
+                        typeMap,
+                        propertyToSerializerName,
+                        typeParametersNames,
+                        firstType,
+                        secondType
+                    )
+                }
+
             }
-        }
     }
-    val objectProperties = (propertyElements - genericsProperties)
+    val objectProperties = (fields - genericFields)
         .filter { property -> property.converterType == null }
     val propertyToTypeSerializer = objectProperties
         .associateWith { property ->
             when (property) {
                 is Field.List -> {
-                    val entryClassName = property.entryType.toString()
-                    val declaration = SerializerDeclaration(
-                        entryClassName,
-                        entryClassName.replaceFirstChar { it.lowercase() } + "Serializer")
-                    listOf(declaration)
+                    listOf(property.entryType.toString())
                 }
                 is Field.Map -> {
                     val keyClassName = property.keyType.toString()
                     val valueClassName = property.entryType.toString()
-                    val keyDeclaration = SerializerDeclaration(
-                        keyClassName,
-                        keyClassName.replaceFirstChar { it.lowercase() } + "Serializer",
-                    )
-                    val valueDeclaration = SerializerDeclaration(
-                        valueClassName,
-                        valueClassName.replaceFirstChar { it.lowercase() } + "Serializer",
-                    )
-                    listOf(keyDeclaration, valueDeclaration)
+                    listOf(keyClassName, valueClassName)
                 }
                 else -> {
-                    val className = property.fieldType.toString()
-                    val declaration = SerializerDeclaration(
-                        className,
-                        className.replaceFirstChar { it.lowercase() } + "Serializer")
-                    listOf(declaration)
+                    listOf(property.fieldType.toString())
                 }
             }
         }
-    propertyToSerializerName.putAll(propertyToTypeSerializer.mapValues { (_, declarations) ->
-        val declaration = declarations[0]
-        val valueDeclaration = declarations.getOrNull(1)
+    propertyToSerializerName.putAll(propertyToTypeSerializer.mapValues { (_, classes) ->
+        val className = classes[0]
+        val valueDeclaration = classes.getOrNull(1)
         FieldSerializer(
-            serializerVariableName = declaration.valueName,
-            valueSerializerVariableName = valueDeclaration?.valueName
+            firstValSerializer = ValSerializer(className.toSerializerValName()),
+            secondValSerializer = valueDeclaration?.toSerializerValName()?.let { ValSerializer(it) }
         )
     })
-    propertyToTypeSerializer.values.flatten().toSet().forEach { serializerDeclaration ->
-        addStatement("val ${serializerDeclaration.valueName} = GlobalSerializersLibrary.findSerializers(${serializerDeclaration.className}::class)")
+    propertyToTypeSerializer.values.flatten().toSet().forEach { className ->
+        renderSerializerVal(className)
     }
 
-    val propertiesWithConverter = (propertyElements - objectProperties - genericsProperties)
+    val propertiesWithConverter = (fields - objectProperties - genericFields)
         .filter { property -> property.converterType != null }
     val propertyToConverterSerializer = propertiesWithConverter
         .associateWith { property ->
             val converterType = property.converterType ?: error("Unknown error")
-            val className = converterType.declaration.simpleName.asString()
-            SerializerDeclaration(className, className.replaceFirstChar { it.lowercase() } + "Serializer")
+            converterType.declaration.simpleName.asString()
         }
-    propertyToSerializerName.putAll(propertyToConverterSerializer.mapValues { (_, declaration) ->
-        FieldSerializer(declaration.valueName)
+    propertyToSerializerName.putAll(propertyToConverterSerializer.mapValues { (_, className) ->
+        FieldSerializer(ValSerializer(className.toSerializerValName()))
     })
-    propertyToConverterSerializer.values.toSet().forEach { serializerDeclaration ->
-        addStatement("val ${serializerDeclaration.valueName} = ValueSerializer(${serializerDeclaration.className}())")
+    propertyToConverterSerializer.values.toSet().forEach { className ->
+        addStatement("val ${className.toSerializerValName()} = ValueSerializer(${className}())")
     }
     return propertyToSerializerName
+}
+
+private fun String.toSerializerValName(): String {
+    return replaceFirstChar { it.lowercase() } + "Serializer"
+}
+
+private fun hasGenericArg(field: Field, typeParameters: Set<String>): Boolean {
+    return when (field) {
+        is Field.Tag -> typeParameters.contains(field.fieldType?.toString())
+        is Field.Attribute -> typeParameters.contains(field.fieldType.toString())
+        is Field.Text -> typeParameters.contains(field.fieldType?.toString())
+        is Field.List -> {
+            typeParameters.contains(field.entryType.toString())
+        }
+        is Field.Map -> {
+            typeParameters.contains(field.keyType.toString()) || typeParameters.contains(field.entryType.toString())
+        }
+        is Field.IsTag -> false
+    }
+}
+
+private fun FunSpec.Builder.genericValSerializer(
+    field: Field,
+    typeMap: MutableMap<String, ValSerializer>,
+    propertyToSerializerName: MutableMap<Field, FieldSerializer>,
+    typeParameters: Set<String>,
+    firstType: KSTypeReference,
+    secondType: KSTypeReference? = null,
+) {
+    val firstTypeName = firstType.toString()
+    val secondTypeName = secondType?.toString()
+    val firstCachedFieldSerializer = typeMap[firstTypeName]
+    val secondCachedFieldSerializer = typeMap[secondTypeName]
+    val firstIndex = typeParameters.indexOf(firstTypeName)
+    val secondIndex = typeParameters.indexOf(secondTypeName)
+
+    val firstSerializer: ValSerializer
+    var secondSerializer: ValSerializer? = null
+    if (firstCachedFieldSerializer != null) {
+        firstSerializer = firstCachedFieldSerializer
+    } else {
+        if (firstIndex >= 0) {
+            firstSerializer = renderGenericSerializerVal(firstTypeName, firstIndex)
+            typeMap[firstTypeName] = firstSerializer
+        } else {
+            firstSerializer = renderSerializerVal(firstTypeName)
+            typeMap[firstTypeName] = firstSerializer
+        }
+    }
+    if (secondTypeName != null) {
+        if (secondCachedFieldSerializer != null) {
+            secondSerializer = secondCachedFieldSerializer
+        } else {
+            if (secondIndex >= 0) {
+                secondSerializer = renderGenericSerializerVal(secondTypeName, secondIndex)
+                typeMap[secondTypeName] = secondSerializer
+            } else {
+                secondSerializer = renderSerializerVal(secondTypeName)
+                typeMap[secondTypeName] = secondSerializer
+            }
+        }
+    }
+    propertyToSerializerName[field] = FieldSerializer(firstSerializer, secondSerializer)
+}
+
+private fun FunSpec.Builder.renderSerializerVal(className: String): ValSerializer {
+    val valueName = className.toSerializerValName()
+    addStatement("val $valueName = GlobalSerializersLibrary.findSerializers(${className}::class)")
+    return ValSerializer(valueName)
+}
+
+private fun FunSpec.Builder.renderGenericSerializerVal(className: String, index: Int): ValSerializer {
+    val classNameLowCase = className.replaceFirstChar { it.lowercase() }
+    val classTypeArguments = "${classNameLowCase}Args"
+    val valueName = "${classNameLowCase}Serializer"
+    addStatement("val ${classNameLowCase}Type = genericTypeList[$index].type")
+    addStatement("val $classTypeArguments = ${classNameLowCase}Type?.arguments.orEmpty()")
+    addStatement("val $valueName = GlobalSerializersLibrary.findSerializers(${classNameLowCase}Type?.classifier as KClass<Any>)")
+    return ValSerializer(valueName, classTypeArguments)
 }

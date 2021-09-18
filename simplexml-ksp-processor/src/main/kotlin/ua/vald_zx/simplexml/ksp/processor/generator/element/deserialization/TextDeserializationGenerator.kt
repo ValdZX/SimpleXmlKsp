@@ -3,7 +3,6 @@ package ua.vald_zx.simplexml.ksp.processor.generator.element.deserialization
 import com.squareup.kotlinpoet.FunSpec
 import ua.vald_zx.simplexml.ksp.processor.Field
 import ua.vald_zx.simplexml.ksp.processor.generator.FieldSerializer
-import ua.vald_zx.simplexml.ksp.processor.generator.addDeserializeCallStatement
 
 class TextDeserializationGenerator(private val field: Field.Text) : ElementDeserializationGenerator {
 
@@ -20,8 +19,8 @@ class TextDeserializationGenerator(private val field: Field.Text) : ElementDeser
     }
 
     override fun renderConstructorArgument(funBuilder: FunSpec.Builder, fieldSerializer: FieldSerializer) {
-        val serializerName = fieldSerializer.serializerVariableName
-        val genericTypesVariableName = fieldSerializer.genericTypesVariableName
+        val serializerName = fieldSerializer.firstValSerializer.serializerVariableName
+        val genericTypesVariableName = fieldSerializer.firstValSerializer.genericTypesVariableName
         val argumentsFunArgument = if (genericTypesVariableName != null) {
             ", $genericTypesVariableName"
         } else ""
@@ -44,8 +43,8 @@ class TextDeserializationGenerator(private val field: Field.Text) : ElementDeser
     }
 
     override fun renderFieldFilling(funBuilder: FunSpec.Builder, fieldSerializer: FieldSerializer) {
-        val serializerName = fieldSerializer.serializerVariableName
-        val genericTypesVariableName = fieldSerializer.genericTypesVariableName
+        val serializerName = fieldSerializer.firstValSerializer.serializerVariableName
+        val genericTypesVariableName = fieldSerializer.firstValSerializer.genericTypesVariableName
         val argumentsFunArgument = if (genericTypesVariableName != null) {
             ", $genericTypesVariableName"
         } else ""

@@ -35,13 +35,13 @@ class MapDeserializationGenerator(private val field: Field.Map) : ElementDeseria
     }
 
     override fun renderConstructorArgument(funBuilder: FunSpec.Builder, fieldSerializer: FieldSerializer) {
-        val keySerializerName = fieldSerializer.serializerVariableName
-        val valueSerializerName = fieldSerializer.valueSerializerVariableName
-        val keyGenericTypesVariableName = fieldSerializer.genericTypesVariableName
+        val keySerializerName = fieldSerializer.firstValSerializer.serializerVariableName
+        val valueSerializerName = fieldSerializer.secondValSerializer?.serializerVariableName
+        val keyGenericTypesVariableName = fieldSerializer.firstValSerializer.genericTypesVariableName
         val keyArgumentsFunArgument = if (keyGenericTypesVariableName != null) {
             ", $keyGenericTypesVariableName"
         } else ""
-        val valueGenericTypesVariableName = fieldSerializer.valueGenericTypesVariableName
+        val valueGenericTypesVariableName = fieldSerializer.secondValSerializer?.genericTypesVariableName
         val valueArgumentsFunArgument = if (valueGenericTypesVariableName != null) {
             ", $valueGenericTypesVariableName"
         } else ""
@@ -59,13 +59,13 @@ class MapDeserializationGenerator(private val field: Field.Map) : ElementDeseria
     }
 
     override fun renderFieldFilling(funBuilder: FunSpec.Builder, fieldSerializer: FieldSerializer) {
-        val keySerializerName = fieldSerializer.serializerVariableName
-        val valueSerializerName = fieldSerializer.valueSerializerVariableName
-        val keyGenericTypesVariableName = fieldSerializer.genericTypesVariableName
+        val keySerializerName = fieldSerializer.firstValSerializer.serializerVariableName
+        val valueSerializerName = fieldSerializer.secondValSerializer?.serializerVariableName
+        val keyGenericTypesVariableName = fieldSerializer.firstValSerializer.genericTypesVariableName
         val keyArgumentsFunArgument = if (keyGenericTypesVariableName != null) {
             ", $keyGenericTypesVariableName"
         } else ""
-        val valueGenericTypesVariableName = fieldSerializer.valueGenericTypesVariableName
+        val valueGenericTypesVariableName = fieldSerializer.secondValSerializer?.genericTypesVariableName
         val valueArgumentsFunArgument = if (valueGenericTypesVariableName != null) {
             ", $valueGenericTypesVariableName"
         } else ""

@@ -16,17 +16,13 @@ class ListSerializationGenerator(private val field: Field.List) : ElementSeriali
         fieldSerializer: FieldSerializer?,
         serializersMap: Map<Field, FieldSerializer>
     ) {
-        serializerName = fieldSerializer?.serializerVariableName
-        val genericTypesVariableName = fieldSerializer?.genericTypesVariableName
+        serializerName = fieldSerializer?.firstValSerializer?.serializerVariableName
+        val genericTypesVariableName = fieldSerializer?.firstValSerializer?.genericTypesVariableName
         this.genericArguments = if (genericTypesVariableName != null) ", $genericTypesVariableName" else ""
         this.serializersMap = serializersMap
 
         if (field.isNullable) {
-            if (field.children.isNotEmpty()) {
-                funBuilder.listNullableValueWithChildren()
-            } else {
-                funBuilder.listNullableValue()
-            }
+            funBuilder.listNullableValue()
         } else {
             if (field.children.isNotEmpty()) {
                 funBuilder.valueWithChildren()
@@ -37,39 +33,24 @@ class ListSerializationGenerator(private val field: Field.List) : ElementSeriali
     }
 
     private fun FunSpec.Builder.printListForeach() {
-        beginControlFlow("obj.${field.fieldName}.forEach")
+        beginControlFlow("obj.${field.fieldName}.filterNotNull().forEach")
         addStatement("$serializerName.buildXml(this, \"${field.entryName}\", it$genericArguments)")
         endControlFlow()
     }
 
     private fun FunSpec.Builder.listNullableValue() {
         if (field.isInline) {
-            beginControlFlow("obj.${field.fieldName}?.forEach")
+            beginControlFlow("obj.${field.fieldName}?.filterNotNull()?.forEach")
             addStatement("$serializerName.buildXml(this, \"${field.entryName}\", it$genericArguments)")
             endControlFlow()
         } else {
             beginControlFlow("obj.${field.fieldName}?.let")
             addStatement("list ->")
             beginControlFlow("tag(\"${field.tagName}\") {")
-            beginControlFlow("list.forEach {")
-            addStatement("$serializerName.buildXml(this, \"${field.entryName}\", it$genericArguments)")
-            endControlFlow()
-            endControlFlow()
-            endControlFlow()
-        }
-    }
-
-    private fun FunSpec.Builder.listNullableValueWithChildren() {
-        if (field.isInline) {
-            beginControlFlow("obj.${field.fieldName}?.forEach")
-            addStatement("$serializerName.buildXml(this, \"${field.entryName}\", it$genericArguments)")
-            endControlFlow()
-        } else {
-            beginControlFlow("obj.${field.fieldName}?.let")
-            addStatement("list ->")
-            beginControlFlow("tag(\"${field.tagName}\") {")
-            renderChildren(field.children, serializersMap)
-            beginControlFlow("list.forEach {")
+            if (field.children.isNotEmpty()) {
+                renderChildren(field.children, serializersMap)
+            }
+            beginControlFlow("list.filterNotNull().forEach {")
             addStatement("$serializerName.buildXml(this, \"${field.entryName}\", it$genericArguments)")
             endControlFlow()
             endControlFlow()

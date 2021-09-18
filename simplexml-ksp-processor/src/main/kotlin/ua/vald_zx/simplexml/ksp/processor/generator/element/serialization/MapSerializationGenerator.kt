@@ -19,10 +19,10 @@ class MapSerializationGenerator(private val field: Field.Map) : ElementSerializa
         fieldSerializer: FieldSerializer?,
         serializersMap: Map<Field, FieldSerializer>
     ) {
-        keySerializerName = fieldSerializer?.serializerVariableName
-        keyGenericTypesVariableName = fieldSerializer?.genericTypesVariableName
-        valueSerializerVariableName = fieldSerializer?.valueSerializerVariableName
-        valueGenericTypesVariableName = fieldSerializer?.valueGenericTypesVariableName
+        keySerializerName = fieldSerializer?.firstValSerializer?.serializerVariableName
+        keyGenericTypesVariableName = fieldSerializer?.firstValSerializer?.genericTypesVariableName
+        valueSerializerVariableName = fieldSerializer?.secondValSerializer?.serializerVariableName
+        valueGenericTypesVariableName = fieldSerializer?.secondValSerializer?.genericTypesVariableName
         this.fieldSerializer = fieldSerializer
         this.serializersMap = serializersMap
         if (field.isInline) {

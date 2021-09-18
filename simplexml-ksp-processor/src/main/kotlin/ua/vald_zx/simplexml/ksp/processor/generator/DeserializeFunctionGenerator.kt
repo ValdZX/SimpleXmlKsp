@@ -70,8 +70,8 @@ internal fun FunSpec.Builder.addDeserializeCallStatement(
     postfix: String = "",
     isNotNull: Boolean = false
 ) {
-    val serializerName = fieldSerializer.serializerVariableName
-    val genericTypesVariableName = fieldSerializer.genericTypesVariableName
+    val serializerName = fieldSerializer.firstValSerializer.serializerVariableName
+    val genericTypesVariableName = fieldSerializer.firstValSerializer.genericTypesVariableName
     val argumentsFunArgument = if (genericTypesVariableName != null) {
         ", $genericTypesVariableName"
     } else ""

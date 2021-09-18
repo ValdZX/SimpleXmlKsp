@@ -112,7 +112,7 @@ class AnnotationIndoReader(
                 isInline = isInline,
                 isMutableCollection = isMutableCollection,
                 entryName = entryName,
-                entryType = entryType,
+                entryType = entryType!!,
             )
             XmlUnitType.MAP -> Field.Map(
                 hasDefaultValue = hasDefaultValue,
@@ -129,9 +129,9 @@ class AnnotationIndoReader(
                 isInline = isInline,
                 isMutableCollection = isMutableCollection,
                 keyName = keyName,
-                keyType = keyType,
+                keyType = keyType!!,
                 entryName = entryName,
-                entryType = entryType,
+                entryType = entryType!!,
             )
             XmlUnitType.UNKNOWN -> TODO()
         }

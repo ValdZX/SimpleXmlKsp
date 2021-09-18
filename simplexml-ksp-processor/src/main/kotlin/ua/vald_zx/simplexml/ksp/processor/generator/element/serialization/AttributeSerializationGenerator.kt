@@ -14,8 +14,8 @@ internal class AttributeSerializationGenerator(private val field: Field.Attribut
         fieldSerializer: FieldSerializer?,
         serializersMap: Map<Field, FieldSerializer>
     ) {
-        serializerName = fieldSerializer?.serializerVariableName
-        val genericTypesVariableName = fieldSerializer?.genericTypesVariableName
+        serializerName = fieldSerializer?.firstValSerializer?.serializerVariableName
+        val genericTypesVariableName = fieldSerializer?.firstValSerializer?.genericTypesVariableName
         this.genericArguments = if (genericTypesVariableName != null) ", $genericTypesVariableName" else ""
         if (field.isNullable) {
             funBuilder.nullableValue()

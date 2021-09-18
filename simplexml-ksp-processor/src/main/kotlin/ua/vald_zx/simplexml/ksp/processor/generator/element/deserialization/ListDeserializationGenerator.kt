@@ -44,8 +44,8 @@ class ListDeserializationGenerator(private val field: Field.List) : ElementDeser
     }
 
     override fun renderFieldFilling(funBuilder: FunSpec.Builder, fieldSerializer: FieldSerializer) {
-        val entrySerializerName = fieldSerializer.serializerVariableName
-        val genericTypesVariableName = fieldSerializer.genericTypesVariableName
+        val entrySerializerName = fieldSerializer.firstValSerializer.serializerVariableName
+        val genericTypesVariableName = fieldSerializer.firstValSerializer.genericTypesVariableName
         val argumentsFunArgument = if (genericTypesVariableName != null) {
             ", $genericTypesVariableName"
         } else ""

@@ -19,8 +19,8 @@ internal class TagSerializationGenerator(private val field: Field.Tag) : Element
         fieldSerializer: FieldSerializer?,
         serializersMap: Map<Field, FieldSerializer>
     ) {
-        val serializerName = fieldSerializer?.serializerVariableName
-        val genericTypesVariableName = fieldSerializer?.genericTypesVariableName
+        val serializerName = fieldSerializer?.firstValSerializer?.serializerVariableName
+        val genericTypesVariableName = fieldSerializer?.firstValSerializer?.genericTypesVariableName
         this.genericArguments = if (genericTypesVariableName != null) ", $genericTypesVariableName" else ""
         this.serializerName = serializerName
         this.serializersMap = serializersMap
