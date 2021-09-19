@@ -51,17 +51,28 @@ class MapSerializationGenerator(private val field: Field.Map) : ElementSerializa
             beginControlFlow("tag(\"${field.tagName}\") {")
             renderChildren(field.children, serializersMap)
         }
-        printMapForeach(objectName)
+        beginControlFlow("$objectName.mapNotNull { (key, value) -> key?.let { value?.let { key to value } } }.forEach")
+        addStatement("(key, value) ->")
+        if (field.isAttribute) {
+            printAttributeMapForeach()
+        } else {
+            printMapForeach()
+        }
+        endControlFlow()
         if (!field.isInline) {
             endControlFlow()
         }
     }
 
-    private fun FunSpec.Builder.printMapForeach(objectName: String) {
-        beginControlFlow("$objectName.mapNotNull { (key, value) -> key?.let { value?.let { key to value } } }.forEach")
-        addStatement("(key, value) ->")
+    private fun FunSpec.Builder.printMapForeach() {
         addStatement("$keySerializerName.buildXml(this, \"${field.keyName}\", key${keyGenericTypesVariableName})")
         addStatement("$valueSerializerVariableName.buildXml(this, \"${field.entryName}\", value${valueGenericTypesVariableName})")
+    }
+
+    private fun FunSpec.Builder.printAttributeMapForeach() {
+        beginControlFlow("$valueSerializerVariableName.buildXml(this, \"${field.entryName}\", value${valueGenericTypesVariableName})")
+        val serializeCall = "$keySerializerName.serialize(key${keyGenericTypesVariableName})"
+        addStatement("attr(\"${field.keyName}\", $serializeCall)")
         endControlFlow()
     }
 }

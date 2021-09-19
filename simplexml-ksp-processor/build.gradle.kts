@@ -14,13 +14,15 @@ repositories {
 
 java {
     withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 dependencies {
 //    implementation("io.github.valdzx:simplexml-ksp-core-jvm:$projectVersion")
     implementation(project(":simplexml-ksp-core"))
     implementation("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
-    implementation("com.squareup:kotlinpoet:1.9.0")
+    implementation("com.squareup:kotlinpoet:1.10.1")
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-common"))
     testImplementation(kotlin("test-annotations-common"))

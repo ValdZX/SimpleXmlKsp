@@ -123,4 +123,68 @@ class MapTests {
         assertEquals(bean.map, deserializedBean.map)
         assertEquals(bean.count, deserializedBean.count)
     }
+
+    @Test
+    @JsName("AndroidStringResourcesChildTest")
+    fun `AndroidStringResourcesChild serialize deserialize test`() {
+        SimpleXml.pretty = true
+        val bean = AndroidStringResourcesChild(
+            resources = mapOf(
+                "appName" to "The best app",
+                "greetings" to "Hello!"
+            )
+        )
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: AndroidStringResourcesChild = SimpleXml.deserialize(xml)
+        assertEquals(bean, deserializedBean)
+    }
+
+    @Test
+    @JsName("AndroidStringResourcesTest")
+    fun `AndroidStringResources serialize deserialize test`() {
+        SimpleXml.pretty = true
+        val bean = AndroidStringResources(
+            resources = mapOf(
+                "appName" to "The best app",
+                "greetings" to "Hello!"
+            )
+        )
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: AndroidStringResources = SimpleXml.deserialize(xml)
+        assertEquals(bean, deserializedBean)
+    }
+
+    @Test
+    @JsName("FieldAndroidStringResourcesChildTest")
+    fun `FieldAndroidStringResourcesChild serialize deserialize test`() {
+        SimpleXml.pretty = true
+        val bean = FieldAndroidStringResourcesChild()
+        bean.resources = mapOf(
+            "appName" to "The best app",
+            "greetings" to "Hello!"
+        )
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: FieldAndroidStringResourcesChild = SimpleXml.deserialize(xml)
+        assertEquals(bean.resources, deserializedBean.resources)
+        assertEquals(bean.ns, deserializedBean.ns)
+    }
+
+    @Test
+    @JsName("FieldAndroidStringResourcesTest")
+    fun `FieldAndroidStringResources serialize deserialize test`() {
+        SimpleXml.pretty = true
+        val bean = FieldAndroidStringResources()
+        bean.resources = mapOf(
+            "appName" to "The best app",
+            "greetings" to "Hello!"
+        )
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: FieldAndroidStringResources = SimpleXml.deserialize(xml)
+        assertEquals(bean.resources, deserializedBean.resources)
+        assertEquals(bean.ns, deserializedBean.ns)
+    }
 }

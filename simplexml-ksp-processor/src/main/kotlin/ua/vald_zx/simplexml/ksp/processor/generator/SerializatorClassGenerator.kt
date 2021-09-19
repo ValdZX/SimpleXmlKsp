@@ -63,7 +63,10 @@ fun CodeGenerator.generateSerializer(
                 )
                 .addFunction(
                     FunSpec.builder("buildXml")
-                        .suppressAnnotation(typeParameters.isNotEmpty())
+                        .suppressAnnotation(
+                            uncheckedCast = typeParameters.isNotEmpty(),
+                            unnecessarySafeCall = true
+                        )
                         .addModifiers(KModifier.OVERRIDE)
                         .addParameter("tagFather", TagFather::class)
                         .addParameter("obj", parameterizedStarsBeanClassName ?: beanClassName)
@@ -103,12 +106,14 @@ fun CodeGenerator.generateSerializer(
 private fun FunSpec.Builder.suppressAnnotation(
     uncheckedCast: Boolean,
     senselessComparison: Boolean = false,
-    uselessElvis: Boolean = false
+    uselessElvis: Boolean = false,
+    unnecessarySafeCall: Boolean = false
 ): FunSpec.Builder {
     val names = mutableListOf<String>()
     if (uncheckedCast) names.add("\"UNCHECKED_CAST\"")
     if (senselessComparison) names.add("\"SENSELESS_COMPARISON\"")
     if (uselessElvis) names.add("\"USELESS_ELVIS\"")
+    if (unnecessarySafeCall) names.add("\"UNNECESSARY_SAFE_CALL\"")
     return if (names.isNotEmpty()) {
         val namesString = names.joinToString(", ")
         addAnnotation(

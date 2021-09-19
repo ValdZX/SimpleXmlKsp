@@ -3,6 +3,7 @@ package ua.vald_zx.simplexml.ksp.test.map
 import ua.vald_zx.simplexml.ksp.Attribute
 import ua.vald_zx.simplexml.ksp.ElementMap
 import ua.vald_zx.simplexml.ksp.Path
+import ua.vald_zx.simplexml.ksp.Root
 
 /*
 <ConstructorFieldMapOfStrings>
@@ -116,4 +117,66 @@ class FieldMapOfStringsDefaultWithAttribute {
     @Path("Map")
     @Attribute
     var count: Int = 0
+}
+
+/*
+<AndroidStringResourcesChild>
+    <resources xmlns:android="http://schemas.android.com/apk/res/android">
+        <string name="appName">The best app</string>
+        <string name="greetings">Hello!</string>
+    </resources>
+</AndroidStringResourcesChild>
+ */
+data class AndroidStringResourcesChild(
+    @ElementMap(name = "resources", key = "name", entry = "string", attribute = true)
+    val resources: Map<String, String>,
+
+    @field:[Path("resources") Attribute("xmlns:android")]
+    var ns: String = "http://schemas.android.com/apk/res/android",
+)
+
+/*
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <string name="appName">The best app</string>
+    <string name="greetings">Hello!</string>
+</resources>
+ */
+@Root("resources")
+data class AndroidStringResources(
+    @ElementMap(inline = true, key = "name", entry = "string", attribute = true)
+    val resources: Map<String, String>,
+
+    @Attribute("xmlns:android")
+    var ns: String = "http://schemas.android.com/apk/res/android",
+)
+
+/*
+<FieldAndroidStringResourcesChild>
+    <resources xmlns:android="http://schemas.android.com/apk/res/android">
+        <string name="appName">The best app</string>
+        <string name="greetings">Hello!</string>
+    </resources>
+</FieldAndroidStringResourcesChild>
+ */
+class FieldAndroidStringResourcesChild {
+    @ElementMap(name = "resources", key = "name", entry = "string", attribute = true)
+    var resources: Map<String, String> = emptyMap()
+
+    @field:[Path("resources") Attribute("xmlns:android")]
+    var ns: String = "http://schemas.android.com/apk/res/android"
+}
+
+/*
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <string name="appName">The best app</string>
+    <string name="greetings">Hello!</string>
+</resources>
+ */
+@Root("resources")
+class FieldAndroidStringResources {
+    @ElementMap(inline = true, key = "name", entry = "string", attribute = true)
+    var resources: Map<String, String> = emptyMap()
+
+    @Attribute("xmlns:android")
+    var ns: String = "http://schemas.android.com/apk/res/android"
 }
