@@ -129,8 +129,8 @@ plugins {
 }
 
 dependencies {
-    implementation("io.github.valdzx:simplexml-ksp-core:1.0.0-dev06")
-    ksp("io.github.valdzx:simplexml-ksp-processor:1.0.0-dev06")
+    implementation("io.github.valdzx:simplexml-ksp-core:1.0.0-dev07")
+    ksp("io.github.valdzx:simplexml-ksp-processor:1.0.0-dev07")
 }
 ```
 
@@ -153,8 +153,8 @@ plugins {
 }
 val commonMain by getting {
     dependencies {
-        implementation("io.github.valdzx:simplexml-ksp-core:1.0.0-dev06")
-        configurations["ksp"].dependencies.add(project.dependencies.create("io.github.valdzx:simplexml-ksp-processor:1.0.0-dev06"))
+        implementation("io.github.valdzx:simplexml-ksp-core:1.0.0-dev07")
+        configurations["ksp"].dependencies.add(project.dependencies.create("io.github.valdzx:simplexml-ksp-processor:1.0.0-dev07"))
     }
 }
 ```
