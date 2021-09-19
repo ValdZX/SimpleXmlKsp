@@ -39,6 +39,13 @@ class MapSerializationGenerator(private val field: Field.Map) : ElementSerializa
         renderMap("obj.${field.fieldName}")
     }
 
+    private fun FunSpec.Builder.nullableValue() {
+        beginControlFlow("obj.${field.fieldName}?.let")
+        addStatement("map ->")
+        renderMap("map")
+        endControlFlow()
+    }
+
     private fun FunSpec.Builder.renderMap(objectName: String) {
         if (!field.isInline) {
             beginControlFlow("tag(\"${field.tagName}\") {")
@@ -48,13 +55,6 @@ class MapSerializationGenerator(private val field: Field.Map) : ElementSerializa
         if (!field.isInline) {
             endControlFlow()
         }
-    }
-
-    private fun FunSpec.Builder.nullableValue() {
-        beginControlFlow("obj.${field.fieldName}?.let")
-        addStatement("map ->")
-        renderMap("map")
-        endControlFlow()
     }
 
     private fun FunSpec.Builder.printMapForeach(objectName: String) {
