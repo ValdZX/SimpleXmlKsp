@@ -1,9 +1,6 @@
 package ua.vald_zx.simplexml.ksp.test.readme
 
-import ua.vald_zx.simplexml.ksp.Attribute
-import ua.vald_zx.simplexml.ksp.Element
-import ua.vald_zx.simplexml.ksp.Path
-import ua.vald_zx.simplexml.ksp.Root
+import ua.vald_zx.simplexml.ksp.*
 
 @Root("Package")
 data class PackageDto(
@@ -19,4 +16,27 @@ data class PackageDto(
     @Path("Location")
     @Attribute(name = "lng")
     val longitude: Double,
+)
+
+/*
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <string name="appName">The best app</string>
+    <string name="greetings">Hello!</string>
+</resources>
+ */
+
+@Root("string")
+data class StringResource(
+    @Attribute(name = "name")
+    val name: String,
+    @Text
+    val value: String
+)
+
+@Root("resources")
+data class StringResources(
+    @ElementList(inline = true, entry = "string")
+    val strings: List<StringResource>,
+    @Attribute(name = "xmlns:android")
+    var androidNs: String = "http://schemas.android.com/apk/res/android"
 )

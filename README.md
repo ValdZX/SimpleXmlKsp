@@ -84,6 +84,31 @@ val deserializedBean: PackageDto = SimpleXml.deserialize(xml)
 
 ### @ElementList
 
+```xml
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <string name="appName">The best app</string>
+    <string name="greetings">Hello!</string>
+</resources>
+```
+
+```kotlin
+@Root("string")
+data class StringResource(
+    @Attribute(name = "name")
+    val name: String,
+    @Text
+    val value: String
+)
+
+@Root("resources")
+data class StringResources(
+    @ElementList(inline = true, entry = "string")
+    val strings: List<StringResource>,
+    @Attribute(name = "xmlns:android")
+    var androidNs: String = "http://schemas.android.com/apk/res/android"
+)
+```
+
 ## Add to your project
 
 1. Importing

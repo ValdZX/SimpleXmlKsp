@@ -47,7 +47,11 @@ data class TagFather(
     override fun render(margin: Int): String = StringBuilder().apply {
         val isClosed = tags.isEmpty() && value == null
         if (pretty) {
-            appendLine(TAB.repeat(margin) + renderStartTeg())
+            if (tags.isEmpty()) {
+                append(TAB.repeat(margin) + renderStartTeg())
+            } else {
+                appendLine(TAB.repeat(margin) + renderStartTeg())
+            }
         } else {
             append(renderStartTeg(isClosed))
         }
