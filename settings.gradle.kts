@@ -11,3 +11,4 @@ pluginManagement {
 include("simplexml-ksp-core")
 include("simplexml-ksp-processor")
 include("simplexml-ksp-test:kmm")
+include("simplexml-ksp-sample:android")
