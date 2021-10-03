@@ -15,6 +15,7 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
     private val codeGenerator = environment.codeGenerator
     private val options = environment.options
     private val filesToGenerate = mutableMapOf<String, ClassToGenerate>()
+    private var serializerSpecList = mutableSetOf<GeneratedSerializerSpec>()
     private val isStrictMode = options["strict"]?.toBoolean() ?: false
     private val scanBeanMode = options["scanBean"]?.toBoolean() ?: true
     private val visitor = ElementsVisitor(
@@ -37,18 +38,21 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
                 .filter { it is KSPropertyDeclaration && it.validate() }
                 .forEach { it.accept(visitor, Unit) }
         }
+
+        if (filesToGenerate.isEmpty()) return emptyList()
+
+        serializerSpecList.addAll(
+            filesToGenerate.values
+                .filter { toGenerate -> toGenerate.isValid(isStrictMode, logger) }
+                .map { toGenerate -> codeGenerator.generateSerializer(toGenerate, logger) }
+        )
+        filesToGenerate.clear()
         return emptyList()
     }
 
     override fun finish() {
-        if (filesToGenerate.isEmpty()) return
-
         val modulePackageArgument = options["simplexml.ksp.modulepackage"].orEmpty()
         val moduleNameArgument = options["simplexml.ksp.modulename"].orEmpty()
-
-        val serializerSpecList = filesToGenerate.values
-            .filter { toGenerate -> toGenerate.isValid(isStrictMode, logger) }
-            .map { toGenerate -> codeGenerator.generateSerializer(toGenerate, logger) }
         var modulePackage = modulePackageArgument
         if (modulePackageArgument.isEmpty()) {
             serializerSpecList.forEach { spec ->

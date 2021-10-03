@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets
 fun CodeGenerator.generateModuleInitializer(
     moduleName: String,
     modulePackage: String,
-    toRegister: List<GeneratedSerializerSpec>,
+    toRegister: Set<GeneratedSerializerSpec>,
     logger: KSPLogger
 ) {
     val fileName = "${moduleName}SerializersEnrolment"
@@ -35,7 +35,7 @@ fun CodeGenerator.generateModuleInitializer(
                 ).build()
         ).build()
     createNewFile(
-        Dependencies(false),
+        Dependencies.ALL_FILES,
         modulePackage,
         fileName
     ).use { stream ->
@@ -46,7 +46,7 @@ fun CodeGenerator.generateModuleInitializer(
     logger.info("Generated $modulePackage.$fileName")
 }
 
-private fun FileSpec.Builder.addRegistrationImports(toRegister: List<GeneratedSerializerSpec>): FileSpec.Builder {
+private fun FileSpec.Builder.addRegistrationImports(toRegister: Set<GeneratedSerializerSpec>): FileSpec.Builder {
     toRegister.forEach { toRegistration ->
         addImport(toRegistration.beanClass, "")
         addImport(toRegistration.serializerClass, "")
