@@ -180,3 +180,18 @@ class FieldAndroidStringResources {
     @Attribute("xmlns:android")
     var ns: String = "http://schemas.android.com/apk/res/android"
 }
+
+/*
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <string name="appName">The best app</string>
+    <string name="greetings">Hello!</string>
+</resources>
+ */
+@Root("resources")
+class NullableFieldAndroidStringResources {
+    @ElementMap(inline = true, key = "name", entry = "string", attribute = true)
+    var resources: Map<String, String>? = null
+
+    @Attribute("xmlns:android")
+    var ns: String = "http://schemas.android.com/apk/res/android"
+}

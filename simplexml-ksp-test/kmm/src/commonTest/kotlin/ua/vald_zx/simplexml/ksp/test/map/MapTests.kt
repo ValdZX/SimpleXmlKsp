@@ -187,4 +187,20 @@ class MapTests {
         assertEquals(bean.resources, deserializedBean.resources)
         assertEquals(bean.ns, deserializedBean.ns)
     }
+
+    @Test
+    @JsName("NullableFieldAndroidStringResourcesTest")
+    fun `NullableFieldAndroidStringResources serialize deserialize test`() {
+        SimpleXml.pretty = true
+        val bean = NullableFieldAndroidStringResources()
+        bean.resources = mapOf(
+            "appName" to "The best app",
+            "greetings" to "Hello!"
+        )
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: NullableFieldAndroidStringResources = SimpleXml.deserialize(xml)
+        assertEquals(bean.resources, deserializedBean.resources)
+        assertEquals(bean.ns, deserializedBean.ns)
+    }
 }
