@@ -224,6 +224,20 @@ data class ConstructorFieldListOfStringsNullableWithAttribute(
 )
 
 /*
+<ConstructorFieldMutableListOfStringsWithDefault>
+    <List>
+        <Entry>Value1</Entry>
+        <Entry>Value2</Entry>
+        <Entry>Value3</Entry>
+    </List>
+</ConstructorFieldMutableListOfStringsWithDefault>
+ */
+data class ConstructorFieldMutableListOfStringsWithDefault(
+    @ElementList(name = "List", entry = "Entry")
+    var list: MutableList<String> = mutableListOf("Value1", "Value2", "Value3")
+)
+
+/*
 <FieldMutableListOfStrings>
     <List>
         <Entry>Value1</Entry>
@@ -249,4 +263,73 @@ class FieldMutableListOfStrings {
 class NullableFieldMutableListOfStrings {
     @ElementList(name = "List", entry = "Entry")
     var list: MutableList<String>? = null
+}
+
+/*
+<NullableFieldMutableListOfObjects>
+    <List>
+        <Entry>
+            <tag1>Value1</tag1>
+            <tag2>1</tag2>
+        </Entry>
+        <Entry>
+            <tag1>Value2</tag1>
+            <tag2>2</tag2>
+        </Entry>
+        <Entry>
+            <tag1>Value3</tag1>
+            <tag2>3</tag2>
+        </Entry>
+    </List>
+</NullableFieldMutableListOfObjects>
+ */
+class NullableFieldMutableListOfObjects {
+    @ElementList(name = "List", entry = "Entry")
+    var list: MutableList<ListItem>? = null
+}
+
+/*
+<FieldMutableListOfObjects>
+    <List>
+        <Entry>
+            <tag1>Value1</tag1>
+            <tag2>1</tag2>
+        </Entry>
+        <Entry>
+            <tag1>Value2</tag1>
+            <tag2>2</tag2>
+        </Entry>
+        <Entry>
+            <tag1>Value3</tag1>
+            <tag2>3</tag2>
+        </Entry>
+    </List>
+</FieldMutableListOfObjects>
+ */
+class FieldMutableListOfObjects {
+    @ElementList(name = "List", entry = "Entry")
+    var list: MutableList<ListItem> = mutableListOf()
+}
+
+/*
+<FieldMutableListOfObjectsNotRequired>
+    <List>
+        <Entry>
+            <tag1>Value1</tag1>
+            <tag2>1</tag2>
+        </Entry>
+        <Entry>
+            <tag1>Value2</tag1>
+            <tag2>2</tag2>
+        </Entry>
+        <Entry>
+            <tag1>Value3</tag1>
+            <tag2>3</tag2>
+        </Entry>
+    </List>
+</FieldMutableListOfObjectsNotRequired>
+ */
+class FieldMutableListOfObjectsNotRequired {
+    @ElementList(name = "List", entry = "Entry", required = false)
+    var list: MutableList<ListItem> = mutableListOf()
 }

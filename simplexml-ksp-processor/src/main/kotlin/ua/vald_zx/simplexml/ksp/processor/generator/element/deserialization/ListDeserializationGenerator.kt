@@ -55,7 +55,11 @@ class ListDeserializationGenerator(private val field: Field.List) : ElementDeser
             funBuilder.addStatement("$entrySerializerName.readData(it$argumentsFunArgument)")
             funBuilder.endControlFlow()
             if (field.isMutableCollection) {
-                funBuilder.addStatement("?.toMutableList()")
+                if(field.isNullable) {
+                    funBuilder.addStatement("?.toMutableList()")
+                } else {
+                    funBuilder.addStatement(".toMutableList()")
+                }
             }
             funBuilder.endControlFlow()
         } else {

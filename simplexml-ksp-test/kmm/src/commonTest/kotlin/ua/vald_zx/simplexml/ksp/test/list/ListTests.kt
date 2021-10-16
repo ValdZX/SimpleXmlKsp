@@ -153,6 +153,26 @@ class ListTests {
     }
 
     @Test
+    @JsName("ConstructorFieldMutableListOfStringsWithDefaultTest")
+    fun `ConstructorFieldMutableListOfStringsWithDefault serialize deserialize test`() {
+        val bean = ConstructorFieldMutableListOfStringsWithDefault(mutableListOf("Value4", "Value5", "Value6"))
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: ConstructorFieldMutableListOfStringsWithDefault = SimpleXml.deserialize(xml)
+        assertEquals(bean, deserializedBean)
+    }
+
+    @Test
+    @JsName("ConstructorFieldMutableListOfStringsWithDefaultTest_Default")
+    fun `ConstructorFieldMutableListOfStringsWithDefault serialize deserialize test default`() {
+        val bean = ConstructorFieldMutableListOfStringsWithDefault()
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: ConstructorFieldMutableListOfStringsWithDefault = SimpleXml.deserialize(xml)
+        assertEquals(bean, deserializedBean)
+    }
+
+    @Test
     @JsName("ConstructorFieldMutableListOfStringsWithAttributeTest")
     fun `ConstructorFieldMutableListOfStringsWithAttribute serialize deserialize test`() {
         val bean = ConstructorFieldMutableListOfStringsWithAttribute(mutableListOf("Value1", "Value2", "Value3"), 3)
@@ -191,6 +211,54 @@ class ListTests {
         val xml = SimpleXml.serialize(bean)
         println(xml)
         val deserializedBean: NullableFieldMutableListOfStrings = SimpleXml.deserialize(xml)
+        assertEquals(bean.list, deserializedBean.list)
+    }
+
+    @Test
+    @JsName("NullableFieldMutableListOfObjectsTest")
+    fun `NullableFieldMutableListOfObjects serialize deserialize test`() {
+        val bean = NullableFieldMutableListOfObjects()
+        bean.list = mutableListOf(
+            ListItem("Value1", 1),
+            ListItem("Value2", 2),
+            ListItem("Value3", 3),
+        )
+
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: NullableFieldMutableListOfObjects = SimpleXml.deserialize(xml)
+        assertEquals(bean.list, deserializedBean.list)
+    }
+
+    @Test
+    @JsName("FieldMutableListOfObjectsTest")
+    fun `FieldMutableListOfObjects serialize deserialize test`() {
+        val bean = FieldMutableListOfObjects()
+        bean.list = mutableListOf(
+            ListItem("Value1", 1),
+            ListItem("Value2", 2),
+            ListItem("Value3", 3),
+        )
+
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: FieldMutableListOfObjects = SimpleXml.deserialize(xml)
+        assertEquals(bean.list, deserializedBean.list)
+    }
+
+    @Test
+    @JsName("FieldMutableListOfObjectsNotRequiredTest")
+    fun `FieldMutableListOfObjectsNotRequired serialize deserialize test`() {
+        val bean = FieldMutableListOfObjectsNotRequired()
+        bean.list = mutableListOf(
+            ListItem("Value1", 1),
+            ListItem("Value2", 2),
+            ListItem("Value3", 3),
+        )
+
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: FieldMutableListOfObjectsNotRequired = SimpleXml.deserialize(xml)
         assertEquals(bean.list, deserializedBean.list)
     }
 }
