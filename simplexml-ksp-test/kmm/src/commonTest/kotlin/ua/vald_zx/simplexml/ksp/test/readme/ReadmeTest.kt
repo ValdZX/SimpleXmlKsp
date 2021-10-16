@@ -46,4 +46,20 @@ class ReadmeTest {
         val deserializedBean: StringResources = SimpleXml.deserialize(xml)
         assertEquals(bean, deserializedBean)
     }
+
+    @Test
+    @JsName("StringResourcesMapTest")
+    fun `StringResourcesMap serialization test`() {
+        SimpleXml.pretty = true
+        val bean = StringResourcesMap(
+            mapOf(
+                "appName" to "The best app",
+                "greetings" to "Hello!"
+            )
+        )
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: StringResourcesMap = SimpleXml.deserialize(xml)
+        assertEquals(bean, deserializedBean)
+    }
 }

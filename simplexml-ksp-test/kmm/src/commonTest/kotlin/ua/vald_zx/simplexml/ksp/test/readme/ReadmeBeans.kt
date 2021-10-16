@@ -40,3 +40,19 @@ data class StringResources(
     @Attribute(name = "xmlns:android")
     var androidNs: String = "http://schemas.android.com/apk/res/android"
 )
+
+/*
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <string name="appName">The best app</string>
+    <string name="greetings">Hello!</string>
+</resources>
+ */
+
+
+@Root("resources")
+data class StringResourcesMap(
+    @ElementMap(inline = true, entry = "string", key = "name", attribute = true)
+    val strings: Map<String, String>,
+    @Attribute(name = "xmlns:android")
+    var androidNs: String = "http://schemas.android.com/apk/res/android"
+)
