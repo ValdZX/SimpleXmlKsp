@@ -42,6 +42,6 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.3.1")
     implementation("com.google.android.material:material:1.4.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.1")
-    implementation("io.github.valdzx:simplexml-ksp-core-jvm:1.0.0-dev07")
-    ksp("io.github.valdzx:simplexml-ksp-processor:1.0.0-dev07")
+    implementation("io.github.valdzx:simplexml-ksp-core-jvm:1.0.0-dev09")
+    ksp("io.github.valdzx:simplexml-ksp-processor:1.0.0-dev09")
 }
