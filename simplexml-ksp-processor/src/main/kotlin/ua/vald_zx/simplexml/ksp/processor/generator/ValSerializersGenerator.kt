@@ -1,5 +1,6 @@
 package ua.vald_zx.simplexml.ksp.processor.generator
 
+import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.squareup.kotlinpoet.FunSpec
 import ua.vald_zx.simplexml.ksp.processor.ClassToGenerate
@@ -20,11 +21,10 @@ fun FunSpec.Builder.generateAndGetSerializers(classToGenerate: ClassToGenerate):
     val fields = classToGenerate.fields
     val genericFields = mutableListOf<Field>()
     val typeParameters = classToGenerate.typeParameters.toSet()
-    val typeParametersNames = typeParameters.map { it.toString() }.toSet()
     if (typeParameters.isNotEmpty()) {
         val typeMap = mutableMapOf<String, ValSerializer>()
         fields
-            .filter { hasGenericArg(it, typeParametersNames) }
+            .filter { hasGenericArg(it, typeParameters) }
             .forEach { field ->
                 genericFields.add(field)
                 val (firstType, secondType) = when (field) {
@@ -37,7 +37,7 @@ fun FunSpec.Builder.generateAndGetSerializers(classToGenerate: ClassToGenerate):
                         field,
                         typeMap,
                         propertyToSerializerName,
-                        typeParametersNames,
+                        typeParameters,
                         firstType,
                         secondType
                     )
@@ -95,26 +95,30 @@ private fun String.toSerializerValName(): String {
     return replaceFirstChar { it.lowercase() } + "Serializer"
 }
 
-private fun hasGenericArg(field: Field, typeParameters: Set<String>): Boolean {
+private fun hasGenericArg(field: Field, typeParameters: Set<KSTypeParameter>): Boolean {
     return when (field) {
-        is Field.Tag -> typeParameters.contains(field.fieldType?.toString())
-        is Field.Attribute -> typeParameters.contains(field.fieldType.toString())
-        is Field.Text -> typeParameters.contains(field.fieldType?.toString())
+        is Field.Tag -> typeParameters.containsInTreeIndexOf(field.fieldType) >= 0
+        is Field.Attribute -> typeParameters.containsInTreeIndexOf(field.fieldType) >= 0
+        is Field.Text -> typeParameters.containsInTreeIndexOf(field.fieldType) >= 0
         is Field.List -> {
-            typeParameters.contains(field.entryType.toString())
+            typeParameters.containsInTreeIndexOf(field.entryType) >= 0
         }
         is Field.Map -> {
-            typeParameters.contains(field.keyType.toString()) || typeParameters.contains(field.entryType.toString())
+            typeParameters.containsInTreeIndexOf(field.keyType) >= 0 || typeParameters.containsInTreeIndexOf(field.entryType) >= 0
         }
         is Field.IsTag -> false
     }
+}
+
+private fun Collection<KSTypeParameter>.containsInTreeIndexOf(fieldType: KSTypeReference?): Int {
+    TODO("Not yet implemented")
 }
 
 private fun FunSpec.Builder.genericValSerializer(
     field: Field,
     typeMap: MutableMap<String, ValSerializer>,
     propertyToSerializerName: MutableMap<Field, FieldSerializer>,
-    typeParameters: Set<String>,
+    typeParameters: Set<KSTypeParameter>,
     firstType: KSTypeReference,
     secondType: KSTypeReference? = null,
 ) {
@@ -122,8 +126,8 @@ private fun FunSpec.Builder.genericValSerializer(
     val secondTypeName = secondType?.toString()
     val firstCachedFieldSerializer = typeMap[firstTypeName]
     val secondCachedFieldSerializer = typeMap[secondTypeName]
-    val firstIndex = typeParameters.indexOf(firstTypeName)
-    val secondIndex = typeParameters.indexOf(secondTypeName)
+    val firstIndex = typeParameters.containsInTreeIndexOf(firstType)
+    val secondIndex = typeParameters.containsInTreeIndexOf(secondType)
 
     val firstSerializer: ValSerializer
     var secondSerializer: ValSerializer? = null
