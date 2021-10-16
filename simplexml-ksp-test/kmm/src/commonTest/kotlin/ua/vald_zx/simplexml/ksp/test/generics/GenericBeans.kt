@@ -45,4 +45,34 @@ open class GenericThreeBean<T1, T2, T3> {
     var somObject6: T3? = null
 }
 
+data class GenericData<T>(
+    @Element
+    var somObject1: T,
+)
+
+data class OneDeepGenericData<T>(
+    @Element
+    var oneDeepObject1: GenericData<T>,
+)
+
+data class TwoDeepGenericData<T>(
+    @Element
+    var twoDeepObject1: OneDeepGenericData<T>,
+)
+
+class GenericClass<T> {
+    @Element
+    var somObject1: T? = null
+}
+
+class OneDeepGenericClass<T> {
+    @Element
+    var oneDeepObject1: GenericClass<T>? = null
+}
+
+class TwoDeepGenericClass<T> {
+    @Element
+    var twoDeepObject1: OneDeepGenericClass<T>? = null
+}
+
 class GenericExtension : GenericBean<String, Float>()
