@@ -79,7 +79,13 @@ internal fun FunSpec.Builder.addDeserializeCallStatement(
     if (field.required && !isNotNull) {
         addStatement("$prefix$serializerName.readData(")
         addStatement("$fieldStatement ?: throw DeserializeException(\"\"\"field ${field.fieldName} value is required\"\"\")$argumentsFunArgument")
-        addStatement(")$postfix")
+        val arguments = field.fieldType?.resolve()?.arguments
+        if (arguments?.isNotEmpty() == true) {
+            val anyArgs = arguments.indices.joinToString { "Any" }
+            addStatement(") as ${field.fieldType.toString()}<$anyArgs>$postfix")
+        } else {
+            addStatement(")$postfix")
+        }
     } else if (isNotNull) {
         addStatement("$prefix$serializerName.readData($fieldStatement$argumentsFunArgument)$postfix")
     } else {

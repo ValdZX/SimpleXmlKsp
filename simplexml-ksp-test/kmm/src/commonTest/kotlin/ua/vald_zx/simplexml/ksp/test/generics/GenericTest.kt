@@ -101,6 +101,29 @@ class GenericTest {
 //    }
 
     @Test
+    @JsName("OneDeepGenericDataTest")
+    fun `OneDeepGenericData serialize deserialize test`() {
+        val bean = OneDeepGenericData(GenericData("String"))
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: OneDeepGenericData<String> = SimpleXml.deserialize(xml)
+        assertEquals(bean, deserializedBean)
+    }
+
+    @Test
+    @JsName("OneDeepGenericClassTest")
+    fun `OneDeepGenericClass serialize deserialize test`() {
+        val bean = OneDeepGenericClass<String>()
+        val genericClass = GenericClass<String>()
+        genericClass.somObject1 = "String"
+        bean.oneDeepObject1 = genericClass
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: OneDeepGenericClass<String> = SimpleXml.deserialize(xml)
+        assertEquals(bean, deserializedBean)
+    }
+
+    @Test
     @JsName("TwoDeepGenericDataTest")
     fun `TwoDeepGenericData serialize deserialize test`() {
         val bean = TwoDeepGenericData(OneDeepGenericData(GenericData("String")))
