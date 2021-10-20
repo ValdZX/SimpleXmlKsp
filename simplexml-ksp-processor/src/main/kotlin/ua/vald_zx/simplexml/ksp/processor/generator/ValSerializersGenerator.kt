@@ -112,25 +112,23 @@ private fun hasGenericArg(field: Field, typeParameters: Set<KSTypeParameter>): B
 
 data class TypeContainsResult(
     val index: Int,
-    val isFirstLayer: Boolean
+    val secondLayerIndexes: List<Int> = emptyList()
 ) {
     val contains: Boolean
-        get() = index >= 0
+        get() = index >= 0 || secondLayerIndexes.isNotEmpty()
 }
 
-private fun Collection<KSTypeParameter>.containsInTreeIndexOf(fieldType: KSType?, layer: Int = 0): TypeContainsResult {
-    if (fieldType == null) return TypeContainsResult(-1, layer == 0)
-    val index = map { it.toString() }.indexOf(fieldType.toString().replace("?", ""))
+private fun Collection<KSTypeParameter>.containsInTreeIndexOf(fieldType: KSType?): TypeContainsResult {
+    if (fieldType == null) return TypeContainsResult(-1)
+    val parentArgs = map { it.toString() }
+    val index = parentArgs.indexOf(fieldType.toString().replace("?", ""))
     return if (index == -1) {
-        val arguments = fieldType.arguments
-        if (arguments.isNotEmpty()) {
-            arguments.forEach { ksTypeParameter ->
-                return containsInTreeIndexOf(ksTypeParameter.type?.resolve(), layer + 1)
-            }
+        val secondLayerIndexes = fieldType.arguments.map { argument ->
+            argument.type?.resolve()?.toString()?.let { parentArgs.indexOf(it) } ?: -1
         }
-        TypeContainsResult(-1, layer == 0)
+        TypeContainsResult(-1, secondLayerIndexes)
     } else {
-        TypeContainsResult(index, layer == 0)
+        TypeContainsResult(index)
     }
 }
 
@@ -142,47 +140,37 @@ private fun FunSpec.Builder.genericValSerializer(
     firstType: KSTypeReference,
     secondType: KSTypeReference? = null,
 ) {
-    val firstTypeName = firstType.toString()
-    val secondTypeName = secondType?.toString()
-    val firstCachedFieldSerializer = typeMap[firstTypeName]
-    val secondCachedFieldSerializer = typeMap[secondTypeName]
-    val firstIndexResult = typeParameters.containsInTreeIndexOf(firstType.resolve())
-    val secondIndexResult = typeParameters.containsInTreeIndexOf(secondType?.resolve())
-
-    val firstSerializer: ValSerializer
-    var secondSerializer: ValSerializer? = null
-    if (firstCachedFieldSerializer != null) {
-        firstSerializer = firstCachedFieldSerializer
-    } else {
-        typeMap[firstTypeName] =
-            if (firstIndexResult.contains) {
-                if (firstIndexResult.isFirstLayer) {
-                    renderGenericSerializerVal(firstTypeName, firstIndexResult.index).apply { firstSerializer = this }
-                } else {
-                    renderSerializerValWithGenericField(firstTypeName).apply { firstSerializer = this }
-                }
-            } else {
-                renderSerializerVal(firstTypeName).apply { firstSerializer = this }
-            }
-    }
-    if (secondTypeName != null) {
-        if (secondCachedFieldSerializer != null) {
-            secondSerializer = secondCachedFieldSerializer
-        } else {
-            typeMap[secondTypeName] = if (secondIndexResult.contains) {
-                if (secondIndexResult.isFirstLayer) {
-                    renderGenericSerializerVal(secondTypeName, secondIndexResult.index).apply {
-                        secondSerializer = this
-                    }
-                } else {
-                    renderSerializerValWithGenericField(secondTypeName).apply { secondSerializer = this }
-                }
-            } else {
-                renderSerializerVal(secondTypeName).apply { secondSerializer = this }
-            }
-        }
-    }
+    val firstSerializer = renderValSerializer(typeMap, typeParameters, firstType)
+    val secondSerializer = secondType?.let { renderValSerializer(typeMap, typeParameters, it) }
     propertyToSerializerName[field] = FieldSerializer(firstSerializer, secondSerializer)
+}
+
+private fun FunSpec.Builder.renderValSerializer(
+    typeMap: MutableMap<String, ValSerializer>,
+    typeParameters: Set<KSTypeParameter>,
+    type: KSTypeReference
+): ValSerializer {
+    val typeName = type.toString()
+    val cachedFieldSerializer = typeMap[typeName]
+    val indexResult = typeParameters.containsInTreeIndexOf(type.resolve())
+    val valSerializer: ValSerializer
+    if (cachedFieldSerializer != null) {
+        valSerializer = cachedFieldSerializer
+    } else {
+        typeMap[typeName] =
+            if (indexResult.contains) {
+                if (indexResult.index >= 0) {
+                    renderGenericSerializerVal(typeName, indexResult.index).apply { valSerializer = this }
+                } else {
+                    renderSerializerValWithGenericField(typeName, indexResult).apply {
+                        valSerializer = this
+                    }
+                }
+            } else {
+                renderSerializerVal(typeName).apply { valSerializer = this }
+            }
+    }
+    return valSerializer
 }
 
 private fun FunSpec.Builder.renderSerializerVal(className: String): ValSerializer {
@@ -191,10 +179,14 @@ private fun FunSpec.Builder.renderSerializerVal(className: String): ValSerialize
     return ValSerializer(valueName)
 }
 
-private fun FunSpec.Builder.renderSerializerValWithGenericField(className: String): ValSerializer {
+private fun FunSpec.Builder.renderSerializerValWithGenericField(
+    className: String,
+    indexResult: TypeContainsResult
+): ValSerializer {
     val valueName = className.toSerializerValName()
     addStatement("val $valueName = GlobalSerializersLibrary.findSerializers(${className}::class)")
-    return ValSerializer(valueName, "genericTypeList")
+    val genericParameters = indexResult.secondLayerIndexes.joinToString { "genericTypeList[$it]" }
+    return ValSerializer(valueName, "listOf($genericParameters)")
 }
 
 private fun FunSpec.Builder.renderGenericSerializerVal(className: String, index: Int): ValSerializer {

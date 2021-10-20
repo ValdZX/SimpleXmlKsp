@@ -115,12 +115,12 @@ class GenericTest {
     fun `OneDeepGenericClass serialize deserialize test`() {
         val bean = OneDeepGenericClass<String>()
         val genericClass = GenericClass<String>()
-        genericClass.somObject1 = "String"
+        genericClass.somObject = "String"
         bean.oneDeepObject1 = genericClass
         val xml = SimpleXml.serialize(bean)
         println(xml)
         val deserializedBean: OneDeepGenericClass<String> = SimpleXml.deserialize(xml)
-        assertEquals(bean.oneDeepObject1?.somObject1, deserializedBean.oneDeepObject1?.somObject1)
+        assertEquals(bean.oneDeepObject1?.somObject, deserializedBean.oneDeepObject1?.somObject)
     }
 
     @Test
@@ -139,12 +139,66 @@ class GenericTest {
         val bean = TwoDeepGenericClass<String>()
         val oneDeepGenericClass = OneDeepGenericClass<String>()
         val genericClass = GenericClass<String>()
-        genericClass.somObject1 = "String"
+        genericClass.somObject = "String"
         oneDeepGenericClass.oneDeepObject1 = genericClass
         bean.twoDeepObject1 = oneDeepGenericClass
         val xml = SimpleXml.serialize(bean)
         println(xml)
         val deserializedBean: TwoDeepGenericClass<String> = SimpleXml.deserialize(xml)
-        assertEquals(bean.twoDeepObject1?.oneDeepObject1?.somObject1, deserializedBean.twoDeepObject1?.oneDeepObject1?.somObject1)
+        assertEquals(
+            bean.twoDeepObject1?.oneDeepObject1?.somObject,
+            deserializedBean.twoDeepObject1?.oneDeepObject1?.somObject
+        )
+    }
+
+    @Test
+    @JsName("TwoDeepGenericClassTest")
+    fun `TwoDeepGenericsClass serialize deserialize test`() {
+        val bean = TwoDeepGenericsClass<Char, Long>()
+        bean.oneDeepBothArgs = GenericBean<Char, Long>().apply {
+            somObject1 = 'z'
+            somObject2 = 42L
+        }
+        bean.twoDeepFirstArg = OneDeepGenericClass<Char>().apply {
+            oneDeepObject1 = GenericClass<Char>().apply {
+                somObject = 'Y'
+            }
+        }
+        bean.oneDeepSecondArg = GenericClass<Long>().apply {
+            somObject = 27L
+        }
+        bean.oneDeepFirstHardSecondArg = GenericBean<GenericClass<Long>, Char>().apply {
+            somObject1 = GenericClass<Long>().apply {
+                somObject = 16
+            }
+            somObject2 = 'G'
+        }
+        val xml = SimpleXml.serialize(bean)
+        println(xml)
+        val deserializedBean: TwoDeepGenericsClass<Char, Long> = SimpleXml.deserialize(xml)
+        assertEquals(
+            bean.oneDeepBothArgs?.somObject1,
+            deserializedBean.oneDeepBothArgs?.somObject1
+        )
+        assertEquals(
+            bean.oneDeepBothArgs?.somObject2,
+            deserializedBean.oneDeepBothArgs?.somObject2
+        )
+        assertEquals(
+            bean.twoDeepFirstArg?.oneDeepObject1?.somObject,
+            deserializedBean.twoDeepFirstArg?.oneDeepObject1?.somObject
+        )
+        assertEquals(
+            bean.oneDeepSecondArg?.somObject,
+            deserializedBean.oneDeepSecondArg?.somObject
+        )
+        assertEquals(
+            bean.oneDeepFirstHardSecondArg?.somObject1?.somObject,
+            deserializedBean.oneDeepFirstHardSecondArg?.somObject1?.somObject
+        )
+        assertEquals(
+            bean.oneDeepFirstHardSecondArg?.somObject2,
+            deserializedBean.oneDeepFirstHardSecondArg?.somObject2
+        )
     }
 }

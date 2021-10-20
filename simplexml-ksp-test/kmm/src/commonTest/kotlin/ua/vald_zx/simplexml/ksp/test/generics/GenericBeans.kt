@@ -62,7 +62,7 @@ data class TwoDeepGenericData<T>(
 
 class GenericClass<T> {
     @Element
-    var somObject1: T? = null
+    var somObject: T? = null
 }
 
 class OneDeepGenericClass<T> {
@@ -73,4 +73,18 @@ class OneDeepGenericClass<T> {
 class TwoDeepGenericClass<T> {
     @Element
     var twoDeepObject1: OneDeepGenericClass<T>? = null
+}
+
+class TwoDeepGenericsClass<T1, T2> {
+    @Element
+    var twoDeepFirstArg: OneDeepGenericClass<T1>? = null
+
+    @Element
+    var oneDeepBothArgs: GenericBean<T1, T2>? = null
+
+    @Element
+    var oneDeepSecondArg: GenericClass<T2>? = null
+
+    @Element
+    var oneDeepFirstHardSecondArg: GenericBean<GenericClass<T2>, T1>? = null
 }
