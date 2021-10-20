@@ -152,7 +152,7 @@ class GenericTest {
     }
 
     @Test
-    @JsName("TwoDeepGenericClassTest")
+    @JsName("TwoDeepGenericsClassTest")
     fun `TwoDeepGenericsClass serialize deserialize test`() {
         val bean = TwoDeepGenericsClass<Char, Long>()
         bean.oneDeepBothArgs = GenericBean<Char, Long>().apply {
