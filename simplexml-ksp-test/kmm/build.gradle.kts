@@ -14,6 +14,7 @@ ksp {
 }
 
 kotlin {
+    mingwX64()
     android()
     jvm()
     js {

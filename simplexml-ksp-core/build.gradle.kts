@@ -13,6 +13,7 @@ repositories {
 }
 
 kotlin {
+    mingwX64()
     android {
         publishLibraryVariants("release", "debug")
     }

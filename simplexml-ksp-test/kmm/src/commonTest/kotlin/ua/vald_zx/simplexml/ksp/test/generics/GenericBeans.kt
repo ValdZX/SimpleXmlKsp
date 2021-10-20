@@ -86,5 +86,5 @@ class TwoDeepGenericsClass<T1, T2> {
     var oneDeepSecondArg: GenericClass<T2>? = null
 
     @Element
-    var oneDeepFirstHardSecondArg: GenericBean<GenericClass<T2>, T1>? = null
+    var oneDeepFirstHardSecondArg: GenericBean<T2, T1>? = null
 }
