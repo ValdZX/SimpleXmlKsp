@@ -41,7 +41,7 @@ internal class TagSerializationGenerator(private val field: Field.Tag) : Element
     }
 
     private fun FunSpec.Builder.value() {
-        addStatement("${serializerName}.buildXml(this, \"$tabName\", obj.$fieldName)$genericArguments")
+        addStatement("${serializerName}.buildXml(this, \"$tabName\", obj.$fieldName$genericArguments)")
     }
 
     private fun FunSpec.Builder.nullableValue() {

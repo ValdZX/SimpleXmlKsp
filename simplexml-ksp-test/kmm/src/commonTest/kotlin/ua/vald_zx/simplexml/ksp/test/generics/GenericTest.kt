@@ -120,7 +120,7 @@ class GenericTest {
         val xml = SimpleXml.serialize(bean)
         println(xml)
         val deserializedBean: OneDeepGenericClass<String> = SimpleXml.deserialize(xml)
-        assertEquals(bean, deserializedBean)
+        assertEquals(bean.oneDeepObject1?.somObject1, deserializedBean.oneDeepObject1?.somObject1)
     }
 
     @Test
@@ -145,6 +145,6 @@ class GenericTest {
         val xml = SimpleXml.serialize(bean)
         println(xml)
         val deserializedBean: TwoDeepGenericClass<String> = SimpleXml.deserialize(xml)
-        assertEquals(bean, deserializedBean)
+        assertEquals(bean.twoDeepObject1?.oneDeepObject1?.somObject1, deserializedBean.twoDeepObject1?.oneDeepObject1?.somObject1)
     }
 }

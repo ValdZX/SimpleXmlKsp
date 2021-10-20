@@ -74,5 +74,3 @@ class TwoDeepGenericClass<T> {
     @Element
     var twoDeepObject1: OneDeepGenericClass<T>? = null
 }
-
-class GenericExtension : GenericBean<String, Float>()
