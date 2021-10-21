@@ -1,5 +1,7 @@
 package ua.vald_zx.simplexml.ksp.processor.generator
 
+import com.google.devtools.ksp.symbol.KSTypeArgument
+import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.squareup.kotlinpoet.FunSpec
 import ua.vald_zx.simplexml.ksp.processor.ClassToGenerate
 import ua.vald_zx.simplexml.ksp.processor.Field
@@ -70,8 +72,9 @@ internal fun FunSpec.Builder.addDeserializeCallStatement(
     postfix: String = "",
     isNotNull: Boolean = false
 ) {
-    val serializerName = fieldSerializer.firstValSerializer.serializerVariableName
-    val genericTypesVariableName = fieldSerializer.firstValSerializer.genericTypesVariableName
+    val valSerializer = fieldSerializer.firstValSerializer
+    val serializerName = valSerializer.serializerVariableName
+    val genericTypesVariableName = valSerializer.genericTypesVariableName
     val argumentsFunArgument = if (genericTypesVariableName != null) {
         ", $genericTypesVariableName"
     } else ""
@@ -81,7 +84,9 @@ internal fun FunSpec.Builder.addDeserializeCallStatement(
         addStatement("$fieldStatement ?: throw DeserializeException(\"\"\"field ${field.fieldName} value is required\"\"\")$argumentsFunArgument")
         val arguments = field.fieldType?.resolve()?.arguments
         if (arguments?.isNotEmpty() == true) {
-            val anyArgs = arguments.indices.joinToString { "Any" }
+            val anyArgs = arguments.joinToString { typeArgument ->
+                typeArgument.toStringWithArgs()
+            }
             addStatement(") as ${field.fieldType.toString()}<$anyArgs>$postfix")
         } else {
             addStatement(")$postfix")
@@ -90,5 +95,19 @@ internal fun FunSpec.Builder.addDeserializeCallStatement(
         addStatement("$prefix$serializerName.readData($fieldStatement$argumentsFunArgument)$postfix")
     } else {
         addStatement("$prefix$fieldStatement?.let { $serializerName.readData(it$argumentsFunArgument) }$postfix")
+    }
+}
+
+private fun KSTypeArgument.toStringWithArgs(): String {
+    val type = this.type ?: return "Any"
+    val ksType = type.resolve()
+    val arguments = ksType.arguments
+    return if (ksType.declaration is KSTypeParameter) {
+        "Any"
+    } else if (arguments.isEmpty()) {
+        type.toString()
+    } else {
+        val ksTypeArguments = arguments.joinToString { it.toStringWithArgs() }
+        ksType.declaration.toString() + "<$ksTypeArguments>"
     }
 }
