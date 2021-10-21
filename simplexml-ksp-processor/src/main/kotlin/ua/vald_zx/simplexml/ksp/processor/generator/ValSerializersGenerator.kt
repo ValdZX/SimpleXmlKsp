@@ -205,8 +205,8 @@ private fun FunSpec.Builder.renderGenericSerializerVal(
     val classTypeArguments = "${classNameLowCase}Args"
     val valueName = "${classNameLowCase}Serializer"
     if (serializerNotExist) {
-        addStatement("val ${classNameLowCase}Type = genericTypeList[$index].type")
-        addStatement("val $classTypeArguments = ${classNameLowCase}Type?.arguments.orEmpty()")
+        addStatement("val ${classNameLowCase}Type = genericTypeList[$index]")
+        addStatement("val $classTypeArguments = ${classNameLowCase}Type?.arguments?.map { it.type }.orEmpty()")
         addStatement("val $valueName = GlobalSerializersLibrary.findSerializers(${classNameLowCase}Type?.classifier as KClass<Any>)")
     }
     return ValSerializer(valueName, classTypeArguments)

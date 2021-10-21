@@ -6,13 +6,13 @@ import ua.vald_zx.simplexml.ksp.xml.Tag
 import ua.vald_zx.simplexml.ksp.xml.TagFather
 import ua.vald_zx.simplexml.ksp.xml.XmlReader.readXml
 import ua.vald_zx.simplexml.ksp.xml.tag
-import kotlin.reflect.KTypeProjection
+import kotlin.reflect.KType
 
 abstract class ObjectSerializer<T> : Serializer<T> {
 
     protected abstract val rootName: String
 
-    override fun serialize(obj: T, genericTypeList: List<KTypeProjection>): String {
+    override fun serialize(obj: T, genericTypeList: List<KType?>): String {
         return tag(rootName, pretty = SimpleXml.pretty) { buildXml(this, obj, genericTypeList) }.render()
     }
 
@@ -20,7 +20,7 @@ abstract class ObjectSerializer<T> : Serializer<T> {
         tagFather: TagFather,
         tagName: String,
         obj: T,
-        genericTypeList: List<KTypeProjection>,
+        genericTypeList: List<KType?>,
         attributeBlock: Tag.() -> Unit
     ) {
         tagFather.apply {
@@ -31,10 +31,10 @@ abstract class ObjectSerializer<T> : Serializer<T> {
         }
     }
 
-    override fun deserialize(raw: String, genericTypeList: List<KTypeProjection>): T {
+    override fun deserialize(raw: String, genericTypeList: List<KType?>): T {
         val dom = raw.readXml() ?: error("Read xml failed")
         return readData(dom, genericTypeList)
     }
 
-    abstract fun buildXml(tagFather: TagFather, obj: T, genericTypeList: List<KTypeProjection>)
+    abstract fun buildXml(tagFather: TagFather, obj: T, genericTypeList: List<KType?>)
 }

@@ -33,7 +33,7 @@ fun CodeGenerator.generateSerializer(
     logger.info("Generating $packageName.$objectName")
     val serializerClassName = ClassName(packageName, objectName)
     val listKTypeProjection = ClassName("kotlin.collections", "List")
-        .parameterizedBy(ClassName("kotlin.reflect", "KTypeProjection"))
+        .parameterizedBy(ClassName("kotlin.reflect", "KType").copy(nullable = true))
     val file = FileSpec.builder(packageName, objectName)
         .addImport(XmlSymbolProcessor.LIBRARY_PACKAGE, "GlobalSerializersLibrary")
         .addImport("kotlin.reflect", "KClass")
