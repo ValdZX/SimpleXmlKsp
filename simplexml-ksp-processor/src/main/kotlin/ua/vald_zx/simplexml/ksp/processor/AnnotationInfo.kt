@@ -14,7 +14,7 @@ private enum class XmlUnitType {
     UNKNOWN
 }
 
-class AnnotationIndoReader(
+class AnnotationInfoReader(
     private val property: KSPropertyDeclaration,
     private val parent: KSClassDeclaration,
     private val logger: KSPLogger,

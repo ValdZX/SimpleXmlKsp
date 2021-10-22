@@ -57,7 +57,7 @@ class ElementsVisitor(
     }
 
     private fun KSPropertyDeclaration.toElement(parent: KSClassDeclaration): Field {
-        return AnnotationIndoReader(
+        return AnnotationInfoReader(
             this,
             parent,
             logger,
