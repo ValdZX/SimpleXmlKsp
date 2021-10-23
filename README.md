@@ -73,17 +73,17 @@ val deserializedBean: PackageDto = SimpleXml.deserialize(xml)
 ## Annotations
 
 ### @Element
-
+The Element annotation is used to represent a field or method that appears as an XML element. Fields or methods that are annotated with this can be either primitive or compound, that is, represent an object that can be serialized and deserialized. Below is an example of the serialized format for a compound object.
 ### @Text
-
+The Text annotation is used to represent a field or method that appears as text within an XML element.
 ### @Root
-
+This Root annotation is used to annotate classes that need to be serialized.
 ### @Path
-
+The Path annotation is used to specify an XML path where an XML element or attribute is located.
 ### @Attribute
-
+The Attribute annotation represents a serializable XML attribute within an XML element. An object annotated with this is typically a primitive or enumerated type. Conversion from the attribute to primitive type is done with a Transform object. If a suitable transform can be found then this will convert the attribute string value to an object instance, which can be assigned to the annotated field, or passed to the annotated method.
 ### @ElementList
-
+The ElementList annotation represents a method or field that is a List for storing entries. However, a class attribute can be used to override the field type, however the type must be assignable.
 ```xml
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <string name="appName">The best app</string>
@@ -110,7 +110,7 @@ data class StringResources(
 ```
 
 ### @ElementMap
-
+The ElementMap annotation represents a method or field that is a Map for storing key value pairs.
 ```xml
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <string name="appName">The best app</string>
