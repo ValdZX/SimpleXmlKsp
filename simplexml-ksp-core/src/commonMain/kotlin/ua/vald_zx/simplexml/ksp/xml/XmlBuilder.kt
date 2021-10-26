@@ -48,9 +48,9 @@ data class TagFather(
         val isClosed = tags.isEmpty() && value == null
         if (pretty) {
             if (tags.isEmpty()) {
-                append(TAB.repeat(margin) + renderStartTeg())
+                append(TAB.repeat(margin) + renderStartTeg(isClosed))
             } else {
-                appendLine(TAB.repeat(margin) + renderStartTeg())
+                appendLine(TAB.repeat(margin) + renderStartTeg(isClosed))
             }
         } else {
             append(renderStartTeg(isClosed))

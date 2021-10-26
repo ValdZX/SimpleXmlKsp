@@ -12,6 +12,7 @@ class AttributeTest {
     @BeforeTest
     fun init() {
         TestSerializersEnrolment.enrol()
+        SimpleXml.pretty = true
     }
 
     @Test
