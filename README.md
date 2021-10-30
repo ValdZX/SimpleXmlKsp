@@ -3,7 +3,7 @@
 
 # SimpleXmlKsp
 
-Kotlin Symbol Processing for XML serialization. Generates serializers by annotations
+Generator of bean serializators for XML serialization. Based on [Google KSP](https://github.com/google/ksp)
 
 ## Usage
 
