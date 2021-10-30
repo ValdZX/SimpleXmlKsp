@@ -46,8 +46,27 @@ class DebugStand {
         }
     """
         ).compile()
-
         assertEquals(result.exitCode, KotlinCompilation.ExitCode.OK)
+    }
+
+    @Test
+    fun `Same tag name error`() {
+        val result = SourceFile.kotlin(
+            "GenericBean.kt", """
+        package test
+        
+        import ua.vald_zx.simplexml.ksp.Element
+        
+        class GenericBean<T1, T2> {
+            @Element(name = "Type")
+            var somObject1: T1? = null
+        
+            @Element(name = "Type")
+            var somObject2: T2? = null
+        }
+    """
+        ).compile()
+        assertEquals(result.exitCode, KotlinCompilation.ExitCode.COMPILATION_ERROR)
     }
 
 }

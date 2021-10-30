@@ -9,21 +9,21 @@ import ua.vald_zx.simplexml.ksp.xml.model.XmlElement
 import kotlin.String
 import kotlin.reflect.KType
 
-public object AndroidStringResourcesChildSerializer :
+object AndroidStringResourcesChildSerializer :
     ObjectSerializer<AndroidStringResourcesChild>() {
     public override val rootName: String = "AndroidStringResourcesChild"
 
-    public override fun buildXml(
+    override fun buildXml(
         tagFather: TagFather,
         obj: AndroidStringResourcesChild,
         genericTypeList: List<KType?>
-    ): Unit {
+    ) {
         val stringSerializer = GlobalSerializersLibrary.findSerializers(String::class)
         tagFather.apply {
             tag("resources") {
                 attr("xmlns:android", stringSerializer.serialize(obj.ns))
                 obj.resources.mapNotNull { (key, value) ->
-                    key?.let { value?.let { key to value } }
+                    key.let { value.let { key to value } }
                 }.forEach { (key, value) ->
                     stringSerializer.buildXml(this, "string", value) {
                         attr("name", stringSerializer.serialize(key))
@@ -34,7 +34,7 @@ public object AndroidStringResourcesChildSerializer :
     }
 
     @Suppress("SENSELESS_COMPARISON", "USELESS_ELVIS")
-    public override fun readData(element: XmlElement?, genericTypeList: List<KType?>):
+    override fun readData(element: XmlElement?, genericTypeList: List<KType?>):
             AndroidStringResourcesChild {
         val stringSerializer = GlobalSerializersLibrary.findSerializers(String::class)
         element as TagXmlElement?

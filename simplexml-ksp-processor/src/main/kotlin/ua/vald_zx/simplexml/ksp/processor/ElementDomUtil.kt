@@ -18,30 +18,30 @@ private fun addLayer(
     currentLayerFields: MutableList<Field>,
     currentPath: String,
     path: List<String>,
-    property: Field
+    field: Field
 ) {
-    if (currentPath.isEmpty() && property is Field.IsTag) {
+    if (currentPath.isEmpty() && field is Field.IsTag) {
         val layerField =
-            currentLayerFields.find { it is Field.IsTag && it.tagName == property.tagName }
+            currentLayerFields.find { it is Field.IsTag && it.tagName == field.tagName }
         if (layerField != null && layerField is Field.IsTag && (layerField.fieldName.isNotEmpty() || layerField.children.any { it !is Field.Attribute })) {
-            error("already has data tag with name ${property.tagName}")
+            error("already has data tag with name ${field.tagName}")
         } else if (layerField?.fieldName?.isEmpty() == true && layerField is Field.IsTag) {
             val itemIndex = currentLayerFields.indexOf(layerField)
-            property.children.addAll(layerField.children)
-            currentLayerFields[itemIndex] = property
+            field.children.addAll(layerField.children)
+            currentLayerFields[itemIndex] = field
         } else {
-            currentLayerFields.add(property)
+            currentLayerFields.add(field)
         }
     } else {
         val currentPathUnit =
             (currentLayerFields.find { it is Field.IsTag && it.tagName == currentPath } as Field.IsTag?)
                 ?: Field.Tag(tagName = currentPath).apply { currentLayerFields.add(this) }
-        if (property is Field.Attribute && path.isEmpty()) {
-            currentPathUnit.children.add(property)
+        if (field is Field.Attribute && path.isEmpty()) {
+            currentPathUnit.children.add(field)
         } else if (path.isEmpty()) {
-            addLayer(currentPathUnit.children, "", emptyList(), property)
+            addLayer(currentPathUnit.children, "", emptyList(), field)
         } else {
-            addLayer(currentPathUnit.children, path[0], path.subList(1, path.size), property)
+            addLayer(currentPathUnit.children, path[0], path.subList(1, path.size), field)
         }
     }
 }

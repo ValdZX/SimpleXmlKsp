@@ -16,7 +16,7 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
     private val options = environment.options
     private val filesToGenerate = mutableMapOf<String, ClassToGenerate>()
     private var serializerSpecList = mutableSetOf<GeneratedSerializerSpec>()
-    private val isStrictMode = options["strict"]?.toBoolean() ?: false
+    private val isStrictMode = options["strict"]?.toBoolean() ?: true
     private val scanBeanMode = options["scanBean"]?.toBoolean() ?: true
     private val visitor = ElementsVisitor(
         scanBeanMode = scanBeanMode,
@@ -43,7 +43,7 @@ class XmlSymbolProcessor(environment: SymbolProcessorEnvironment) : SymbolProces
 
         serializerSpecList.addAll(
             filesToGenerate.values
-                .filter { toGenerate -> toGenerate.isValid(isStrictMode, logger) }
+                .filter { toGenerate -> ClassValidator(toGenerate, isStrictMode, logger).isValid() }
                 .map { toGenerate -> codeGenerator.generateSerializer(toGenerate, logger) }
         )
         filesToGenerate.clear()
