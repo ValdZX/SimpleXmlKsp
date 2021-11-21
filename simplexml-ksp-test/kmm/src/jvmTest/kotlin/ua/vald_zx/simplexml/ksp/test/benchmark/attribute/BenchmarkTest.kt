@@ -42,6 +42,12 @@ class BenchmarkTest {
         val beanR = makeRObj()
         val deserializedBeanR: R
         val rTime = measureTime {
+            repeat(1000) {
+                val stringWriter = StringWriter()
+                serializer.write(beanR, stringWriter)
+                val xml = stringWriter.buffer.toString()
+                serializer.read(R::class.java, xml)
+            }
             val stringWriter = StringWriter()
             serializer.write(beanR, stringWriter)
             val xml = stringWriter.buffer.toString()
@@ -51,6 +57,10 @@ class BenchmarkTest {
         val beanG = makeGObj()
         val deserializedBeanG: G
         val gTime = measureTime {
+            repeat(1000) {
+                val xml = SimpleXml.serialize(beanG)
+                SimpleXml.deserialize<G>(xml)
+            }
             val xml = SimpleXml.serialize(beanG)
             deserializedBeanG = SimpleXml.deserialize(xml)
         }
