@@ -1,4 +1,4 @@
-package ua.vald_zx.simplexml.ksp.test.benchmark.attribute
+package ua.vald_zx.simplexml.ksp.test.benchmark
 
 import org.simpleframework.xml.*
 import org.simpleframework.xml.convert.Convert

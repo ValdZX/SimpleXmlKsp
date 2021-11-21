@@ -1,4 +1,4 @@
-package ua.vald_zx.simplexml.ksp.test.benchmark.attribute
+package ua.vald_zx.simplexml.ksp.test.benchmark
 
 import org.simpleframework.xml.Serializer
 import org.simpleframework.xml.convert.AnnotationStrategy
@@ -13,6 +13,7 @@ import ua.vald_zx.simplexml.ksp.test.custompackage.TestSerializersEnrolment
 import java.io.StringWriter
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
@@ -33,12 +34,34 @@ class BenchmarkTest {
         TestSerializersEnrolment.enrol()
     }
 
-    private inline fun <reified R : Any, reified G : Any> runBenchmark(
-        makeRObj: () -> R,
-        assertRObj: (R, R) -> Unit,
+
+    private inline fun <reified G : Any> runGBenchmark(
         makeGObj: () -> G,
         assertGObj: (G, G) -> Unit
-    ) {
+    ): Pair<Duration, Duration> {
+        val beanG = makeGObj()
+        val deserializedBeanG: G
+        val gXml: String
+        val gWriteTime = measureTime {
+            repeat(1000) {
+                SimpleXml.serialize(beanG)
+            }
+            gXml = SimpleXml.serialize(beanG)
+        }
+        val gReadTime = measureTime {
+            repeat(1000) {
+                SimpleXml.deserialize<G>(gXml)
+            }
+            deserializedBeanG = SimpleXml.deserialize(gXml)
+        }
+        assertGObj(beanG, deserializedBeanG)
+        return gWriteTime to gReadTime
+    }
+
+    private inline fun <reified R : Any> runRBenchmark(
+        makeRObj: () -> R,
+        assertRObj: (R, R) -> Unit
+    ): Pair<Duration, Duration> {
         val beanR = makeRObj()
         val deserializedBeanR: R
         val rXml: String
@@ -59,22 +82,17 @@ class BenchmarkTest {
             deserializedBeanR = serializer.read(R::class.java, rXml)
         }
         assertRObj(beanR, deserializedBeanR)
-        val beanG = makeGObj()
-        val deserializedBeanG: G
-        val gXml: String
-        val gWriteTime = measureTime {
-            repeat(1000) {
-                SimpleXml.serialize(beanG)
-            }
-            gXml = SimpleXml.serialize(beanG)
-        }
-        val gReadTime = measureTime {
-            repeat(1000) {
-                SimpleXml.deserialize<G>(gXml)
-            }
-            deserializedBeanG = SimpleXml.deserialize(gXml)
-        }
-        assertGObj(beanG, deserializedBeanG)
+        return rWriteTime to rReadTime
+    }
+
+    private inline fun <reified R : Any, reified G : Any> runBenchmark(
+        makeRObj: () -> R,
+        assertRObj: (R, R) -> Unit,
+        makeGObj: () -> G,
+        assertGObj: (G, G) -> Unit
+    ) {
+        val (rWriteTime, rReadTime) = runRBenchmark(makeRObj, assertRObj)
+        val (gWriteTime, gReadTime) = runGBenchmark(makeGObj, assertGObj)
         println(R::class.simpleName)
         println("\t Reflection: \n\t\tRead $rReadTime \n\t\tWrite $rWriteTime")
         println("\t Generated: \n\t\tRead $gReadTime \n\t\tWrite $gWriteTime")

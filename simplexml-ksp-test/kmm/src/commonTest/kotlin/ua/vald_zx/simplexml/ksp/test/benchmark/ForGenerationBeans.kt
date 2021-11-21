@@ -1,4 +1,4 @@
-package ua.vald_zx.simplexml.ksp.test.benchmark.attribute
+package ua.vald_zx.simplexml.ksp.test.benchmark
 
 import ua.vald_zx.simplexml.ksp.*
 import ua.vald_zx.simplexml.ksp.test.converter.TestDoubleConverter
