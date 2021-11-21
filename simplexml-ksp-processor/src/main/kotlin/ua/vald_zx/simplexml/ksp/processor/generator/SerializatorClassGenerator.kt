@@ -61,6 +61,12 @@ fun CodeGenerator.generateSerializer(
                         .initializer("\"${classToGenerate.rootName}\"")
                         .build()
                 )
+                .addProperty(
+                    PropertySpec.builder("needArguments", Boolean::class)
+                        .addModifiers(KModifier.OVERRIDE)
+                        .initializer(typeParameters.isNotEmpty().toString())
+                        .build()
+                )
                 .addFunction(
                     FunSpec.builder("buildXml")
                         .suppressAnnotation(

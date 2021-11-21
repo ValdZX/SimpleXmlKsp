@@ -6,9 +6,10 @@ import ua.vald_zx.simplexml.ksp.xml.Tag
 import ua.vald_zx.simplexml.ksp.xml.TagFather
 import ua.vald_zx.simplexml.ksp.xml.model.XmlElement
 import kotlin.reflect.KType
-import kotlin.reflect.KTypeProjection
 
 class ValueSerializer<T>(val converter: Converter<T>) : Serializer<T> {
+
+    override val needArguments: Boolean = false
 
     override fun serialize(obj: T, genericTypeList: List<KType?>): String =
         converter.write(obj)

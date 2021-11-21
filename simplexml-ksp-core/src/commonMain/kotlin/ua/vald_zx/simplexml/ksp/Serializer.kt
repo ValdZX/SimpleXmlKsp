@@ -4,9 +4,10 @@ import ua.vald_zx.simplexml.ksp.xml.Tag
 import ua.vald_zx.simplexml.ksp.xml.TagFather
 import ua.vald_zx.simplexml.ksp.xml.model.XmlElement
 import kotlin.reflect.KType
-import kotlin.reflect.KTypeProjection
 
 interface Serializer<T> {
+
+    val needArguments: Boolean
 
     fun serialize(obj: T, genericTypeList: List<KType?> = emptyList()): String
 

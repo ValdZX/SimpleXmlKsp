@@ -53,7 +53,7 @@ class MapSerializationGenerator(private val field: Field.Map) : ElementSerializa
         }
         beginControlFlow("$objectName.mapNotNull { (key, value) -> key?.let { value?.let { key to value } } }.forEach")
         addStatement("(key, value) ->")
-        if (field.isAttribute) {
+        if (field.isAttributeKey) {
             printAttributeMapForeach()
         } else {
             printMapForeach()

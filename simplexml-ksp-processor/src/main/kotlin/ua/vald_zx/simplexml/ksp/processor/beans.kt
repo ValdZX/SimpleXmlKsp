@@ -121,7 +121,7 @@ sealed interface Field {
         override val children: MutableList<Field> = mutableListOf(),
         override val converterType: KSType?,
         val isInline: Boolean,
-        val isAttribute: Boolean,
+        val isAttributeKey: Boolean,
         val isMutableCollection: Boolean,
         val attributes: MutableList<Attribute> = mutableListOf(),
         val keyName: String,

@@ -19,10 +19,10 @@ class MapDeserializationGenerator(private val field: Field.Map) : ElementDeseria
         numberIterator: Iterator<Int>
     ) {
         val currentValueName = "layer${layer}Tag${numberIterator.next()}"
-        if (field.isAttribute && field.isInline) {
+        if (field.isAttributeKey && field.isInline) {
             funBuilder.addStatement("val $currentValueName = $parentValueName?.getAll(\"${field.entryName}\")")
             valueName = currentValueName
-        } else if (field.isAttribute) {
+        } else if (field.isAttributeKey) {
             funBuilder.addStatement("val $currentValueName = $parentValueName?.get(\"${field.tagName}\")")
             valueName = "layer${layer}Map${numberIterator.next()}"
             funBuilder.addStatement("val $valueName = $currentValueName?.getAll(\"${field.entryName}\")")
@@ -78,24 +78,18 @@ class MapDeserializationGenerator(private val field: Field.Map) : ElementDeseria
 
     override fun renderConstructorArgument(funBuilder: FunSpec.Builder, fieldSerializer: FieldSerializer) {
         val serName = fieldSerializer.toSerName()
-        if (field.isAttribute) {
+        if (field.isAttributeKey) {
             funBuilder.generateReadingArgument(serName, true)
-            if (field.isMutableCollection) {
-                funBuilder.addStatement("?.toMutableMap()")
-            }
             funBuilder.addStatement("?: throw DeserializeException(\"\"\"${field.fieldType.parent.toString()} field $fieldName value is required\"\"\"),")
         } else {
             funBuilder.generateReading(serName, true)
-            if (field.isMutableCollection) {
-                funBuilder.addStatement("?.toMutableMap()")
-            }
             funBuilder.addStatement("?: throw DeserializeException(\"\"\"${field.fieldType.parent.toString()} field $fieldName value is required\"\"\"),")
         }
     }
 
     override fun renderFieldFilling(funBuilder: FunSpec.Builder, fieldSerializer: FieldSerializer) {
         val serName = fieldSerializer.toSerName()
-        if (field.isAttribute) {
+        if (field.isAttributeKey) {
             if (!field.required) {
                 funBuilder.beginControlFlow("if ($valueName != null)")
                 funBuilder.generateReadingArgument(serName, false)
@@ -127,10 +121,18 @@ class MapDeserializationGenerator(private val field: Field.Map) : ElementDeseria
         addStatement("val valueData = ${serName.valueName}.readData(valueElement${serName.valueArgs})")
         addStatement("keyData to valueData")
         endControlFlow()
-        if (valueIsNullable) {
-            addStatement("?.toMap()")
+        if (field.isMutableCollection) {
+            if (valueIsNullable) {
+                addStatement("?.toMutableMap()")
+            } else {
+                addStatement(".toMutableMap()")
+            }
         } else {
-            addStatement(".toMap()")
+            if (valueIsNullable) {
+                addStatement("?.toMap()")
+            } else {
+                addStatement(".toMap()")
+            }
         }
     }
 
@@ -145,5 +147,8 @@ class MapDeserializationGenerator(private val field: Field.Map) : ElementDeseria
         addStatement("val valueData = ${serName.valueName}.readData(it${serName.valueArgs})")
         addStatement("keyData to valueData")
         endControlFlow()
+        if (field.isMutableCollection) {
+            addStatement("?.toMutableMap()")
+        }
     }
 }

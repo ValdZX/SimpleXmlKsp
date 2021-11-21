@@ -49,6 +49,7 @@ kotlin {
         val jvmTest by getting {
             dependencies {
                 implementation("org.simpleframework:simple-xml:2.7.1")
+                configurations["ksp"].dependencies.add(project.dependencies.create(project(":simplexml-ksp-processor")))
             }
         }
         val androidMain by getting

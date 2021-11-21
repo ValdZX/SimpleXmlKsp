@@ -125,7 +125,7 @@ class AnnotationInfoReader(
                 converterType = converterType,
                 required = required,
                 tagName = elementName,
-                isAttribute = isAttribute,
+                isAttributeKey = isAttribute,
                 isInline = isInline,
                 isMutableCollection = isMutableCollection,
                 keyName = keyName,
