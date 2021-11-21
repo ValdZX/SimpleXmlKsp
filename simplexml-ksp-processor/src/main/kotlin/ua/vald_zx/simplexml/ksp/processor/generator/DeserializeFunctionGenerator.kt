@@ -28,13 +28,12 @@ internal fun FunSpec.Builder.generateDeserialization(
     } else ""
     addStatement("return ${classToGenerate.name}$anyGenerics(")
     val propertyElements = classToGenerate.fields
-    val propertiesRequiredToConstructor = propertyElements
-        .filter { it.isConstructorParameter && !it.hasDefaultValue }
+    val (propertiesRequiredToConstructor, propertiesDynamics) = propertyElements
+        .partition { it.isConstructorParameter && !it.hasDefaultValue }
     propertiesRequiredToConstructor.forEach { field ->
         val fieldSerializer = serializersMap[field] ?: error("Not found serializer")
         field.deserializationGenerator.renderConstructorArgument(this, fieldSerializer)
     }
-    val propertiesDynamics = propertyElements.subtract(propertiesRequiredToConstructor)
     if (propertiesDynamics.isEmpty()) {
         addStatement(")")
     } else {

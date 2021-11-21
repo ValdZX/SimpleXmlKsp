@@ -39,9 +39,9 @@ android {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    implementation("androidx.appcompat:appcompat:1.3.1")
+    implementation("androidx.appcompat:appcompat:1.4.0")
     implementation("com.google.android.material:material:1.4.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.1")
-    implementation("io.github.valdzx:simplexml-ksp-core-jvm:1.0.0-dev09")
-    ksp("io.github.valdzx:simplexml-ksp-processor:1.0.0-dev09")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.3")
+    implementation("io.github.valdzx:simplexml-ksp-core-jvm:1.0.0-dev11")
+    ksp("io.github.valdzx:simplexml-ksp-processor:1.0.0-dev11")
 }

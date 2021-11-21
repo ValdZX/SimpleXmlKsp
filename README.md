@@ -51,7 +51,7 @@ data class PackageDto(
 )
 ```
 
-Serialize:
+####Serialize:
 
 ```kotlin
 val bean = PackageDto(
@@ -64,7 +64,7 @@ val bean = PackageDto(
 val xml: String = SimpleXml.serialize(bean)
 ```
 
-Deserialize:
+####Deserialize:
 
 ```kotlin
 val deserializedBean: PackageDto = SimpleXml.deserialize(xml)
