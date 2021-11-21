@@ -41,33 +41,43 @@ class BenchmarkTest {
     ) {
         val beanR = makeRObj()
         val deserializedBeanR: R
-        val rTime = measureTime {
+        val rXml: String
+        val rWriteTime = measureTime {
             repeat(1000) {
                 val stringWriter = StringWriter()
                 serializer.write(beanR, stringWriter)
-                val xml = stringWriter.buffer.toString()
-                serializer.read(R::class.java, xml)
+                stringWriter.buffer.toString()
             }
             val stringWriter = StringWriter()
             serializer.write(beanR, stringWriter)
-            val xml = stringWriter.buffer.toString()
-            deserializedBeanR = serializer.read(R::class.java, xml)
+            rXml = stringWriter.buffer.toString()
+        }
+        val rReadTime = measureTime {
+            repeat(1000) {
+                serializer.read(R::class.java, rXml)
+            }
+            deserializedBeanR = serializer.read(R::class.java, rXml)
         }
         assertRObj(beanR, deserializedBeanR)
         val beanG = makeGObj()
         val deserializedBeanG: G
-        val gTime = measureTime {
+        val gXml: String
+        val gWriteTime = measureTime {
             repeat(1000) {
-                val xml = SimpleXml.serialize(beanG)
-                SimpleXml.deserialize<G>(xml)
+                SimpleXml.serialize(beanG)
             }
-            val xml = SimpleXml.serialize(beanG)
-            deserializedBeanG = SimpleXml.deserialize(xml)
+            gXml = SimpleXml.serialize(beanG)
+        }
+        val gReadTime = measureTime {
+            repeat(1000) {
+                SimpleXml.deserialize<G>(gXml)
+            }
+            deserializedBeanG = SimpleXml.deserialize(gXml)
         }
         assertGObj(beanG, deserializedBeanG)
         println(R::class.simpleName)
-        println("\t Reflection: $rTime")
-        println("\t Generated:  $gTime")
+        println("\t Reflection: \n\t\tRead $rReadTime \n\t\tWrite $rWriteTime")
+        println("\t Generated: \n\t\tRead $gReadTime \n\t\tWrite $gWriteTime")
     }
 
     @Test
