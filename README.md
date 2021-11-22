@@ -137,7 +137,7 @@ data class StringResourcesMap(
 
 ```kotlin
 plugins {
-    id("com.google.devtools.ksp") version "1.5.31-1.0.0" apply false
+    id("com.google.devtools.ksp") version "1.6.0-1.0.1" apply false
 }
 ```
 
@@ -149,8 +149,8 @@ plugins {
 }
 
 dependencies {
-    implementation("io.github.valdzx:simplexml-ksp-core:1.0.0-dev11")
-    ksp("io.github.valdzx:simplexml-ksp-processor:1.0.0-dev11")
+    implementation("io.github.valdzx:simplexml-ksp-core:1.0.0-alpha01")
+    ksp("io.github.valdzx:simplexml-ksp-processor:1.0.0-alpha01")
 }
 ```
 
@@ -173,8 +173,8 @@ plugins {
 }
 val commonMain by getting {
     dependencies {
-        implementation("io.github.valdzx:simplexml-ksp-core:1.0.0-dev11")
-        configurations["ksp"].dependencies.add(project.dependencies.create("io.github.valdzx:simplexml-ksp-processor:1.0.0-dev11"))
+        implementation("io.github.valdzx:simplexml-ksp-core:1.0.0-alpha01")
+        configurations["ksp"].dependencies.add(project.dependencies.create("io.github.valdzx:simplexml-ksp-processor:1.0.0-alpha01"))
     }
 }
 ```
