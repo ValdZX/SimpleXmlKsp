@@ -10,13 +10,14 @@ ksp {
 }
 
 android {
-    compileSdkVersion(31)
+    compileSdk = 34
 
     defaultConfig {
-        minSdkVersion(21)
-        targetSdkVersion(31)
-        versionCode(1)
-        versionName("1.0")
+        minSdk = 21
+        targetSdk = 34
+        versionCode = 1
+        version = "1.0"
+        namespace = "ua.vald_zx.simplexml.ksp.sample"
     }
 
     compileOptions {
@@ -39,9 +40,9 @@ android {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    implementation("androidx.appcompat:appcompat:1.4.0")
-    implementation("com.google.android.material:material:1.4.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.3")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("com.google.android.material:material:1.12.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("io.github.valdzx:simplexml-ksp-core-jvm:1.0.0-dev11")
     ksp("io.github.valdzx:simplexml-ksp-processor:1.0.0-dev11")
 }

@@ -14,7 +14,7 @@ repositories {
 
 kotlin {
     mingwX64()
-    android {
+    androidTarget() {
         publishLibraryVariants("release", "debug")
     }
     jvm()
@@ -39,20 +39,15 @@ kotlin {
                 implementation(kotlin("test-annotations-common"))
             }
         }
-
-        val androidAndroidTestRelease by getting
-        val androidTest by getting {
-            dependsOn(androidAndroidTestRelease)
-        }
     }
 }
 
 android {
-    compileSdkVersion(31)
+    compileSdk = 34
 
     defaultConfig {
-        minSdkVersion(21)
-        targetSdkVersion(31)
+        namespace = "ua.vald_zx.simplexml.ksp"
+        minSdk = 21
     }
 
     compileOptions {

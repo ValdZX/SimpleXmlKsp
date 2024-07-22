@@ -15,7 +15,7 @@ ksp {
 
 kotlin {
     mingwX64()
-    android()
+    androidTarget()
     jvm()
     js {
         browser()
@@ -32,14 +32,14 @@ kotlin {
     iosTarget("ios") {}
 
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 implementation(kotlin("stdlib"))
                 implementation(project(":simplexml-ksp-core"))
                 configurations["ksp"].dependencies.add(project.dependencies.create(project(":simplexml-ksp-processor")))
             }
         }
-        val commonTest by getting {
+        commonTest {
             dependencies {
                 implementation(kotlin("test"))
                 implementation(kotlin("test-common"))
@@ -52,17 +52,12 @@ kotlin {
                 configurations["ksp"].dependencies.add(project.dependencies.create(project(":simplexml-ksp-processor")))
             }
         }
-        val androidMain by getting
-        val androidAndroidTestRelease by getting
-        val androidTest by getting {
-            dependsOn(androidAndroidTestRelease)
+        val androidUnitTest by getting {
             dependencies {
                 implementation(kotlin("test-junit"))
                 implementation("junit:junit:4.13.2")
             }
         }
-        val iosMain by getting
-        val iosTest by getting
     }
     sourceSets.all {
         kotlin.srcDir("build/generated/ksp/$name/kotlin")
@@ -70,10 +65,10 @@ kotlin {
 }
 
 android {
-    compileSdkVersion(31)
+    compileSdk = 34
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     defaultConfig {
-        minSdkVersion(21)
-        targetSdkVersion(31)
+        minSdk = 21
+        namespace = "ua.vald_zx.simplexml.ksp.test"
     }
 }

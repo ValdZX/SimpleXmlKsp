@@ -22,12 +22,12 @@ dependencies {
 //    implementation("io.github.valdzx:simplexml-ksp-core-jvm:$projectVersion")
     implementation(project(":simplexml-ksp-core"))
     implementation("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
-    implementation("com.squareup:kotlinpoet:1.10.2")
+    implementation("com.squareup:kotlinpoet:1.17.0")
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-common"))
     testImplementation(kotlin("test-annotations-common"))
-    testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.4.6")
-    testImplementation("com.github.tschuchortdev:kotlin-compile-testing-ksp:1.4.6")
+    testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.6.0")
+    testImplementation("com.github.tschuchortdev:kotlin-compile-testing-ksp:1.6.0")
 }
 
 val javadocJar by tasks.registering(Jar::class) {
